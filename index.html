@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#02050b">
-  <title>Universe Explorer v0.1.0</title>
-  <link rel="stylesheet" href="./styles.css?v=explorer010">
+  <title>Universe Explorer v0.1.0.1</title>
+  <link rel="stylesheet" href="./styles.css?v=155">
   <script type="importmap">
   {
     "imports": {
@@ -16,12 +16,12 @@
   }
   </script>
 </head>
-<body class="explorer-mode">
+<body>
   <main id="app" class="app-shell">
     <section id="viewport" class="viewport" aria-label="3D universe viewport. Tap a visible celestial body to target it."></section>
 
     <div class="hud top-hud" aria-live="polite">
-      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0</span></div>
+      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.1</span></div>
       <div class="stat technical-stat"><b id="rendererValue">INIT</b><small>renderer</small></div>
       <div class="stat primary-stat"><b id="fpsValue">—</b><small>fps</small></div>
       <div class="stat technical-stat"><b id="physicsMsValue">—</b><small>physics</small></div>
@@ -74,12 +74,13 @@
       <small>RCS 6 m/s² · attitude roll is pilot-controlled</small>
     </div>
 
-    <nav class="bottom-bar explorer-bottom-bar" aria-label="Primary exploration controls">
+    <nav class="bottom-bar" aria-label="Primary simulation controls">
+      <button id="labToggle" type="button">LAB</button>
       <button id="targetButton" type="button">TARGET</button>
+      <button id="scannerToggle" type="button">SCAN</button>
       <button id="approachButton" type="button">APPROACH</button>
       <button id="frameQuick" class="frame-quick" type="button" aria-pressed="false">FRAME</button>
       <button id="warpQuick" type="button">WARP 60×</button>
-      <button id="menuToggle" type="button">MENU</button>
     </nav>
 
     <div id="message" class="message">Initializing…</div>
@@ -131,56 +132,29 @@
       <small>WALK</small>
     </div>
 
-    <aside id="morePanel" class="drawer quick-panel explorer-menu" hidden>
-      <header><div><b>EXPLORER MENU</b><small>Flight, navigation and session controls</small></div><button id="moreClose" type="button" aria-label="Close explorer menu">×</button></header>
-      <div class="explorer-menu-content">
-        <section class="quick-section">
-          <h3>FLIGHT</h3>
-          <div class="quick-grid">
-            <button id="engineModeButton" type="button">ENGINE FLIGHT</button>
-            <button id="matchVelocity" type="button">STOP RELATIVE</button>
-            <button id="progradeButton" type="button">PROGRADE</button>
-            <button id="retrogradeButton" type="button">RETROGRADE</button>
-            <button id="turnBurnButton" type="button">TURN &amp; BURN</button>
-            <button id="rcsToggle" type="button">RCS PANEL</button>
-          </div>
-        </section>
-
-        <section class="quick-section">
-          <h3>EXPLORE</h3>
-          <div class="quick-grid">
-            <button id="scannerToggle" type="button">TARGET DATA</button>
-            <button id="transitToggle" class="void" type="button">FRAME DRIVE</button>
-            <button id="mapToggle" class="void" type="button">SYSTEM MAP</button>
-            <button id="cosmosToggle" type="button">COSMOS</button>
-            <button id="surfaceLandButton" class="surface-accent" type="button" disabled>LAND TARGET</button>
-            <button id="cockpitToggle" type="button">COCKPIT ON</button>
-          </div>
-        </section>
-
-        <section class="quick-section">
-          <h3>VIEW / SESSION</h3>
-          <div class="quick-grid">
-            <button id="pathToggle" type="button">PATH ON</button>
-            <button id="homeButton" type="button">HOME / ORBIT</button>
-            <button id="pauseToggle" type="button">PAUSE</button>
-            <button id="saveButton" type="button">SAVE</button>
-            <button id="loadButton" type="button">LOAD</button>
-          </div>
-        </section>
-
-        <details class="advanced-controls">
-          <summary>ADVANCED / LAB CONTROLS</summary>
-          <p>Scientific overlays, model notes and the original laboratory tools are retained for advanced use but are no longer part of the normal exploration interface.</p>
-          <div class="quick-grid">
-            <button id="scienceToggle" type="button">SCIENCE MODEL</button>
-            <button id="overlayToggle" type="button">OVERLAYS</button>
-            <button id="labToggle" type="button">UNIVERSE LAB</button>
-          </div>
-        </details>
-
-        <p class="quick-note">Explorer branch preserves the v0.1.5.5 physics, renderer, spacecraft, FRAME travel, cockpit, landing and surface systems. This build changes presentation only.</p>
+    <aside id="morePanel" class="drawer quick-panel" hidden>
+      <header><div><b>FLIGHT / SYSTEM</b><small>Secondary controls</small></div><button id="moreClose" type="button" aria-label="Close flight menu">×</button></header>
+      <div class="quick-grid">
+        <button id="engineModeButton" type="button">ENGINE FLIGHT</button>
+        <button id="matchVelocity" type="button">STOP RELATIVE</button>
+        <button id="pathToggle" type="button">PATH ON</button>
+        <button id="progradeButton" type="button">PROGRADE</button>
+        <button id="retrogradeButton" type="button">RETROGRADE</button>
+        <button id="turnBurnButton" type="button">TURN &amp; BURN</button>
+        <button id="transitToggle" class="void" type="button">FRAME DRIVE</button>
+        <button id="rcsToggle" type="button">RCS PANEL</button>
+        <button id="cockpitToggle" type="button">COCKPIT ON</button>
+        <button id="scienceToggle" type="button">SCIENCE</button>
+        <button id="cosmosToggle" type="button">COSMOS</button>
+        <button id="mapToggle" class="void" type="button">SYSTEM MAP</button>
+        <button id="surfaceLandButton" class="surface-accent" type="button" disabled>LAND TARGET</button>
+        <button id="overlayToggle" type="button">OVERLAYS</button>
+        <button id="homeButton" type="button">HOME / ORBIT</button>
+        <button id="pauseToggle" type="button">PAUSE</button>
+        <button id="saveButton" type="button">SAVE</button>
+        <button id="loadButton" type="button">LOAD</button>
       </div>
+      <p class="quick-note">ENGINE FLIGHT = 20 m/s²; CRUISE = 120 m/s²; BOOST = 5,000 m/s² speculative propulsion. FRAME DRIVE remains a separate fictional spacecraft-only translation layer and never rewrites celestial gravity. The Origin profile preserves the accepted deterministic scientific baseline. The new Abyssal profile adds a bounded dense system, guaranteed rogue/comet population, enhanced visual phenomena and Abyssal Sentinel as a physical wide-orbit Newtonian magnetar companion. Its magnetic field, radiation and burst structures remain visual proxies. Build marker: <b>ABYSSAL-155</b>.</p>
     </aside>
 
     <aside id="engineeringPanel" class="drawer engineering-panel" hidden>
@@ -206,7 +180,7 @@
           <b>MODEL BOUNDARY</b>
           <span>These values mirror existing runtime telemetry only. This panel does not change gravity, integration, FRAME behavior, navigation, save state, or renderer-backend policy.</span>
         </div>
-        <p class="engineering-build">BUILD <b>EXPLORER-010</b> · BASE ABYSSAL-155 · SAVE SCHEMA 1 · THREE.JS 0.185.0</p>
+        <p class="engineering-build">BUILD <b>ABYSSAL-155</b> · SAVE SCHEMA 1 · THREE.JS 0.185.0</p>
       </div>
     </aside>
 
@@ -476,6 +450,6 @@
       </div>
     </aside>
   </main>
-  <script type="module" src="./src/main.js?v=explorer010"></script>
+  <script type="module" src="./src/main.js?v=155"></script>
 </body>
 </html>

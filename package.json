@@ -1,9 +1,9 @@
 {
-  "name": "universe-explorer",
-  "version": "0.1.0",
+  "name": "universe-lab",
+  "version": "0.1.5.5",
   "private": true,
   "type": "module",
-  "description": "Exploration-focused branch of Universe Lab v0.1.5.5 preserving the proven 3D simulation, spacecraft, FRAME travel, cockpit, landing and surface systems while reducing default UI overhead.",
+  "description": "Scientific mobile-first seeded universe laboratory with Newtonian N-body gravity, canonical planetary environments, multi-world exploration, physical atmosphere/sky optics, near-orbit celestial detail, close-orbit planet/moon material polish, and explicitly bounded relativistic-object rendering proxies.",
   "scripts": {
     "check": "node ./tests/static-check.mjs && find src tests -type f \\( -name '*.js' -o -name '*.mjs' \\) -print0 | xargs -0 -n1 node --check",
     "test": "node --test tests/*.test.mjs",

@@ -339,7 +339,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Explorer branch online. Original v0.1.5.5 flight, physics, rendering, FRAME, cockpit and surface systems are preserved; the default interface is reduced for exploration. Active backend: ${backend}. Build EXPLORER-010.`);
+    this.hud.notify(`v0.1.5.5 online. Origin remains the accepted deterministic baseline; Abyssal adds a bounded extreme-system profile with a physical wide-orbit magnetar companion and enhanced explicitly labeled visual phenomena. Active backend: ${backend}. Build ABYSSAL-155.`);
   }
 
   newSystem(seed, generationProfileId = 'origin') {
@@ -2917,7 +2917,6 @@ export class UniverseLabApp {
       }
       transitTierSelect.value = '100';
     }
-    $('#menuToggle').addEventListener('click', () => this.hud.toggleMore());
     $('#labToggle').addEventListener('click', () => this.hud.toggleLab());
     $('#moreClose').addEventListener('click', () => this.hud.toggleMore(false));
     $('#engineeringClose').addEventListener('click', () => this.hud.toggleEngineering(false));

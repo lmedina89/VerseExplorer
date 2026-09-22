@@ -132,47 +132,8 @@ button.is-held{box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 0 18px rgba(10
 }
 
 
-/* Universe Explorer v0.1.0 — exploration branch shell.
-   Presentation-only overrides: preserve v0.1.5.5 simulation, renderer, flight, cockpit,
-   FRAME, landing, surface and save behavior while reducing default UI clutter. */
-.explorer-mode .technical-stat,
-.explorer-mode .seed-chip{display:none!important}
-.explorer-mode .top-hud{right:auto;max-width:min(430px,62vw);gap:5px}
-.explorer-mode .brand{padding:6px 9px;background:rgba(2,7,14,.64);backdrop-filter:blur(5px)}
-.explorer-mode .stat.primary-stat{min-width:58px;padding:4px 6px;background:rgba(2,7,14,.58)}
-.explorer-mode .target-chip{top:max(49px,calc(env(safe-area-inset-top) + 44px));background:rgba(3,16,26,.64);backdrop-filter:blur(4px)}
-.explorer-mode .nav-chip{top:max(76px,calc(env(safe-area-inset-top) + 71px));background:rgba(18,13,5,.58)}
-.explorer-mode .camera-chip{top:max(102px,calc(env(safe-area-inset-top) + 97px));background:rgba(4,24,19,.60)}
-.explorer-mode .bottom-bar{left:50%;grid-template-columns:repeat(5,minmax(0,1fr));width:min(405px,calc(100% - 330px));min-width:320px;background:rgba(2,7,14,.72);border-color:rgba(148,184,230,.22)}
-.explorer-mode .bottom-bar button{font-size:7.3px}
-.explorer-mode #menuToggle{border-color:rgba(102,230,255,.42);color:#c9f7ff}
-.explorer-mode .quick-panel{width:min(360px,94vw);max-height:min(520px,78%);bottom:max(64px,calc(env(safe-area-inset-bottom) + 60px))}
-.explorer-menu-content{display:grid;gap:8px;padding:9px}
-.explorer-menu .quick-section{display:grid;gap:5px;padding:7px;border:1px solid rgba(148,184,230,.14);border-radius:9px;background:rgba(4,12,21,.42)}
-.explorer-menu .quick-section h3{margin:0 2px;color:#8fb6cc;font-size:8px;letter-spacing:.12em}
-.explorer-menu .quick-grid{padding:0;gap:6px}
-.explorer-menu .quick-grid button{min-height:44px;font-size:8px}
-.explorer-menu .advanced-controls{border:1px solid rgba(169,118,255,.20);border-radius:9px;background:rgba(18,9,30,.28);overflow:hidden}
-.explorer-menu .advanced-controls summary{min-height:44px;display:flex;align-items:center;padding:0 10px;color:#cdb9ee;font-size:8px;font-weight:800;letter-spacing:.08em;cursor:pointer}
-.explorer-menu .advanced-controls p{margin:0;padding:0 10px 8px;color:#8f84a2;font-size:7.5px;line-height:1.4}
-.explorer-menu .advanced-controls .quick-grid{padding:0 8px 8px}
-.explorer-menu .quick-note{padding:2px 5px 4px;color:#70899c;font-size:7.5px}
-@media (orientation:portrait){
-  .explorer-mode .top-hud{max-width:92vw}
-  .explorer-mode .brand{padding:5px 7px}
-  .explorer-mode .stat.primary-stat{min-width:54px}
-  .explorer-mode .target-chip{top:max(48px,calc(env(safe-area-inset-top) + 43px));max-width:92vw}
-  .explorer-mode .nav-chip{top:max(75px,calc(env(safe-area-inset-top) + 70px));max-width:94vw}
-  .explorer-mode .camera-chip{top:max(99px,calc(env(safe-area-inset-top) + 94px));max-width:94vw}
-  .explorer-mode .bottom-bar{width:calc(100% - 10px);min-width:0}
-  .explorer-mode .bottom-bar button{font-size:7px}
-  .explorer-mode .quick-panel{width:min(360px,96vw);max-height:68%}
-}
-@media (orientation:landscape) and (max-height:500px){
-  .explorer-mode .top-hud{max-width:min(430px,52vw)}
-  .explorer-mode .bottom-bar{width:min(390px,calc(100% - 300px));min-width:300px}
-  .explorer-mode .quick-panel{max-height:78%}
-  .explorer-menu-content{gap:6px;padding:7px}
-  .explorer-menu .quick-section{padding:6px}
-  .explorer-menu .quick-grid button{min-height:39px;font-size:7.2px}
-}
+/* Universe Explorer v0.1.0.1 — conservative exploration branch.
+   Only hides technical telemetry. All original controls, panel structure, renderer,
+   physics, navigation, particles, cockpit, FRAME, landing and surface behavior remain intact. */
+.technical-stat, .seed-chip { display:none !important; }
+.top-hud { right:auto; max-width:min(430px,92vw); }
