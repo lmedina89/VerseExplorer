@@ -138,7 +138,7 @@ button.is-held{box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 0 18px rgba(10
 .technical-stat, .seed-chip { display:none !important; }
 .top-hud { right:auto; max-width:min(430px,92vw); }
 
-/* Universe Explorer v0.1.0.2 — exploration HUD density layer.
+/* Universe Explorer v0.1.0.3 — exploration HUD hierarchy refinement.
    Presentation only: existing flight/navigation controls remain in the DOM and keep
    their original IDs/event routes. MINIMAL is the default exploration view; FLIGHT
    restores useful cockpit instruments; FULL restores the original laboratory HUD. */
@@ -147,29 +147,25 @@ button.is-held{box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 0 18px rgba(10
 .explorer-hud-min.ship-cockpit-enabled .portrait-cockpit-tabs{display:none}
 .explorer-hud-min #labToggle,.explorer-hud-min #scannerToggle,.explorer-hud-flight #labToggle,.explorer-hud-flight #scannerToggle{display:none}
 .explorer-hud-full #explorerMenuButton{display:none}
-.explorer-hud-min .bottom-bar,.explorer-hud-flight .bottom-bar{grid-template-columns:repeat(5,minmax(0,1fr));background:rgba(2,7,14,.66);border-color:rgba(148,184,230,.20)}
-.explorer-hud-min .bottom-bar{height:49px;padding:3px;gap:3px}
-.explorer-hud-min .bottom-bar button{min-height:41px;font-size:6.8px}
-.explorer-hud-min .look-pad{width:92px;height:92px;opacity:.48}
+.explorer-hud-min .bottom-bar{display:none!important}
+.explorer-hud-flight .bottom-bar{grid-template-columns:repeat(5,minmax(0,1fr));background:rgba(2,7,14,.66);border-color:rgba(148,184,230,.20)}
+.explorer-hud-min .look-pad{width:92px;height:92px;opacity:.48;bottom:max(8px,env(safe-area-inset-bottom))}
 .explorer-hud-min .look-ring{background:radial-gradient(circle,rgba(25,75,101,.08),rgba(2,10,18,.12));border-color:rgba(105,212,240,.20)}
 .explorer-hud-min .look-ring span{display:none}
-.explorer-hud-min .flight-controls{opacity:.74;transform:scale(.88);transform-origin:100% 100%}
+.explorer-hud-min .flight-controls{opacity:.82;transform:scale(.88);transform-origin:100% 100%;bottom:max(8px,env(safe-area-inset-bottom))}
 .explorer-hud-min .hold-button{background:rgba(5,15,26,.62);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .explorer-hud-min .brand{padding:5px 7px;background:rgba(2,7,14,.54);border-color:rgba(148,184,230,.18);font-size:9px}
 .explorer-hud-min .target-chip,.explorer-hud-min .nav-chip,.explorer-hud-min .camera-chip{background:rgba(3,13,21,.58);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .explorer-hud-min .message{opacity:.82}
 @media (orientation:portrait){
   .hud-mode-button{top:max(7px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));min-width:70px;height:32px;min-height:32px;font-size:6.4px}
-  .explorer-hud-min .bottom-bar,.explorer-hud-flight .bottom-bar{width:calc(100% - 12px);grid-template-columns:repeat(5,minmax(0,1fr))}
-  .explorer-hud-min .bottom-bar{height:51px}
-  .explorer-hud-min .bottom-bar button{min-height:43px;font-size:6.1px}
-  .explorer-hud-min .look-pad{width:72px;height:72px;bottom:max(64px,calc(env(safe-area-inset-bottom) + 58px))}
-  .explorer-hud-min .flight-controls{right:max(4px,env(safe-area-inset-right));bottom:max(62px,calc(env(safe-area-inset-bottom) + 56px));transform:scale(.82);transform-origin:100% 100%}
+  .explorer-hud-flight .bottom-bar{width:calc(100% - 12px);grid-template-columns:repeat(5,minmax(0,1fr))}
+  .explorer-hud-min .look-pad{width:72px;height:72px;bottom:max(8px,env(safe-area-inset-bottom))}
+  .explorer-hud-min .flight-controls{right:max(4px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));transform:scale(.82);transform-origin:100% 100%}
 }
 @media (orientation:landscape) and (max-height:500px){
   .hud-mode-button{top:max(6px,env(safe-area-inset-top));right:max(7px,env(safe-area-inset-right));height:30px;min-height:30px;min-width:68px;font-size:6.2px}
-  .explorer-hud-min .bottom-bar{height:46px;width:min(390px,calc(100% - 300px));min-width:330px}
-  .explorer-hud-min .bottom-bar button{min-height:38px;font-size:6.3px}
-  .explorer-hud-min .look-pad{width:78px;height:78px;bottom:max(22px,env(safe-area-inset-bottom))}
-  .explorer-hud-min .flight-controls{bottom:max(20px,env(safe-area-inset-bottom));transform:scale(.82)}
+  .explorer-hud-flight .bottom-bar{height:46px;width:min(390px,calc(100% - 300px));min-width:330px}
+  .explorer-hud-min .look-pad{width:78px;height:78px;bottom:max(8px,env(safe-area-inset-bottom))}
+  .explorer-hud-min .flight-controls{bottom:max(8px,env(safe-area-inset-bottom));transform:scale(.82)}
 }

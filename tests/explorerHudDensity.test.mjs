@@ -18,15 +18,22 @@ test('Explorer HUD density control exists and defaults to minimal', async () => 
   assert.match(main, /applyExplorerHudMode\('minimal'\)/);
 });
 
-test('minimal and flight modes hide only presentation launchers while keeping original action controls in DOM', async () => {
+test('minimal keeps FLIGHT MFD and thrust controls but hides bottom action strip', async () => {
   const html = await htmlSource();
   const css = await cssSource();
-  for (const id of ['labToggle','scannerToggle','targetButton','approachButton','frameQuick','warpQuick','thrustButton','reverseButton','brakeButton']) {
+  const main = await mainSource();
+  for (const id of ['thrustButton','reverseButton','brakeButton','targetButton','approachButton','frameQuick','warpQuick','explorerMenuButton']) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
-  assert.match(css, /\.explorer-hud-min #labToggle,\.explorer-hud-min #scannerToggle/);
-  assert.match(css, /\.explorer-hud-flight #labToggle,\.explorer-hud-flight #scannerToggle/);
-  assert.match(css, /\.explorer-hud-full #explorerMenuButton\{display:none\}/);
+  assert.match(main, /else visible = id === 'flight'/);
+  assert.match(css, /\.explorer-hud-min \.bottom-bar\{display:none!important\}/);
+  assert.doesNotMatch(css, /\.explorer-hud-min \.flight-controls\{[^}]*display:none/);
+});
+
+test('flight mode owns the reduced five-action bottom strip and hides LAB SCAN launchers', async () => {
+  const css = await cssSource();
+  assert.match(css, /\.explorer-hud-flight \.bottom-bar\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.explorer-hud-flight #labToggle,\.explorer-hud-flight #scannerToggle\{display:none\}/);
 });
 
 test('cockpit density layer changes only cockpit child visibility and never simulation state', async () => {
@@ -45,7 +52,6 @@ test('menu launcher opens the existing FLIGHT SYSTEM drawer instead of creating 
   const main = await mainSource();
   assert.match(main, /#explorerMenuButton'\)\?\.addEventListener\('click', \(\) => app\.hud\?\.toggleMore\(\)\)/);
 });
-
 
 test('hidden SCAN and LAB launchers remain reachable through the existing drawers', async () => {
   const main = await mainSource();

@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.3 — Exploration HUD Hierarchy Refinement
+
+- MINIMAL remains the default HUD mode.
+- MINIMAL now preserves the central FLIGHT MFD plus thrust/reverse/brake and steering/reticle cues.
+- MINIMAL hides the bottom TARGET/APPROACH/FRAME/WARP/MENU action strip to keep the normal exploration view open.
+- FLIGHT mode is now the layer that reveals the bottom action strip; landscape FLIGHT also restores NAV/FLIGHT/SCI MFDs while leaving diagnostics hidden.
+- FULL remains the original cockpit/control presentation.
+- No physics, navigation, renderer, particle, FRAME, landing, surface, target, or flight-control semantics were changed.
+
 # Universe Explorer v0.1.0.2 — Exploration HUD Reduction
 
 - Added MINIMAL / FLIGHT / FULL HUD density modes; MINIMAL is the default.

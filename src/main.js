@@ -26,7 +26,7 @@ function applyCockpitHudDensity() {
     let visible;
     if (explorerHudMode === 'full') visible = !portrait || id === 'flight';
     else if (explorerHudMode === 'flight') visible = portrait ? id === 'flight' : id !== 'diagnostics';
-    else visible = false;
+    else visible = id === 'flight';
     entry.screen.visible = visible;
     entry.bezel.visible = visible && !(portrait && id === 'flight');
   }
