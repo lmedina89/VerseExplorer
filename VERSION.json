@@ -1,6 +1,6 @@
 {
-  "version": "0.1.5.5",
-  "name": "Abyssal Universe Profile Foundation",
+  "version": "0.1.0",
+  "name": "Exploration Branch Foundation",
   "saveSchema": 1,
   "threeVersion": "0.185.0",
   "authoritativeUnits": "SI",
@@ -46,7 +46,7 @@
   "navigationNumerics": "adaptive ship strong-gravity substeps + adaptive massive-body pair encounter/crossing timestep ceiling + 10% c Newtonian validity guard",
   "observationCamera": "massless experiment/cosmic frame-track-orbit views with ship-state isolation",
   "experimentNavigation": "selected experiment fields + physical bounded-thrust rendezvous",
-  "buildMarker": "ABYSSAL-155",
+  "buildMarker": "EXPLORER-010",
   "generationProfiles": [
     "origin",
     "abyssal"
@@ -97,7 +97,7 @@
   "cockpitLighting": "mobile-safe emissive-only panel accents plus live POWER/TARGET/NAV/PROPULSION/CAUTION indicators; no additional dynamic cockpit lights or physics state",
   "cockpitDiagnostics": "live renderer, FPS, physics/render time, ship speed, simulation time, seed, major/test counts, draw calls, prediction time and experiment telemetry are mirrored into the right-side translucent ship-mounted MFD and a dedicated read-only Engineering/Diagnostics drawer; the values remain sourced from existing app/renderer state and own no simulation authority",
   "frameDrive": "tap-toggle speculative spacecraft-only translation toward a locked body/COSMOS target; real-time frame-rate tiers step down near arrival; world N-body/particle simulation authority is untouched; local ship acceleration is suspended while active; manual disengage matches the target inertial velocity, while normal planet/moon/rogue-planet completion may hand off into a calculated circular osculating orbit before ordinary ShipDynamics/gravity resume",
-  "assetCachePolicy": "HTML shell version-tags styles.css and src/main.js with build tag 155; main/app/renderer/cockpit module hops are also version-tagged so Safari/GitHub Pages do not mix the v0.1.5.5 shell with stale JavaScript.",
+  "assetCachePolicy": "Explorer HTML shell tags styles.css and src/main.js with explorer010; src/main.js tags the modified app shell with explorer010. Unchanged renderer/HUD/system-map module hops retain the accepted v0.1.5.5 cache tag until those modules change.",
   "planetaryRotation": "fresh generated planets use orbital-relative v2 spin poles derived from parent-relative orbital angular momentum, with PRO/RETRO classification matching the physical spin pole; generated moons use parent+moon synchronous periods and face the parent at the rotation epoch. Existing schema-1 saves preserve serialized v1 rotation frames so body-fixed landing anchors do not move.",
   "surfaceAstronomyDiagnostics": "read-only surface DETAILS diagnostics derive from the same canonical astronomical observer and rotation model used by rendering: procedural body-fixed latitude/longitude, rotation phase, primary-star altitude/azimuth, and geometric local solar time from primary-star hour angle; no independent sky model or physics authority",
   "planetaryNavigation": "generated stars, planets and moons are first-class selectable NAV targets; planets/moons/rogues additionally expose canonical environment class, escape speed, stellar flux, radiative-equilibrium temperature, Bond albedo, atmosphere pressure/retention proxy, volatile/ice potential, surface family and tidal rotation state alongside existing live navigation diagnostics",
@@ -147,5 +147,8 @@
   "neutronStarVisualModel": "physical mass/radius derive compactness, gravitational-redshift and light-cylinder diagnostics; visual magnetospheres use dipole-shaped field lines and pulsar/magnetar beam/reconnection cues scaled for readability. Spacetime lensing, plasma transport and radiation transfer are not solved.",
   "celestialExposure": "close-star exposure adaptation remains active and close-planet exposure now adds stronger apparent-size/albedo headroom when a body dominates the camera, reducing pale-wall washout without changing canonical radiometry or HUD values.",
   "planetMoonCloseMaterial": "close-only tileable normal/roughness material layer preserves existing global identity while adding mesoscale crater/fracture/roughness response; it is a deterministic geological appearance proxy and does not claim solved global topography or mineralogy.",
-  "stellarIrradiancePresentation": "read-only canonical stellar luminosity + live inverse-square distance flux bridge for orbital reflected-body lighting and landed direct/diffuse daylight; exact physical W/m\u00b2 and S\u2295 remain scientific values while display gain uses bounded sqrt(flux ratio) HDR compression; renderer reuses output records to avoid per-frame result allocation"
+  "stellarIrradiancePresentation": "read-only canonical stellar luminosity + live inverse-square distance flux bridge for orbital reflected-body lighting and landed direct/diffuse daylight; exact physical W/m\u00b2 and S\u2295 remain scientific values while display gain uses bounded sqrt(flux ratio) HDR compression; renderer reuses output records to avoid per-frame result allocation",
+  "sourceBaseline": "Universe Lab v0.1.5.5 / ABYSSAL-155",
+  "sourceBaselineZipSha256": "4b5efcf37b481dedc3f87323f3c4c6d5c54d6c8576ed0d195ad544f4e2499748",
+  "explorationBranchScope": "presentation-only default UI reduction; physics, renderer, spacecraft dynamics, FRAME, cockpit, landing, surface exploration and save schema preserved from source baseline"
 }

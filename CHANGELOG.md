@@ -1,3 +1,14 @@
+## v0.1.0 — Exploration Branch Foundation
+
+- Branched directly from the known-good Universe Lab v0.1.5.5 / ABYSSAL-155 source.
+- Preserved the existing physics, Three.js renderer, spacecraft dynamics, cockpit, APPROACH, FRAME travel, landing, surface exploration, save schema and advanced systems.
+- Reduced the default top HUD by hiding renderer/physics/render-time and laboratory telemetry.
+- Replaced the six-way laboratory-first bottom bar with TARGET / APPROACH / FRAME / WARP / MENU.
+- Reorganized secondary controls into a grouped Explorer menu.
+- Moved the original laboratory/scientific-overlay controls behind an explicit Advanced / Lab section rather than removing their underlying code.
+- Added branch guardrails and baseline provenance documentation.
+- No celestial physics, renderer behavior, flight dynamics, landing behavior or save-state semantics were intentionally changed.
+
 ## v0.1.5.5 — Abyssal Universe Profile Foundation
 
 - Added explicit Origin/Abyssal universe profiles with profile and seed kept separate.

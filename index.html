@@ -1,20 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#02050b">
+  <title>Universe Explorer v0.1.0</title>
+  <link rel="stylesheet" href="./styles.css?v=explorer010">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js",
+      "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js",
+      "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.tsl.js"
+    }
+  }
+  </script>
+</head>
+<body class="explorer-mode">
+  <main id="app" class="app-shell">
+    <section id="viewport" class="viewport" aria-label="3D universe viewport. Tap a visible celestial body to target it."></section>
 
-UNIVERSE LAB v0.1.5.5
-INITrenderer
-—fps
-—physics
-—render
-—ship
-0 dsim time
-SEED ORIGIN-001 · MAJOR — · TEST — · DRAW — · PRED — · EXP 0 · LAB 0 ms
+    <div class="hud top-hud" aria-live="polite">
+      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0</span></div>
+      <div class="stat technical-stat"><b id="rendererValue">INIT</b><small>renderer</small></div>
+      <div class="stat primary-stat"><b id="fpsValue">—</b><small>fps</small></div>
+      <div class="stat technical-stat"><b id="physicsMsValue">—</b><small>physics</small></div>
+      <div class="stat technical-stat"><b id="renderMsValue">—</b><small>render</small></div>
+      <div class="stat primary-stat ship-stat"><b id="speedValue">—</b><small>ship</small></div>
+      <div class="stat primary-stat"><b id="simTimeValue">0 d</b><small>sim time</small></div>
+    </div>
 
+    <div class="seed-chip">SEED <b id="seedValue">ORIGIN-001</b> · MAJOR <b id="bodyCountValue">—</b> · TEST <b id="minorCountValue">—</b> · DRAW <b id="drawCallsValue">—</b> · PRED <b id="predictionMsValue">—</b> · EXP <b id="experimentParticleCountValue">0</b> · LAB <b id="experimentMsValue">0 ms</b></div>
+    <div id="targetChip" class="target-chip" hidden>NO TARGET</div>
+    <div id="navChip" class="nav-chip" hidden>NAV MANUAL</div>
+    <div id="cameraChip" class="camera-chip" hidden>CAMERA OBSERVE</div>
+    <div id="ascentDiagnostic" class="ascent-diagnostic" hidden>ASCENT CHECK</div>
+    <div class="reticle" aria-hidden="true"><span></span><i></i></div>
+    <div id="cockpitOverlay" class="cockpit-overlay" aria-hidden="true">
+      <div class="cockpit-glass"></div>
+      <div class="cockpit-reflection cockpit-reflection-a"></div>
+      <div class="cockpit-reflection cockpit-reflection-b"></div>
+      <div class="cockpit-live-status"><small>3D COCKPIT</small><b id="cockpitStatus">ONLINE</b></div>
+      <div class="cockpit-touch-hint">TAP MFDs / KEYS</div>
+    </div>
+    <button id="cockpitRestore" class="cockpit-restore" type="button" hidden>COCKPIT</button>
+    <nav class="portrait-cockpit-tabs" aria-label="Portrait cockpit displays">
+      <button id="portraitNavMfd" type="button">NAV</button>
+      <button id="portraitFlightMfd" type="button">FLIGHT</button>
+      <button id="portraitScienceMfd" type="button">SCI</button>
+      <button id="portraitSystemMfd" type="button">SYS</button>
+    </nav>
+    <div id="velocityMarker" class="velocity-marker" hidden aria-hidden="true">V</div>
 
+    <div id="lookPad" class="look-pad" aria-label="Drag to change spacecraft attitude">
+      <div class="look-ring"><span>LOOK</span></div>
+    </div>
 
+    <div class="flight-controls" aria-label="Main thrusters">
+      <button id="thrustButton" class="hold-button thrust" type="button" aria-label="Main thrust 20 meters per second squared"><span>THRUST</span><b id="thrustValue">20</b></button>
+      <button id="reverseButton" class="hold-button reverse" type="button">REV</button>
+      <button id="brakeButton" class="hold-button brake" type="button">BRAKE</button>
+    </div>
 
-3D COCKPITONLINE
-TAP MFDs / KEYS
-NAV FLIGHT SCI SYS
-LOOK
-THRUST20 REV BRAKE
-LAB TARGET SCAN APPROACH FRAME WARP 60×
-Initializing…
+    <div id="rcsPanel" class="rcs-panel" hidden aria-label="Reaction-control system">
+      <div class="rcs-grid">
+        <button id="rcsUp" type="button" aria-label="Translate up">▲</button>
+        <button id="rollLeft" type="button">ROLL ◀</button>
+        <button id="rollRight" type="button">ROLL ▶</button>
+        <button id="rcsLeft" type="button" aria-label="Translate left">◀</button>
+        <button id="rcsDown" type="button" aria-label="Translate down">▼</button>
+        <button id="rcsRight" type="button" aria-label="Translate right">▶</button>
+      </div>
+      <small>RCS 6 m/s² · attitude roll is pilot-controlled</small>
+    </div>
+
+    <nav class="bottom-bar explorer-bottom-bar" aria-label="Primary exploration controls">
+      <button id="targetButton" type="button">TARGET</button>
+      <button id="approachButton" type="button">APPROACH</button>
+      <button id="frameQuick" class="frame-quick" type="button" aria-pressed="false">FRAME</button>
+      <button id="warpQuick" type="button">WARP 60×</button>
+      <button id="menuToggle" type="button">MENU</button>
+    </nav>
+
+    <div id="message" class="message">Initializing…</div>
+
+    <section id="surfaceHud" class="surface-hud compact" hidden aria-label="Planetary surface status">
+      <div class="surface-compact-bar">
+        <div class="surface-heading"><b id="surfaceWorldName">SURFACE</b><small id="surfaceBiome">—</small></div>
+        <div class="surface-compact-metrics" aria-label="Surface quick status">
+          <span><small>WX</small><b id="surfaceWeather">CLEAR</b></span>
+          <span><small>SIGNAL</small><b id="surfaceNearest">—</b></span>
+          <span><small>FOUND</small><b id="surfaceDiscoveries">0/0</b></span>
+          <span><small>SHIP</small><b id="surfaceShipCompact">—</b></span>
+        </div>
+        <div class="surface-compact-actions">
+          <button id="surfaceScanButton" class="surface-accent" type="button">SCAN</button>
+          <button id="surfaceSprintButton" type="button">SPRINT</button>
+          <button id="surfaceHudToggle" type="button" aria-expanded="false" aria-controls="surfaceHudDetails">DETAILS</button>
+        </div>
+      </div>
+      <div id="surfaceHudDetails" class="surface-hud-details" hidden>
+        <div class="surface-stat-grid">
+          <span>Gravity</span><b id="surfaceGravity">—</b><span>Temperature</span><b id="surfaceTemperature">—</b>
+          <span>Atmosphere</span><b id="surfaceAtmosphere">—</b><span>Local X/Z</span><b id="surfaceCoords">—</b>
+          <span>Wind</span><b id="surfaceWind">—</b><span>Ship</span><b id="surfaceShipDistance">—</b>
+          <span>Local weather</span><b id="surfaceClock">0 s</b><span>Mode</span><b id="surfacePhase">LANDED</b>
+          <span>Astronomy time</span><b id="surfaceSkyClock">0 s</b><span>Body rotation</span><b id="surfaceRotation">—</b>
+          <span>Body-fixed lat/lon</span><b id="surfaceLatLon">—</b><span>Rotation phase</span><b id="surfaceRotationPhase">—</b>
+          <span>Primary star alt/az</span><b id="surfaceStarAltAz">—</b><span>Local solar time</span><b id="surfaceSolarTime">—</b>
+          <span>Primary star disk</span><b id="surfaceStarDisk">—</b><span>Stellar occultation</span><b id="surfaceEclipse">NONE</b>
+          <span>NAV target phase</span><b id="surfaceTargetPhase">—</b><span>NAV target angular size</span><b id="surfaceTargetAngular">—</b>
+        </div>
+        <p id="surfaceWeatherStatus" class="surface-weather-status">Local weather monitor initializing.</p>
+        <p id="surfaceScanStatus" class="surface-scan-status">Surface scanner ready.</p>
+        <div class="surface-action-grid surface-detail-actions">
+          <button id="surfaceSaveButton" type="button">SAVE</button>
+          <button id="surfaceTakeoffButton" class="void" type="button">BOARD / TAKEOFF</button>
+          <button id="surfacePlannerButton" class="surface-sky-toggle" type="button">PLAN SKY EVENTS</button>
+          <button id="surfaceAstronomyPause" class="surface-sky-toggle" type="button" aria-pressed="false">PAUSE SKY</button>
+        </div>
+        <small class="surface-model-note">BODY-FIXED SURFACE OBSERVER · apparent disks/phases/occultations derive from authoritative body geometry · LAT/LON uses the procedural body-fixed zero-meridian · SOLAR time uses primary-star hour angle · PAUSE SKY holds celestial N-body time only</small>
+      </div>
+    </section>
+
+    <div id="surfaceMovePad" class="surface-move-pad" hidden aria-label="Surface movement controls">
+      <button id="surfaceForward" type="button" aria-label="Walk forward">▲</button>
+      <button id="surfaceLeft" type="button" aria-label="Strafe left">◀</button>
+      <button id="surfaceBack" type="button" aria-label="Walk backward">▼</button>
+      <button id="surfaceRight" type="button" aria-label="Strafe right">▶</button>
+      <small>WALK</small>
+    </div>
+
+    <aside id="morePanel" class="drawer quick-panel explorer-menu" hidden>
+      <header><div><b>EXPLORER MENU</b><small>Flight, navigation and session controls</small></div><button id="moreClose" type="button" aria-label="Close explorer menu">×</button></header>
+      <div class="explorer-menu-content">
+        <section class="quick-section">
+          <h3>FLIGHT</h3>
+          <div class="quick-grid">
+            <button id="engineModeButton" type="button">ENGINE FLIGHT</button>
+            <button id="matchVelocity" type="button">STOP RELATIVE</button>
+            <button id="progradeButton" type="button">PROGRADE</button>
+            <button id="retrogradeButton" type="button">RETROGRADE</button>
+            <button id="turnBurnButton" type="button">TURN &amp; BURN</button>
+            <button id="rcsToggle" type="button">RCS PANEL</button>
+          </div>
+        </section>
+
+        <section class="quick-section">
+          <h3>EXPLORE</h3>
+          <div class="quick-grid">
+            <button id="scannerToggle" type="button">TARGET DATA</button>
+            <button id="transitToggle" class="void" type="button">FRAME DRIVE</button>
+            <button id="mapToggle" class="void" type="button">SYSTEM MAP</button>
+            <button id="cosmosToggle" type="button">COSMOS</button>
+            <button id="surfaceLandButton" class="surface-accent" type="button" disabled>LAND TARGET</button>
+            <button id="cockpitToggle" type="button">COCKPIT ON</button>
+          </div>
+        </section>
+
+        <section class="quick-section">
+          <h3>VIEW / SESSION</h3>
+          <div class="quick-grid">
+            <button id="pathToggle" type="button">PATH ON</button>
+            <button id="homeButton" type="button">HOME / ORBIT</button>
+            <button id="pauseToggle" type="button">PAUSE</button>
+            <button id="saveButton" type="button">SAVE</button>
+            <button id="loadButton" type="button">LOAD</button>
+          </div>
+        </section>
+
+        <details class="advanced-controls">
+          <summary>ADVANCED / LAB CONTROLS</summary>
+          <p>Scientific overlays, model notes and the original laboratory tools are retained for advanced use but are no longer part of the normal exploration interface.</p>
+          <div class="quick-grid">
+            <button id="scienceToggle" type="button">SCIENCE MODEL</button>
+            <button id="overlayToggle" type="button">OVERLAYS</button>
+            <button id="labToggle" type="button">UNIVERSE LAB</button>
+          </div>
+        </details>
+
+        <p class="quick-note">Explorer branch preserves the v0.1.5.5 physics, renderer, spacecraft, FRAME travel, cockpit, landing and surface systems. This build changes presentation only.</p>
+      </div>
+    </aside>
+
+    <aside id="engineeringPanel" class="drawer engineering-panel" hidden>
+      <header><div><b>ENGINEERING / DIAGNOSTICS</b><small>Read-only renderer + simulation telemetry</small></div><button id="engineeringClose" type="button" aria-label="Close engineering diagnostics">×</button></header>
+      <div class="engineering-copy">
+        <div class="engineering-banner"><b>LIVE SYSTEM BUS</b><span>No flight controls · no physics authority</span></div>
+        <div class="engineering-grid" aria-label="Live engineering telemetry">
+          <span>Renderer</span><b id="engineeringRenderer">INIT</b>
+          <span>FPS</span><b id="engineeringFps">—</b>
+          <span>Physics</span><b id="engineeringPhysics">—</b>
+          <span>Render</span><b id="engineeringRender">—</b>
+          <span>Ship speed</span><b id="engineeringShipSpeed">—</b>
+          <span>Sim time</span><b id="engineeringSimTime">—</b>
+          <span>Seed</span><b id="engineeringSeed">ORIGIN-001</b>
+          <span>Major bodies</span><b id="engineeringMajor">—</b>
+          <span>Test bodies</span><b id="engineeringTest">—</b>
+          <span>Draw calls</span><b id="engineeringDraw">—</b>
+          <span>Prediction</span><b id="engineeringPrediction">—</b>
+          <span>Experiment particles</span><b id="engineeringParticles">0</b>
+          <span>Experiment step</span><b id="engineeringLab">0 ms</b>
+        </div>
+        <div class="engineering-boundary">
+          <b>MODEL BOUNDARY</b>
+          <span>These values mirror existing runtime telemetry only. This panel does not change gravity, integration, FRAME behavior, navigation, save state, or renderer-backend policy.</span>
+        </div>
+        <p class="engineering-build">BUILD <b>EXPLORER-010</b> · BASE ABYSSAL-155 · SAVE SCHEMA 1 · THREE.JS 0.185.0</p>
+      </div>
+    </aside>
+
+    <aside id="mapPanel" class="drawer system-map-panel" hidden>
+      <header><div><b>NAVIGATION · SYSTEM MAP</b><small>Live N-body hierarchy · true geometry + logarithmic survey</small></div><button id="mapClose" type="button" aria-label="Close system map">×</button></header>
+      <div class="map-copy">
+        <p class="help">Choose any generated star, planet or moon from the BODY CATALOG even when astronomical scale makes it too small to tap. LOG SURVEY is explicitly non-linear for discovery; TRUE SYSTEM and TRUE LOCAL preserve linear X/Z geometry.</p>
+        <div class="map-catalog-grid">
+          <label>Body catalog<select id="mapBodySelect" aria-label="Star planet and moon navigation catalog"><option value="">Loading bodies…</option></select></label>
+          <label>Map model<select id="mapViewMode"><option value="survey" selected>LOG SURVEY · whole system</option><option value="true-system">TRUE SYSTEM · linear X/Z</option><option value="true-local">TRUE LOCAL · selected planet + moons</option></select></label>
+        </div>
+        <canvas id="systemMapCanvas" class="system-map-canvas" width="760" height="500" aria-label="Interactive live map of the generated star system"></canvas>
+        <div class="map-toolbar">
+          <label>Map zoom<select id="mapZoom"><option value="0.7">Wide</option><option value="1" selected>Nominal</option><option value="1.6">Closer</option><option value="2.5">Close</option></select></label>
+          <label class="inline-check"><input id="mapUnknownToggle" type="checkbox" checked><span>SHOW UNIDENTIFIED SIGNALS</span></label>
+        </div>
+        <div class="scanner-title"><b id="mapSelectionName">Choose a body or tap a marker</b><small id="mapSelectionKind">—</small></div>
+        <div class="scan-grid map-science-grid">
+          <span>Ship range</span><b id="mapSelectionDistance">—</b>
+          <span>Star-relative range</span><b id="mapSelectionStarRange">—</b>
+          <span>Parent</span><b id="mapSelectionParent">—</b>
+          <span>Physical class</span><b id="mapSelectionClass">—</b>
+          <span>Physical radius</span><b id="mapSelectionRadius">—</b>
+          <span>Mass</span><b id="mapSelectionMass">—</b>
+          <span>Surface gravity</span><b id="mapSelectionGravity">—</b>
+          <span>Kepler period</span><b id="mapSelectionOrbit">—</b>
+          <span>Eccentricity</span><b id="mapSelectionEccentricity">—</b>
+          <span>Body rotation</span><b id="mapSelectionRotation">—</b>
+          <span>Instantaneous Hill radius</span><b id="mapSelectionHill">—</b>
+          <span>Surface capability</span><b id="mapSelectionSurface">—</b>
+          <span>Atmosphere model</span><b id="mapSelectionAtmosphere">—</b>
+          <span>Escape velocity</span><b id="mapSelectionEscape">—</b>
+          <span>Stellar flux</span><b id="mapSelectionFlux">—</b>
+          <span>Equilibrium temperature</span><b id="mapSelectionEquilibrium">—</b>
+          <span>Bond albedo</span><b id="mapSelectionAlbedo">—</b>
+          <span>Atmosphere pressure proxy</span><b id="mapSelectionPressure">—</b>
+          <span>Atmosphere retention</span><b id="mapSelectionRetention">—</b>
+          <span>Volatile / ice potential</span><b id="mapSelectionVolatiles">—</b>
+          <span>Surface family</span><b id="mapSelectionSurfaceFamily">—</b>
+          <span>Rotation state</span><b id="mapSelectionTidal">—</b>
+          <span>Observed angular diameter</span><b id="mapSelectionAngular">—</b>
+          <span>Illuminated fraction</span><b id="mapSelectionPhase">—</b>
+          <span>Stellar shadow</span><b id="mapSelectionShadow">—</b>
+          <span>FRAME normal arrival</span><b id="mapSelectionFrameArrival">—</b>
+          <span>Map projection</span><b id="mapProjectionModel">LOG SURVEY · NON-LINEAR RANGE</b>
+        </div>
+        <p id="mapSelectionStatus" class="prediction">The BODY CATALOG exposes the star → planets → moons hierarchy directly from the authoritative generated body registry.</p>
+        <div class="observation-grid map-actions">
+          <button id="mapSelectAction" type="button">SET NAV TARGET</button>
+          <button id="mapTransitAction" class="void" type="button">FRAME TO TARGET</button>
+          <button id="mapScanAction" type="button">SCAN SIGNAL</button>
+          <button id="mapCosmosAction" type="button">OPEN SCIENCE / COSMOS</button>
+          <button id="mapEventsAction" class="void" type="button">PLAN OBSERVATIONS</button>
+          <button id="mapLandAction" class="surface-accent" type="button" disabled>LAND / DESCEND</button>
+        </div>
+        <p class="warning"><strong>MAP SCIENCE BOUNDARY:</strong> TRUE views are linear projections of the live inertial X/Z state. LOG SURVEY compresses radius only and is labeled non-linear. The map never moves a body or creates a second orbit model. Planetary-environment values distinguish hard derived physics from seeded formation/retention proxies; atmosphere chemistry, greenhouse climate and radiative transfer are not silently inferred from artwork.</p>
+      </div>
+    </aside>
+
+    <aside id="eventsPanel" class="drawer event-planner-panel" hidden>
+      <header><div><b>OBSERVATION PLANNER</b><small>Read-only cloned N-body ephemeris · stellar alignments</small></div><button id="eventsClose" type="button" aria-label="Close observation planner">×</button></header>
+      <div class="science-copy event-planner-copy">
+        <p class="help">Select a planet or moon in NAV first. The planner searches forward from the current simulation epoch using a temporary copy of the same gravity-source bodies. It never advances, teleports or edits the live universe.</p>
+        <div class="scan-grid">
+          <span>Reference observer</span><b id="eventObserverName">—</b>
+          <span>Reference model</span><b id="eventObserverModel">—</b>
+          <span>Search starts</span><b id="eventStartTime">—</b>
+          <span>Geometry</span><b>PRIMARY-STAR DISK · ≤5° ALIGNMENTS</b>
+        </div>
+        <label class="event-horizon-label">Search horizon<select id="eventHorizon"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="180">180 days</option></select></label>
+        <div class="observation-grid event-actions"><button id="eventSearch" class="void" type="button">SEARCH ALIGNMENTS</button><button id="eventCancel" type="button" hidden>CANCEL SEARCH</button></div>
+        <div class="event-progress" aria-label="Observation search progress"><div id="eventProgressFill"></div><b id="eventProgressText">READY</b></div>
+        <p id="eventStatus" class="prediction">Search forward from the current simulation epoch. The planner propagates a temporary copy of the N-body system and never moves live bodies.</p>
+        <div id="eventResults" class="event-results"><p class="event-empty">No search has been run for this reference observer yet.</p></div>
+        <p class="warning"><strong>PLANNER BOUNDARY:</strong> BODY CENTER is a geocentric/selenocentric approximation and does not include a local horizon. If you are landed on the selected reference body, CURRENT LANDED SITE instead follows that exact body-fixed location and reports whether the star is above the horizon. The search does not predict future pilot motion or replay future collision/fragmentation events. Numerical work is bounded and reported rather than hidden.</p>
+      </div>
+    </aside>
+
+    <aside id="transitPanel" class="drawer science-panel" hidden>
+      <header><div><b>SPECULATIVE FRAME DRIVE</b><small>Spacecraft-only reference-frame travel · world physics continues unchanged</small></div><button id="transitClose" type="button" aria-label="Close frame drive">×</button></header>
+      <div class="science-copy">
+        <label>Frame target<select id="transitTargetSource"><option value="body" selected>Current celestial TARGET</option><option value="cosmic">Selected COSMOS source</option></select></label>
+        <label>Maximum frame rate<select id="transitTier"><option value="1">1 c</option><option value="10">10 c</option><option value="100" selected>100 c</option><option value="500">500 c</option><option value="1000">1,000 c</option></select></label>
+        <div class="frame-rule"><b>ARRIVAL RULE</b><span>Planet/moon normal arrivals hand back to Newtonian flight in an instantaneous circular osculating orbit when a resolved Hill-stable window exists. Other targets and manual disengage retain inertial-frame matching. Celestial bodies, gravity and the N-body integrator are never rewritten by FRAME.</span></div>
+        <div class="scan-grid"><span>Target</span><b id="transitTargetName">—</b><span>Distance</span><b id="transitDistance">—</b><span>Local relative velocity</span><b id="transitLocalVelocity">—</b><span>Normal arrival</span><b id="transitArrivalProfile">—</b><span>Route</span><b id="transitRouteProfile">AUTO · SWEPT-GUARD</b><span>Effective frame rate</span><b id="transitEffectiveSpeed">—</b><span>ETA</span><b id="transitEta">—</b></div>
+        <button id="transitEngage" class="void" type="button">ENGAGE FRAME</button>
+        <p class="warning"><strong>FICTIONAL / SPECULATIVE:</strong> FRAME translates only the spacecraft position toward the selected destination over real time and automatically uses a live-body-anchored detour when the direct swept path would cross another massive-body clearance guard. While FRAME is active, the ship is isolated from local Newtonian acceleration; the rest of the universe continues through the existing simulation unchanged. For planets/moons, a normal completed arrival inserts the spacecraft into a calculated circular osculating orbit; manual disengage still matches target inertial velocity. Ordinary gravity and ShipDynamics resume immediately after the fictional handoff.</p>
+      </div>
+    </aside>
+
+    <aside id="labPanel" class="drawer lab-panel" hidden>
+      <header><div><b>UNIVERSE LAB</b><small>Seeded system + experiment launcher</small></div><button id="labClose" type="button" aria-label="Close lab">×</button></header>
+      <div class="drawer-grid">
+        <label>Universe profile<select id="generationProfile"><option value="origin" selected>ORIGIN — scientific baseline</option><option value="abyssal">ABYSSAL — extreme universe</option></select></label>
+        <label>System seed<input id="seedInput" value="ORIGIN-001" maxlength="64"></label>
+        <div class="button-row"><button id="regenerate" type="button">GENERATE</button><button id="randomSeed" type="button">RANDOM</button></div>
+        <label>Time warp<select id="timeScale"><option value="1">1× real seconds</option><option value="60" selected>60×</option><option value="600">600×</option><option value="3600">3,600×</option><option value="86400">86,400×</option></select></label>
+        <label>Trajectory horizon<select id="trajectoryHorizon"><option value="3600">1 hour</option><option value="21600">6 hours</option><option value="86400" selected>1 day</option><option value="604800">7 days</option><option value="2592000">30 days</option></select></label>
+        <label>Minor test bodies<select id="minorCount"><option value="1000">1,000</option><option value="4000" selected>4,000</option><option value="10000">10,000</option><option value="20000">20,000</option></select></label>
+        <hr>
+        <h3>PARTICLE EXPERIMENTS</h3>
+        <p id="particleModeHelp" class="help">Loading particle-mode description…</p>
+        <label>Experiment mode<select id="particleMode"><option value="gravity" selected>Gravity Cloud — physical test particles</option><option value="life">Particle Life — Conway-inspired</option><option value="species">Species Forces — attraction/repulsion</option></select></label>
+        <label>Particle slots<input id="particleCount" type="number" inputmode="numeric" value="5000" min="100" max="30000" step="100"></label>
+        <label>Field radius (km)<input id="particleRadiusKm" type="number" inputmode="decimal" value="10000" min="500" max="200000" step="1000"></label>
+        <label>Neighbor radius (km)<input id="particleNeighborKm" type="number" inputmode="decimal" value="1000" min="50" max="200000" step="100"></label>
+        <label>Initial random speed (m/s)<input id="particleSpeed" type="number" inputmode="decimal" value="1500" min="0" max="200000" step="100"></label>
+        <label>Artificial local strength (m/s²)<input id="particleStrength" type="number" inputmode="decimal" value="20" min="0" max="250" step="1"></label>
+        <label class="inline-check"><input id="particleMajorGravity" type="checkbox" checked><span>Also feel all major-body Newtonian gravity</span></label>
+        <div class="button-row"><button id="randomizeParticleRules" type="button">RANDOMIZE RULE PARAMS</button><button id="spawnParticleField" class="void" type="button">SPAWN + OBSERVE</button></div>
+        <p id="particleStatus" class="prediction">No particle experiments. Fields are session-local.</p>
+        <h3>OBSERVATION / RENDEZVOUS</h3>
+        <p class="help">OBSERVE/FRAME/TRACK/ORBIT move only a massless scientific camera. RENDEZVOUS returns to SHIP VIEW and moves the physical spacecraft with bounded thrust and braking.</p>
+        <label>Selected experiment<select id="experimentSelect"><option value="">No active experiment</option></select></label>
+        <div class="observation-grid">
+          <button id="observeExperiment" type="button">OBSERVE</button>
+          <button id="frameExperiment" type="button">FRAME</button>
+          <button id="trackExperiment" type="button">TRACK</button>
+          <button id="orbitExperiment" type="button">ORBIT</button>
+          <button id="nextExperiment" type="button">NEXT FIELD</button>
+          <button id="replayExperiment" type="button">REPLAY FIELD</button>
+          <button id="rendezvousExperiment" class="void" type="button">RENDEZVOUS</button>
+          <button id="shipViewButton" type="button">SHIP VIEW</button>
+        </div>
+        <h3>PARTICLE GUN</h3>
+        <p class="help">Ballistic luminous test particles inherit ship velocity, receive major-body Newtonian gravity, and disappear when they contact a finite-radius major body.</p>
+        <label>Gun particles<input id="particleGunCount" type="number" inputmode="numeric" value="750" min="10" max="5000" step="10"></label>
+        <label>Gun speed (m/s)<input id="particleGunSpeed" type="number" inputmode="decimal" value="25000" min="0" max="1000000" step="1000"></label>
+        <label>Spread (degrees)<input id="particleGunSpread" type="number" inputmode="decimal" value="4" min="0" max="60" step="1"></label>
+        <div class="button-row"><button id="fireParticleGun" type="button">FIRE PARTICLE GUN</button><button id="clearParticleExperiments" type="button">CLEAR PARTICLES</button></div>
+        <p class="warning">Particle experiments cap global time warp at 60× only while live particles remain. Completed/extinct fields keep a final observation frame but release the cap automatically, restoring a previously requested 600×/3,600× warp when safe. Gravity Cloud particles do not source gravity; full self-gravity is reserved for the Barnes–Hut/WebGPU scaling phase.</p>
+        <hr>
+        <h3>MASS LAUNCHER</h3>
+        <p class="help">Projectile radius is derived from mass and bulk density. The preview integrates the projectile and all major gravity sources mutually under the same Newtonian model used live.</p>
+        <div class="preset-grid" aria-label="Impact presets">
+          <button class="impact-preset" data-preset="meteor" type="button">SMALL METEOR</button>
+          <button class="impact-preset" data-preset="tunguska" type="button">TUNGUSKA-ISH</button>
+          <button class="impact-preset" data-preset="chicxulub" type="button">CHICXULUB-CLASS</button>
+          <button class="impact-preset" data-preset="moonlet" type="button">MOONLET</button>
+        </div>
+        <label>Material<select id="asteroidMaterial"><option value="porousRock">Porous rock</option><option value="ice">Water ice</option><option value="basalt" selected>Basalt</option><option value="iron">Iron-rich</option></select></label>
+        <label>Bulk density (kg/m³)<input id="asteroidDensity" type="number" inputmode="decimal" value="3000" min="100" max="30000"></label>
+        <label>Mass (kg)<input id="asteroidMass" type="number" inputmode="decimal" value="1000000000000000" min="100000000" max="1e24"></label>
+        <div class="derived">Derived spherical radius <b id="asteroidRadius">—</b></div>
+        <label>Launch speed relative to ship (m/s)<input id="asteroidSpeed" type="number" inputmode="decimal" value="25000" min="0" max="1000000"></label>
+        <div class="button-row"><button id="aimTarget" type="button">AIM TARGET</button><button id="previewAsteroid" type="button">PREVIEW TRAJECTORY</button></div>
+        <p id="launchPrediction" class="prediction">Launch preview off.</p>
+        <button id="spawnAsteroid" class="danger" type="button">LAUNCH PHYSICAL BODY</button>
+        <hr>
+        <h3>COMPACT OBJECTS</h3>
+        <p class="help">Spawn live Newtonian compact masses with high-detail visual proxies. These are deliberately guarded before the simulation enters regimes where GR/radiation physics is required.</p>
+        <label>Neutron object<select id="compactObjectType"><option value="pulsar" selected>Pulsar</option><option value="neutron-star">Neutron star</option></select></label>
+        <label>Mass (solar masses)<input id="neutronStarMass" type="number" inputmode="decimal" value="1.4" min="1.05" max="2.35" step="0.05"></label>
+        <label>Spin period (s)<input id="pulsarSpinPeriod" type="number" inputmode="decimal" value="0.65" min="0.02" max="20" step="0.01"></label>
+        <label>Magnetic field (tesla)<input id="pulsarMagneticField" type="number" inputmode="decimal" value="100000000" min="10000" max="100000000000" step="1000000"></label>
+        <button id="spawnNeutronStar" class="void" type="button">SPAWN COMPACT STAR</button>
+        <p class="warning">The 12 km physical radius and selected mass are used by live Newtonian gravity/collision code. Magnetosphere, sweep beams and glow are visual proxies. A compact-object guard pauses before near-surface Newtonian motion is presented as valid.</p>
+        <hr>
+        <h3>EXTREME OBJECT PRESETS</h3>
+        <p class="help">Spawn additional live Newtonian objects for close study. Their mass/radius are physical presets; atmospheric, magnetic, thermal and radiative appearances are visual approximations.</p>
+        <label>Extreme object<select id="extremeObjectType"><option value="magnetar" selected>Magnetar</option><option value="white-dwarf">White dwarf</option><option value="brown-dwarf">Brown dwarf</option><option value="rogue-planet">Rogue planet</option></select></label>
+        <button id="spawnExtremeObject" class="void" type="button">SPAWN EXTREME OBJECT</button>
+        <p class="warning">Magnetars retain the neutron-star model guard. White/brown dwarfs and rogue planets use propulsion-safe stand-off from live Newtonian gravity; detailed stellar/atmospheric evolution is not solved.</p>
+        <hr>
+        <h3>ACTIVE BLACK HOLE</h3>
+        <label>Black-hole mass (solar masses)<input id="blackHoleMass" type="number" inputmode="decimal" value="3" min="0.1" max="100" step="0.1"></label>
+        <button id="spawnBlackHole" class="void" type="button">SPAWN ACTIVE BLACK HOLE</button>
+        <p class="warning">Schwarzschild radius is calculated and gravity is live Newtonian. The dense accretion particles, photon-ring cues, pseudo-lensing halo and polar jets are real-time graphics, not a GR ray tracer or plasma simulation.</p>
+      </div>
+    </aside>
+
+    <aside id="cosmosPanel" class="drawer cosmos-panel" hidden>
+      <header><div><b>COSMIC EXPLORER</b><small>Seeded local phenomena · discovery · massless observation</small></div><button id="cosmosClose" type="button" aria-label="Close cosmic explorer">×</button></header>
+      <div class="scanner-copy">
+        <p class="help">The local system includes modeled astronomical phenomena plus a much larger seeded anomaly layer. Some anomalies are plausible or speculative; others are intentionally impossible. Sources begin unclassified and repeated SCAN SOURCE passes reveal deeper information instead of instantly exposing the whole record.</p>
+        <label class="cosmos-select-label">Local source<select id="phenomenonSelect"><option value="">Loading sources…</option></select></label>
+        <div class="scan-grid">
+          <span>Discovery</span><b id="phenomenonDiscovery">—</b>
+          <span>Classification</span><b id="phenomenonKind">—</b>
+          <span>Characteristic radius</span><b id="phenomenonRadius">—</b>
+          <span>Anchor body</span><b id="phenomenonAnchor">—</b>
+          <span>Reality class</span><b id="phenomenonReality">—</b>
+          <span>Scan depth</span><b id="phenomenonScanDepth">0/3</b>
+        </div>
+        <p id="phenomenonStatus" class="prediction">No source selected.</p>
+        <div class="observation-grid">
+          <button id="scanPhenomenon" type="button">SCAN SOURCE</button>
+          <button id="observePhenomenon" type="button">OBSERVE</button>
+          <button id="orbitPhenomenon" type="button">ORBIT VIEW</button>
+          <button id="nextPhenomenon" type="button">NEXT SOURCE</button>
+          <button id="rendezvousPhenomenon" class="void" type="button">RENDEZVOUS</button>
+          <button id="shipViewCosmos" type="button">SHIP VIEW</button>
+        </div>
+        <hr>
+        <h3>SPACE WEATHER</h3>
+        <p class="help">Coronal mass ejections propagate outward at measured kinematic speeds and can geometrically cross the spacecraft. Plasma/MHD, magnetic reconnection, radiation dose and hardware damage are intentionally not simulated yet.</p>
+        <div class="scan-grid"><span>Active fronts</span><b id="spaceWeatherActive">0</b><span>Next seeded event</span><b id="spaceWeatherNext">—</b></div>
+        <p id="spaceWeatherStatus" class="prediction">No active CME fronts.</p>
+        <div class="button-row"><button id="triggerCme" class="void" type="button">TRIGGER CME</button><button id="autoWeatherToggle" type="button">AUTO WEATHER ON</button></div>
+        <p class="warning">OBSERVE/ORBIT move only the massless camera. RENDEZVOUS moves the physical spacecraft with bounded thrust. Known-physics, speculative, anomalous and impossible/fictional classifications are displayed explicitly after discovery; anomaly visuals do not silently become gravity sources.</p>
+      </div>
+    </aside>
+
+    <aside id="overlayPanel" class="drawer science-panel" hidden>
+      <header><div><b>SCIENTIFIC OVERLAYS</b><small>Target-centric orbital and gravity diagnostics</small></div><button id="overlayClose" type="button" aria-label="Close scientific overlays">×</button></header>
+      <div class="science-copy">
+        <label class="inline-check"><input id="overlayMaster" type="checkbox"><span>ENABLE SCIENTIFIC OVERLAYS</span></label>
+        <label class="inline-check"><input id="overlayLagrange" type="checkbox" checked><span>L1–L5 estimates for selected body + parent/star</span></label>
+        <label class="inline-check"><input id="overlayHill" type="checkbox" checked><span>Hill-sphere radius</span></label>
+        <label class="inline-check"><input id="overlayRoche" type="checkbox" checked><span>Fluid Roche-limit estimate (3,000 kg/m³ reference satellite)</span></label>
+        <label class="inline-check"><input id="overlayOrbitPlane" type="checkbox" checked><span>Instantaneous selected orbital plane</span></label>
+        <label class="inline-check"><input id="overlayGravity" type="checkbox"><span>25-point local Newtonian gravity-vector field around ship</span></label>
+        <p id="overlayStatus" class="prediction">Scientific overlays are off.</p>
+        <p class="warning">Lagrange markers use circular restricted-three-body approximations on the instantaneous geometry. Hill/Roche overlays are diagnostic estimates, not stability guarantees. Gravity vectors come directly from the current live Newtonian major-body state.</p>
+      </div>
+    </aside>
+
+    <aside id="scannerPanel" class="drawer scanner-panel" hidden>
+      <header><div><b>FLIGHT SCANNER</b><small>Target-relative scientific telemetry</small></div><button id="scannerClose" type="button" aria-label="Close scanner">×</button></header>
+      <div class="scanner-copy">
+        <div class="scanner-title"><b id="targetName">No target</b><small id="targetKind">—</small></div>
+        <div class="scan-grid">
+          <span>Center distance</span><b id="targetDistance">—</b>
+          <span>Surface altitude</span><b id="targetAltitude">—</b>
+          <span>Relative speed</span><b id="targetRelativeSpeed">—</b>
+          <span>Radial speed</span><b id="targetRadialSpeed">—</b>
+          <span>Target gravity here</span><b id="targetGravity">—</b>
+          <span>Escape speed here</span><b id="targetEscape">—</b>
+          <span>Circular speed here</span><b id="targetCircular">—</b>
+          <span>Osculating eccentricity</span><b id="targetEccentricity">—</b>
+          <span>Periapsis altitude</span><b id="targetPeriapsis">—</b>
+          <span>Apoapsis altitude</span><b id="targetApoapsis">—</b>
+          <span>Two-body state</span><b id="targetOrbitState">—</b>
+          <span>Angular diameter</span><b id="targetAngularDiameter">—</b>
+          <span>Illuminated fraction</span><b id="targetIllumination">—</b>
+          <span>Stellar shadow</span><b id="targetStellarShadow">—</b>
+          <span>Recorded impacts</span><b id="targetImpactCount">0</b>
+        </div>
+        <p class="help">Osculating values answer: “If this target were the only gravitating body from this instant onward, what conic orbit matches the current relative state?” The visible path prediction is different: it integrates all current major gravity sources.</p>
+        <div class="prediction-box"><b>N-BODY PREDICTION</b><span id="predictedApproach">Prediction not active.</span></div>
+        <label id="surfaceRegionLabel">Landing region<select id="surfaceRegionSelect"><option value="shatterfall-basin">Shatterfall Basin</option></select></label>
+        <div class="button-row"><button id="nextTarget" type="button">NEXT TARGET</button><button id="landTarget" class="surface-accent" type="button" disabled>LAND TARGET</button></div>
+        <hr>
+        <h3>LAST RESOLVED IMPACT</h3>
+        <p id="impactReadout" class="impact-readout">No collision recorded this session.</p>
+      </div>
+    </aside>
+
+    <aside id="sciencePanel" class="drawer science-panel" hidden>
+      <header><div><b>SCIENTIFIC MODEL</b><small>Physical, approximate, and explicitly fictional layers</small></div><button id="scienceClose" type="button" aria-label="Close science notes">×</button></header>
+      <div class="science-copy">
+        <p><strong>Authoritative units:</strong> SI meters, kilograms, seconds in Float64 arrays.</p>
+        <p><strong>Major gravity:</strong> mutual Newtonian gravity with G = 6.67430×10⁻¹¹ m³·kg⁻¹·s⁻² and velocity-Verlet integration.</p>
+        <p><strong>Seeded systems:</strong> deterministic near-Keplerian eccentric planet and moon initial conditions, shifted into a barycentric rest frame. They are plausible sandbox systems, not claims of astrophysical formation history.</p>
+        <p><strong>Trajectory path:</strong> an N-body forward integration of the current massive system plus the ship/projectile. Future thrust and minor-particle gravity are excluded.</p>
+        <p><strong>Scanner orbit:</strong> osculating two-body elements around the selected target. Other-body perturbations are intentionally ignored in those displayed elements.</p>
+        <p><strong>Minor field:</strong> 1k–20k typed-array background test particles feel major gravity but intentionally contribute no gravity.</p>
+        <p><strong>Particle experiments:</strong> Gravity Cloud uses SI Float64 test particles under all major Newtonian gravity sources. Particle Life and Species Forces use a uniform spatial hash so local neighbor searches avoid all-pairs O(N²) work; their life/attraction rules are explicitly artificial. Experiment fields remain session-local and cap warp at 60× only while live particles remain; completed fields preserve a final frame and release the cap automatically. Observation cameras are non-physical viewpoints; they do not alter particle or spacecraft state.</p>
+        <p><strong>Ship:</strong> FLIGHT thrust is 20 m/s²; CRUISE thrust is 120 m/s²; BOOST is an explicitly speculative 5,000 m/s² propulsion mode for rapid local velocity-vector changes. BRAKE applies bounded thrust opposite inertial velocity. APPROACH uses a propulsion-safe stand-off and persistent HOLD; STOP RELATIVE matches target velocity; TURN &amp; BURN cancels lateral velocity toward the captured nose direction. PROGRADE/RETROGRADE change attitude only.</p>
+        <p><strong>Frame drive:</strong> explicitly fictional spacecraft-only reference-frame travel for convenient exploration. FRAME translates ship position separately from Newtonian body integration, isolates the ship from local acceleration only while active, and steps down near the destination. A manually commanded disengage matches the locked target inertial velocity. A normally completed planet/moon arrival instead applies a calculated instantaneous circular osculating state inside a conservative prograde Hill-stability estimate, then ordinary Newtonian ShipDynamics resumes. Celestial gravity and body trajectories are never rewritten by FRAME. This is not an Alcubierre/GR simulation.</p>
+        <p><strong>Impacts:</strong> finite-radius contact and momentum/energy telemetry are physical. Low-energy collisions bounce/merge using simplified material restitution; energetic impacts use documented crater scaling and heuristic fragment partitioning. Large fragments remain real gravity sources; dense ejecta/fire is visual-only. This is not a hydrocode.</p>
+        <p><strong>Cosmic phenomena:</strong> physical comet nuclei are live Newtonian gravity sources on high-eccentricity orbits. Asteroid/debris belts and planetary rings use seeded GPU-friendly point-population proxies tied to physical anchor bodies; their individual visible points do not source gravity or collide. Distant colored nebular haze is explicitly visual background.</p>
+        <p><strong>Space weather:</strong> CME fronts use seeded directional cones with explicit propagation speeds and geometric arrival/crossing detection. They are kinematic fronts, not magnetohydrodynamic or radiation-transport simulations.</p>
+        <p><strong>Planetary environments:</strong> planets/moons/rogues use one canonical environment solver. Bulk density, surface gravity, escape speed, stellar flux and radiative-equilibrium temperature are hard derived quantities. Bond albedo, volatile inventory and atmospheric inventory are deterministic seeded formation assumptions on an independent RNG stream. Solid-world pressure is explicitly a formation/thermal-retention/gas-phase proxy—not a solved climate, chemistry or radiative-transfer model. Gas giants have no invented solid surface. The existing home world remains the only detailed landable surface in this foundation; its three deterministic regions and local weather remain presentation layers while future multi-world surfaces are required to consume this environment record.</p>
+        <p><strong>Scientific overlays:</strong> gravity vectors are computed from the current Newtonian source set. Lagrange points, Hill spheres and Roche limits are labeled diagnostic approximations; orbital planes are derived from instantaneous target-relative position/velocity.</p>
+        <p><strong>Compact objects:</strong> black holes use Schwarzschild-radius metadata plus live Newtonian gravity, with a dense real-time accretion-disk/photon-ring/jet visual proxy. Neutron stars/pulsars use live Newtonian mass/radius plus visual magnetosphere and sweep-beam proxies. APPROACH computes propulsion-safe stand-off, strong gravity reduces integration steps, and model guards pause before near-horizon/near-surface or &gt;10% c states are presented as adequate Newtonian science. Full GR ray tracing, radiation transport and plasma MHD remain future work.</p>
+      </div>
+    </aside>
+  </main>
+  <script type="module" src="./src/main.js?v=explorer010"></script>
+</body>
+</html>
