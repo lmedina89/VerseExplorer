@@ -1,0 +1,121 @@
+import { surfaceHeightAt, surfacePois } from './surfaceGenerator.js';
+import { createSurfaceWeatherState, serializeSurfaceWeather } from './surfaceWeather.js';
+import { bodyFixedDirectionToInertial } from '../core/planetaryRotation.js';
+
+export function createSurfaceSession(region, snapshot = null) {
+  const landing = region?.landing ?? { x: 0, z: 0, yaw: 0 };
+  const bodyCompatible = !snapshot?.bodyId || snapshot.bodyId === region?.bodyId;
+  const profileCompatible = !snapshot?.surfaceProfileId || snapshot.surfaceProfileId === region?.surfaceEngineProfile;
+  const restored = bodyCompatible && profileCompatible ? snapshot : null;
+  const restoredIds = Array.isArray(restored?.scannedPoiIds) ? restored.scannedPoiIds : [];
+  return {
+    active: true,
+    bodyId: region.bodyId,
+    regionId: region.id,
+    // The generated region is authoritative for current profile/model identity. Compatible
+    // schema-1 snapshots restore local state but cannot relabel one world's runtime as another.
+    surfaceProfileId: region.surfaceEngineProfile ?? restored?.surfaceProfileId ?? null,
+    surfaceModelVersion: Number.isFinite(Number(region.surfaceModelVersion))
+      ? Math.max(1, Math.floor(Number(region.surfaceModelVersion)))
+      : (Number.isFinite(Number(restored?.surfaceModelVersion)) ? Math.max(1, Math.floor(Number(restored.surfaceModelVersion))) : 1),
+    x: Number.isFinite(restored?.x) ? restored.x : landing.x,
+    z: Number.isFinite(restored?.z) ? restored.z : landing.z,
+    yaw: Number.isFinite(restored?.yaw) ? restored.yaw : landing.yaw,
+    pitch: Number.isFinite(restored?.pitch) ? restored.pitch : -0.08,
+    walkSpeedMps: 14,
+    sprintSpeedMps: 24,
+    lastMoveSpeedMps: 0,
+    scannedPoiIds: new Set(restoredIds),
+    selectedPoiId: restored?.selectedPoiId ?? null,
+    hudExpanded: restored?.hudExpanded === true,
+    bodyFixedAnchor: Array.isArray(restored?.bodyFixedAnchor) && restored.bodyFixedAnchor.length >= 3
+      ? restored.bodyFixedAnchor.slice(0, 3).map((value) => Number(value))
+      : null,
+    anchorCapturedAtSimSeconds: Number.isFinite(Number(restored?.anchorCapturedAtSimSeconds)) ? Number(restored.anchorCapturedAtSimSeconds) : null,
+    rotationModelVersion: Number.isFinite(Number(restored?.rotationModelVersion)) ? Math.max(1, Math.floor(Number(restored.rotationModelVersion))) : 1,
+    weather: createSurfaceWeatherState(region, restored?.weather ?? null),
+  };
+}
+
+
+export function surfaceTakeoffReferencePosition(session, body, simulationTimeSeconds = 0, radiusScale = 1.2) {
+  if (!session?.active || !body?.position || !(Number(body.radius) > 0)) return null;
+  const anchor = session.bodyFixedAnchor;
+  if (!Array.isArray(anchor) || anchor.length < 3 || !anchor.slice(0, 3).every((value) => Number.isFinite(Number(value)))) return null;
+  const direction = bodyFixedDirectionToInertial(body, anchor, simulationTimeSeconds, new Float64Array(3));
+  const scale = Number.isFinite(Number(radiusScale)) && Number(radiusScale) > 1 ? Number(radiusScale) : 1.2;
+  const radius = Number(body.radius) * scale;
+  return new Float64Array([
+    Number(body.position[0]) + direction[0] * radius,
+    Number(body.position[1]) + direction[1] * radius,
+    Number(body.position[2]) + direction[2] * radius,
+  ]);
+}
+
+export function serializeSurfaceSession(session) {
+  if (!session?.active) return null;
+  return {
+    active: true,
+    bodyId: session.bodyId,
+    regionId: session.regionId,
+    surfaceProfileId: session.surfaceProfileId ?? null,
+    surfaceModelVersion: Number.isFinite(Number(session.surfaceModelVersion)) ? Math.max(1, Math.floor(Number(session.surfaceModelVersion))) : 1,
+    x: session.x,
+    z: session.z,
+    yaw: session.yaw,
+    pitch: session.pitch,
+    scannedPoiIds: [...session.scannedPoiIds],
+    selectedPoiId: session.selectedPoiId ?? null,
+    hudExpanded: session.hudExpanded === true,
+    bodyFixedAnchor: Array.isArray(session.bodyFixedAnchor) ? session.bodyFixedAnchor.slice(0, 3) : null,
+    anchorCapturedAtSimSeconds: Number.isFinite(Number(session.anchorCapturedAtSimSeconds)) ? Number(session.anchorCapturedAtSimSeconds) : null,
+    rotationModelVersion: Number.isFinite(Number(session.rotationModelVersion)) ? Math.max(1, Math.floor(Number(session.rotationModelVersion))) : 1,
+    weather: serializeSurfaceWeather(session.weather),
+  };
+}
+
+export function stepSurfaceMovement(session, region, input, dt) {
+  if (!session?.active || !region || !(dt > 0)) return session;
+  const forwardInput = Math.max(-1, Math.min(1, Number(input?.forward) || 0));
+  const strafeInput = Math.max(-1, Math.min(1, Number(input?.strafe) || 0));
+  const mag = Math.hypot(forwardInput, strafeInput);
+  if (mag < 1e-6) { session.lastMoveSpeedMps = 0; return session; }
+  const f = forwardInput / Math.max(1, mag);
+  const s = strafeInput / Math.max(1, mag);
+  const speed = input?.sprint ? session.sprintSpeedMps : session.walkSpeedMps;
+  const sin = Math.sin(session.yaw), cos = Math.cos(session.yaw);
+  const dx = (sin * f + cos * s) * speed * dt;
+  const dz = (cos * f - sin * s) * speed * dt;
+  const limit = region.terrainSizeMeters * 0.5 - 28;
+  session.x = Math.max(-limit, Math.min(limit, session.x + dx));
+  session.z = Math.max(-limit, Math.min(limit, session.z + dz));
+  session.lastMoveSpeedMps = speed;
+  return session;
+}
+
+export function surfaceEyePosition(session, region, eyeHeightMeters = 1.72) {
+  return [session.x, surfaceHeightAt(region, session.x, session.z) + eyeHeightMeters, session.z];
+}
+
+export function nearestSurfacePoi(session, region) {
+  if (!session?.active || !region) return null;
+  let best = null;
+  let bestDistance = Infinity;
+  for (const poi of surfacePois(region)) {
+    const d = Math.hypot(poi.x - session.x, poi.z - session.z);
+    if (d < bestDistance) { best = poi; bestDistance = d; }
+  }
+  return best ? { poi: best, distanceMeters: bestDistance } : null;
+}
+
+export function scanNearestSurfacePoi(session, region) {
+  const nearest = nearestSurfacePoi(session, region);
+  if (!nearest) return { ok: false, reason: 'No surface POIs exist in this region.' };
+  if (nearest.distanceMeters > (nearest.poi.scanRadiusMeters ?? 80)) {
+    return { ok: false, reason: `${nearest.poi.name} is ${nearest.distanceMeters.toFixed(0)} m away; move within ${(nearest.poi.scanRadiusMeters ?? 80).toFixed(0)} m to scan.`, ...nearest };
+  }
+  const firstScan = !session.scannedPoiIds.has(nearest.poi.id);
+  session.scannedPoiIds.add(nearest.poi.id);
+  session.selectedPoiId = nearest.poi.id;
+  return { ok: true, ...nearest, firstScan };
+}
