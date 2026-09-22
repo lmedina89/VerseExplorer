@@ -1,6 +1,14 @@
 # Universe Explorer exploration branch
 
-**v0.1.0.1 baseline-behavior restoration.** This branch is a byte-for-byte reuse of the Universe Lab v0.1.5.5 runtime source. The only player-facing changes in this checkpoint are the Explorer title/brand and hiding technical top-HUD telemetry. The original control structure is intentionally preserved while the branch is validated.
+**v0.1.0.2 exploration-HUD reduction.** This branch still preserves the Universe Lab v0.1.5.5 simulation, navigation, renderer, particles, cockpit, FRAME, landing, and surface systems. The new HUD-density layer is presentation-only and defaults to a cleaner exploration view.
+
+HUD modes cycle from the small top-right HUD button:
+
+- **MINIMAL** — default. Hides the 3D cockpit MFD faces/buttons and the LAB/SCAN launchers while keeping TARGET, APPROACH, FRAME, WARP, MENU, look, thrust, reverse, brake, reticle, and contextual target/navigation status.
+- **FLIGHT** — restores the useful NAV/FLIGHT/SCI cockpit instruments but keeps the engineering diagnostics MFD and lab launchers out of the main view.
+- **FULL** — restores the original v0.1.5.5 cockpit instruments and primary control presentation.
+
+No flight/navigation action IDs were renamed or repurposed. The new MENU launcher simply opens the existing FLIGHT / SYSTEM drawer.
 
 # Universe Lab v0.1.5.5 — Abyssal Universe Profile Foundation
 

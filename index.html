@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#02050b">
-  <title>Universe Explorer v0.1.0.1</title>
+  <title>Universe Explorer v0.1.0.2</title>
   <link rel="stylesheet" href="./styles.css?v=155">
   <script type="importmap">
   {
@@ -21,7 +21,7 @@
     <section id="viewport" class="viewport" aria-label="3D universe viewport. Tap a visible celestial body to target it."></section>
 
     <div class="hud top-hud" aria-live="polite">
-      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.1</span></div>
+      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.2</span></div>
       <div class="stat technical-stat"><b id="rendererValue">INIT</b><small>renderer</small></div>
       <div class="stat primary-stat"><b id="fpsValue">—</b><small>fps</small></div>
       <div class="stat technical-stat"><b id="physicsMsValue">—</b><small>physics</small></div>
@@ -44,6 +44,7 @@
       <div class="cockpit-touch-hint">TAP MFDs / KEYS</div>
     </div>
     <button id="cockpitRestore" class="cockpit-restore" type="button" hidden>COCKPIT</button>
+    <button id="hudModeButton" class="hud-mode-button" type="button" aria-label="Cycle exploration HUD density" aria-pressed="true">HUD MIN</button>
     <nav class="portrait-cockpit-tabs" aria-label="Portrait cockpit displays">
       <button id="portraitNavMfd" type="button">NAV</button>
       <button id="portraitFlightMfd" type="button">FLIGHT</button>
@@ -81,6 +82,7 @@
       <button id="approachButton" type="button">APPROACH</button>
       <button id="frameQuick" class="frame-quick" type="button" aria-pressed="false">FRAME</button>
       <button id="warpQuick" type="button">WARP 60×</button>
+      <button id="explorerMenuButton" type="button">MENU</button>
     </nav>
 
     <div id="message" class="message">Initializing…</div>
@@ -145,6 +147,7 @@
         <button id="rcsToggle" type="button">RCS PANEL</button>
         <button id="cockpitToggle" type="button">COCKPIT ON</button>
         <button id="scienceToggle" type="button">SCIENCE</button>
+        <button id="explorerScanMenuButton" type="button">SCAN</button>
         <button id="cosmosToggle" type="button">COSMOS</button>
         <button id="mapToggle" class="void" type="button">SYSTEM MAP</button>
         <button id="surfaceLandButton" class="surface-accent" type="button" disabled>LAND TARGET</button>
@@ -153,6 +156,7 @@
         <button id="pauseToggle" type="button">PAUSE</button>
         <button id="saveButton" type="button">SAVE</button>
         <button id="loadButton" type="button">LOAD</button>
+        <button id="explorerLabMenuButton" type="button">ADVANCED / LAB</button>
       </div>
       <p class="quick-note">ENGINE FLIGHT = 20 m/s²; CRUISE = 120 m/s²; BOOST = 5,000 m/s² speculative propulsion. FRAME DRIVE remains a separate fictional spacecraft-only translation layer and never rewrites celestial gravity. The Origin profile preserves the accepted deterministic scientific baseline. The new Abyssal profile adds a bounded dense system, guaranteed rogue/comet population, enhanced visual phenomena and Abyssal Sentinel as a physical wide-orbit Newtonian magnetar companion. Its magnetic field, radiation and burst structures remain visual proxies. Build marker: <b>ABYSSAL-155</b>.</p>
     </aside>

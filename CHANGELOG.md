@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.2 — Exploration HUD Reduction
+
+- Added MINIMAL / FLIGHT / FULL HUD density modes; MINIMAL is the default.
+- MINIMAL keeps the original flight controls and navigation actions while hiding cockpit MFDs, LAB/SCAN launchers, portrait MFD tabs, and nonessential cockpit decoration.
+- FLIGHT restores NAV/FLIGHT/SCI cockpit instruments while keeping SYSTEM DIAGNOSTICS and laboratory launchers out of the main exploration view.
+- FULL restores the original v0.1.5.5 cockpit/control presentation.
+- Added a small HUD mode button and a MENU launcher that opens the existing FLIGHT / SYSTEM drawer.
+- Physics, navigation, renderer, particles, FRAME, landing, surface, and generated-system code are unchanged from the v0.1.0.1 baseline-restoration checkpoint.
+
 ## v0.1.5.5 — Abyssal Universe Profile Foundation
 
 - Added explicit Origin/Abyssal universe profiles with profile and seed kept separate.
