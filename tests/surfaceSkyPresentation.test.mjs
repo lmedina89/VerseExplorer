@@ -53,11 +53,3 @@ test('rotation axis is projected into the local observer basis without mutating 
   assert.ok(Math.abs(mag - 1) < 1e-9);
   assert.deepEqual([...saturn.rotationAxisInertial], axisBefore);
 });
-
-
-test('0.1.0.5B.1 makes the active surface-sky target visible in the compact HUD and NEXT reports selection count', () => {
-  assert.match(html, /id="surfaceDiscoveriesLabel">FOUND<\/small>/);
-  assert.match(app, /compactLabel\.textContent = 'TARGET'/);
-  assert.match(app, /surfaceDiscoveries', surfaceSkyFocus\?\.name/);
-  assert.match(app, /SURFACE SKY TARGET: \${next\.name} \(\${selectedIndex \+ 1}\/\${candidates\.length}\)/);
-});

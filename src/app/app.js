@@ -38,7 +38,7 @@ import { createSurfaceSession, serializeSurfaceSession, stepSurfaceMovement, nea
 import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beginLandingTransition, setLandingPhase, stepLandingTransition, transitionProgress, canEnterSurface, canWalkSurface, canRequestTakeoff, validateOrbitHandoff } from '../surface/landingTransition.js';
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js';
-import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, preferredSurfaceSkyFocusBody, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105b1';
+import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105a';
 
 const SURFACE_SKY_FOV_PRESETS = Object.freeze([70, 35, 15, 5, 1.5]);
 
@@ -349,7 +349,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.5B.1 online. ORIGIN and ABYSSAL remain unchanged; SOL SURFACE SKY now adds physically proportioned Saturn main rings, target-centering sky controls and telescope FOV presets while keeping real landing disabled. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.5B.2 online. ORIGIN and ABYSSAL remain unchanged; SOL SURFACE SKY now adds physically proportioned Saturn main rings, target-centering sky controls and telescope FOV presets while keeping real landing disabled. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -782,16 +782,16 @@ export class UniverseLabApp {
   }
 
 
-  surfaceSkyVisibleCandidates(astronomy = null) {
+  surfaceSkyTargetCandidates(astronomy = null) {
     if (!this.surfaceSession?.active || this.surfaceSession.observerOnly !== true) return [];
     const solution = astronomy ?? this.solveAstronomicalObserver();
     const observerBodyId = this.surfaceSession.bodyId;
-    const visible = (solution?.bodies ?? []).filter((record) => record?.id && record.id !== observerBodyId && record.finite && record.visibleAboveHorizon);
+    const candidates = (solution?.bodies ?? []).filter((record) => record?.id && record.id !== observerBodyId && record.finite);
     const observerBody = this.registry.get(observerBodyId);
     const parentId = observerBody?.parentId ?? null;
     const starId = (this.registry.get('star-0') ?? this.bodies.find((entry) => entry.kind === BODY_KIND.STAR))?.id ?? null;
-    return visible.sort((a, b) => {
-      const priority = (record) => record.id === parentId ? 0 : record.id === starId ? 1 : 2;
+    return candidates.sort((a, b) => {
+      const priority = (record) => record.id === parentId ? 0 : record.id === starId ? 1 : record.visibleAboveHorizon ? 2 : 3;
       const pa = priority(a), pb = priority(b);
       if (pa !== pb) return pa - pb;
       const sizeDelta = Number(b.angularDiameterRad || 0) - Number(a.angularDiameterRad || 0);
@@ -807,15 +807,43 @@ export class UniverseLabApp {
     for (const control of [next, center, fov]) if (control) control.hidden = !observerOnly;
     if (!observerOnly) return null;
     const solution = astronomy ?? this.solveAstronomicalObserver();
-    const candidates = this.surfaceSkyVisibleCandidates(solution);
+    const candidates = this.surfaceSkyTargetCandidates(solution);
     const focus = candidates.find((record) => record.id === this.surfaceSession.skyFocusBodyId) ?? candidates[0] ?? null;
     if (focus) this.surfaceSession.skyFocusBodyId = focus.id;
-    if (next) { next.textContent = 'NEXT'; next.setAttribute('aria-label', focus ? `Next visible sky target after ${focus.name}` : 'Next visible sky target'); }
+    if (next) { next.textContent = 'NEXT'; next.setAttribute('aria-label', focus ? `Next sky target after ${focus.name}` : 'Next sky target'); }
     if (center) { center.textContent = 'CENTER'; center.setAttribute('aria-label', focus ? `Center ${focus.name} in the surface sky` : 'Center current sky target'); }
     const fovDegrees = this.renderer.getSurfaceFovDegrees?.() ?? SURFACE_SKY_FOV_PRESETS[this.surfaceSession.skyFovIndex ?? 0] ?? 70;
     if (fov) fov.textContent = `FOV ${Number(fovDegrees).toFixed(fovDegrees < 2 ? 1 : 0)}°`;
-    const focusReadout = this.root.querySelector('#surfaceSkyFocus'); if (focusReadout) focusReadout.textContent = focus?.name ?? '—';
+
+    const focusName = focus?.name ?? '—';
+    const focusReadout = this.root.querySelector('#surfaceSkyFocus'); if (focusReadout) focusReadout.textContent = focusName;
     const fovReadout = this.root.querySelector('#surfaceViewFov'); if (fovReadout) fovReadout.textContent = `${Number(fovDegrees).toFixed(fovDegrees < 2 ? 1 : 0)}°`;
+    const worldName = this.root.querySelector('#surfaceWorldName');
+    const observerBody = this.registry.get(this.surfaceSession.bodyId);
+    if (worldName) worldName.textContent = `SURFACE SKY — ${observerBody?.name ?? this.surfaceRegion?.bodyName ?? 'UNKNOWN'}`;
+    const biome = this.root.querySelector('#surfaceBiome'); if (biome) biome.textContent = `VIEWING — ${focusName}`;
+    const compactLabel = this.root.querySelector('#surfaceFocusCompactLabel'); if (compactLabel) compactLabel.textContent = 'TARGET';
+    const compactTarget = this.root.querySelector('#surfaceDiscoveries'); if (compactTarget) compactTarget.textContent = focusName;
+
+    const altitudeDeg = focus?.finite && Number.isFinite(focus.centerAltitudeRad) ? degrees(focus.centerAltitudeRad) : NaN;
+    const azimuthDeg = focus?.finite ? horizontalAzimuthDegrees(focus.localDirection) : NaN;
+    const focusAltAz = this.root.querySelector('#surfaceFocusAltAz');
+    if (focusAltAz) focusAltAz.textContent = Number.isFinite(altitudeDeg)
+      ? `${altitudeDeg >= 0 ? '+' : ''}${altitudeDeg.toFixed(2)}° ALT · ${Number.isFinite(azimuthDeg) ? `${azimuthDeg.toFixed(2)}° AZ` : '— AZ'}`
+      : '—';
+    const focusHorizon = this.root.querySelector('#surfaceFocusHorizon');
+    if (focusHorizon) focusHorizon.textContent = !focus?.finite ? '—' : focus.aboveHorizon ? 'ABOVE HORIZON' : focus.visibleAboveHorizon ? 'LIMB ABOVE HORIZON' : 'BELOW HORIZON';
+    const focusPhase = this.root.querySelector('#surfaceFocusPhase');
+    if (focusPhase) {
+      if (!focus?.finite) focusPhase.textContent = '—';
+      else if (focus.kind === BODY_KIND.STAR) focusPhase.textContent = 'PRIMARY STAR';
+      else {
+        const lit = Math.max(0, Math.min(1, Number(focus.illuminatedFraction) || 0));
+        const shadow = Math.max(0, Math.min(1, Number(focus.stellarEclipseFraction) || 0));
+        focusPhase.textContent = `${(lit * 100).toFixed(2)}% lit · phase ${degrees(focus.phaseAngleRad).toFixed(2)}°${shadow > 0 ? ` · shadow ${(shadow * 100).toFixed(1)}%` : ''}`;
+      }
+    }
+    const focusAngular = this.root.querySelector('#surfaceFocusAngular'); if (focusAngular) focusAngular.textContent = focus?.finite ? formatAngularDiameter(focus.angularDiameterRad) : '—';
     return focus;
   }
 
@@ -824,7 +852,7 @@ export class UniverseLabApp {
     const solution = astronomy ?? this.solveAstronomicalObserver();
     const focus = this.syncSurfaceSkyPresentationControls(solution);
     if (!focus?.localDirection) {
-      if (notify) this.hud.notify('SURFACE SKY: no visible celestial focus target is currently above the horizon.');
+      if (notify) this.hud.notify('SURFACE SKY: no celestial focus target is available.');
       return false;
     }
     const east = Number(focus.localDirection[0]) || 0;
@@ -833,23 +861,29 @@ export class UniverseLabApp {
     this.surfaceSession.yaw = Math.atan2(east, north);
     this.surfaceSession.pitch = Math.max(-1.54, Math.min(1.54, Math.asin(up)));
     this.updateSurfaceHud(solution);
-    if (notify) this.hud.notify(`SURFACE SKY CENTER: ${focus.name}. Framing changed only; celestial geometry and spacecraft state are unchanged.`);
+    if (notify) {
+      const altitudeDeg = Number.isFinite(focus.centerAltitudeRad) ? degrees(focus.centerAltitudeRad) : NaN;
+      const horizon = focus.aboveHorizon ? 'above horizon' : focus.visibleAboveHorizon ? 'partly above horizon' : 'below horizon';
+      this.hud.notify(`SURFACE SKY CENTER: ${focus.name} · ${horizon}${Number.isFinite(altitudeDeg) ? ` · ${altitudeDeg >= 0 ? '+' : ''}${altitudeDeg.toFixed(2)}° ALT` : ''}. Framing changed only; celestial geometry and spacecraft state are unchanged.`);
+    }
     return true;
   }
 
   cycleSurfaceSkyTarget() {
     if (!this.surfaceSession?.active || this.surfaceSession.observerOnly !== true) return false;
     const astronomy = this.solveAstronomicalObserver();
-    const candidates = this.surfaceSkyVisibleCandidates(astronomy);
-    if (!candidates.length) { this.hud.notify('SURFACE SKY: no celestial bodies are currently above the horizon.'); return false; }
+    const candidates = this.surfaceSkyTargetCandidates(astronomy);
+    if (!candidates.length) { this.hud.notify('SURFACE SKY: no celestial targets are available.'); return false; }
     const current = candidates.findIndex((record) => record.id === this.surfaceSession.skyFocusBodyId);
-    const next = candidates[(current + 1 + candidates.length) % candidates.length];
+    const nextIndex = (current + 1 + candidates.length) % candidates.length;
+    const next = candidates[nextIndex];
     this.surfaceSession.skyFocusBodyId = next.id;
     this.syncSurfaceSkyPresentationControls(astronomy);
-    const centered = this.centerSurfaceSkyTarget({ astronomy, notify: false });
-    const selectedIndex = candidates.findIndex((record) => record.id === next.id);
-    this.hud.notify(`SURFACE SKY TARGET: ${next.name} (${selectedIndex + 1}/${candidates.length}).${candidates.length === 1 ? ' It is currently the only celestial body above this horizon.' : ''}`);
-    return centered;
+    this.centerSurfaceSkyTarget({ astronomy, notify: false });
+    const altitudeDeg = Number.isFinite(next.centerAltitudeRad) ? degrees(next.centerAltitudeRad) : NaN;
+    const horizon = next.aboveHorizon ? 'ABOVE HORIZON' : next.visibleAboveHorizon ? 'LIMB ABOVE HORIZON' : 'BELOW HORIZON';
+    this.hud.notify(`SURFACE SKY VIEWING: ${next.name} · ${nextIndex + 1}/${candidates.length} · ${horizon}${Number.isFinite(altitudeDeg) ? ` · ${altitudeDeg >= 0 ? '+' : ''}${altitudeDeg.toFixed(2)}° ALT` : ''}.`);
+    return true;
   }
 
   cycleSurfaceSkyFov() {
@@ -896,8 +930,7 @@ export class UniverseLabApp {
 
       const star = this.registry.get('star-0') ?? this.bodies.find((entry) => entry.kind === BODY_KIND.STAR) ?? null;
       const parent = body.parentId ? this.registry.get(body.parentId) : null;
-      const preferredFocus = preferredSurfaceSkyFocusBody(body, this.bodies);
-      this.surfaceSession.skyFocusBodyId = preferredFocus?.id ?? star?.id ?? null;
+      this.surfaceSession.skyFocusBodyId = parent?.id ?? star?.id ?? null;
       this.renderer.enterSurface(this.surfaceRegion, body, star);
       this.renderer.setSurfaceFovDegrees?.(SURFACE_SKY_FOV_PRESETS[0]);
       this.root.classList.add('surface-active', 'surface-sky-observer');
@@ -922,7 +955,7 @@ export class UniverseLabApp {
       this.updateSurfaceHud(astronomy);
       this.updateSurfaceTransitionUi();
       if (options.notify !== false) {
-        const site = preferredFocus ? ` The initial site is chosen so ${preferredFocus.name} begins high in the sky.` : ' The initial site uses the current spacecraft-facing body-fixed fallback.';
+        const site = parent ? ` The initial site is the physically valid sub-${parent.name} point so ${parent.name} begins high in the sky.` : ' The initial site is the body-fixed point beneath the current spacecraft direction.';
         this.hud.notify(`SURFACE SKY: ${body.name}. This is a massless observer camera; the spacecraft and full Newtonian simulation continue normally at the current time scale.${site} Local ground is a schematic horizon, not a claimed terrain map or landing.`, 9000);
       }
       return true;
@@ -1241,8 +1274,9 @@ export class UniverseLabApp {
     const observerOnly = this.surfaceSession.observerOnly === true || region.observerOnly === true;
     const nearest = observerOnly ? null : nearestSurfacePoi(this.surfaceSession, region);
     const set = (selector, text) => { const el = this.root.querySelector(selector); if (el) el.textContent = text; };
-    set('#surfaceWorldName', observerOnly ? `${region.bodyName} · SURFACE SKY` : `${region.bodyName} · ${region.name}`);
-    set('#surfaceBiome', observerOnly ? 'REFERENCE SKY · SCHEMATIC HORIZON' : region.palette.name.toUpperCase());
+    set('#surfaceWorldName', observerOnly ? `SURFACE SKY — ${region.bodyName}` : `${region.bodyName} · ${region.name}`);
+    set('#surfaceBiome', observerOnly ? 'VIEWING — …' : region.palette.name.toUpperCase());
+    set('#surfaceFocusCompactLabel', observerOnly ? 'TARGET' : 'FOUND');
     set('#surfaceGravity', `${region.gravityMps2.toFixed(2)} m/s²`);
     const weatherNow = surfaceWeatherReading(this.surfaceSession.weather);
     const temperatureIsEquilibrium = observerOnly || region.atmosphereMode === 'airless' || region.temperatureModel === 'radiative-equilibrium';
@@ -1278,8 +1312,8 @@ export class UniverseLabApp {
     set('#surfaceRotationPhase', physicalRotation ? `${degrees(rotationAngleAt(parentBody, astronomySeconds)).toFixed(2)}°` : '—');
 
     const astronomySolution = astronomy ?? this.solveAstronomicalObserver();
-    const surfaceSkyFocus = observerOnly ? this.syncSurfaceSkyPresentationControls(astronomySolution) : null;
-    if (!observerOnly) {
+    if (observerOnly) this.syncSurfaceSkyPresentationControls(astronomySolution);
+    else {
       set('#surfaceSkyFocus', '—');
       set('#surfaceViewFov', '70°');
     }
@@ -1335,9 +1369,6 @@ export class UniverseLabApp {
     }
     this.syncPauseControls();
     if (observerOnly) {
-      const compactLabel = this.root.querySelector('#surfaceDiscoveriesLabel');
-      if (compactLabel) compactLabel.textContent = 'TARGET';
-      set('#surfaceDiscoveries', surfaceSkyFocus?.name ?? '—');
       set('#surfaceNearest', 'LIVE CELESTIAL SKY');
       const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
       if (weatherStatus) weatherStatus.textContent = region.scientificStatus;
@@ -1345,9 +1376,11 @@ export class UniverseLabApp {
       if (status) status.textContent = 'REFERENCE SKY OBSERVER · Look around with LOOK. Celestial disks use physical angular size; phases and eclipses use the existing finite-disk observer geometry. The flat local horizon is schematic and SOL landing remains disabled.';
       return;
     }
-    const compactLabel = this.root.querySelector('#surfaceDiscoveriesLabel');
-    if (compactLabel) compactLabel.textContent = 'FOUND';
     set('#surfaceDiscoveries', `${this.surfaceSession.scannedPoiIds.size}/${surfacePois(region).length}`);
+    set('#surfaceFocusAltAz', '—');
+    set('#surfaceFocusHorizon', '—');
+    set('#surfaceFocusPhase', '—');
+    set('#surfaceFocusAngular', '—');
     const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
     if (weatherStatus) {
       if (region.weatherEnabled === false) {

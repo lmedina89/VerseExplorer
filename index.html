@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#02050b">
-  <title>Universe Explorer v0.1.0.5B.1</title>
+  <title>Universe Explorer v0.1.0.5B.2</title>
   <link rel="stylesheet" href="./styles.css?v=155-ue0104a2">
   <script type="importmap">
   {
@@ -21,7 +21,7 @@
     <section id="viewport" class="viewport" aria-label="3D universe viewport. Tap a visible celestial body to target it."></section>
 
     <div class="hud top-hud" aria-live="polite">
-      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.5B.1</span></div>
+      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.5B.2</span></div>
       <div class="stat technical-stat"><b id="rendererValue">INIT</b><small>renderer</small></div>
       <div class="stat primary-stat"><b id="fpsValue">—</b><small>fps</small></div>
       <div class="stat technical-stat"><b id="physicsMsValue">—</b><small>physics</small></div>
@@ -93,7 +93,7 @@
         <div class="surface-compact-metrics" aria-label="Surface quick status">
           <span><small>WX</small><b id="surfaceWeather">CLEAR</b></span>
           <span><small>SIGNAL</small><b id="surfaceNearest">—</b></span>
-          <span><small id="surfaceDiscoveriesLabel">FOUND</small><b id="surfaceDiscoveries">0/0</b></span>
+          <span><small id="surfaceFocusCompactLabel">FOUND</small><b id="surfaceDiscoveries">0/0</b></span>
           <span><small>SHIP</small><b id="surfaceShipCompact">—</b></span>
         </div>
         <div class="surface-compact-actions">
@@ -117,6 +117,8 @@
           <span>Primary star disk</span><b id="surfaceStarDisk">—</b><span>Stellar occultation</span><b id="surfaceEclipse">NONE</b>
           <span>NAV target phase</span><b id="surfaceTargetPhase">—</b><span>NAV target angular size</span><b id="surfaceTargetAngular">—</b>
           <span>Sky focus</span><b id="surfaceSkyFocus">—</b><span>View FOV</span><b id="surfaceViewFov">70°</b>
+          <span>Viewing alt/az</span><b id="surfaceFocusAltAz">—</b><span>Viewing horizon</span><b id="surfaceFocusHorizon">—</b>
+          <span>Viewing phase</span><b id="surfaceFocusPhase">—</b><span>Viewing angular size</span><b id="surfaceFocusAngular">—</b>
         </div>
         <p id="surfaceWeatherStatus" class="surface-weather-status">Local weather monitor initializing.</p>
         <p id="surfaceScanStatus" class="surface-scan-status">Surface scanner ready.</p>
@@ -458,6 +460,6 @@
       </div>
     </aside>
   </main>
-  <script type="module" src="./src/main.js?v=155-ue0105b1"></script>
+  <script type="module" src="./src/main.js?v=155-ue0105b2"></script>
 </body>
 </html>

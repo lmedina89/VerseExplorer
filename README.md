@@ -1,8 +1,7 @@
-# Universe Explorer
-
-**v0.1.0.5B.1 — Surface Sky Visibility & Target UX Hotfix.** This is a narrow correction to 5B after physical iPhone testing showed Earth could open with the only selectable body on the horizon, making NEXT appear inert and the centered Sun effectively invisible through horizon extinction. Earth now opens at the real sub-Moon point with the Moon overhead, while the compact observer HUD visibly names the active sky target. No celestial geometry, physics, landing, or renderer architecture was replaced.
-
 # Universe Explorer exploration branch
+
+**v0.1.0.5B.2 — Surface Sky UX Clarity Hotfix.** This is a UI-only patch built from v0.1.0.5B. It makes the massless surface observer unambiguous by separating the observer location (`SURFACE SKY — Earth`) from the selected celestial target (`VIEWING — Moon`), adds target astronomy details, and explicitly labels below-horizon selections. No astronomy, FOV, physics, flight, FRAME or landing behavior is changed.
+
 
 **v0.1.0.5B — Celestial Surface Presentation.** This checkpoint builds directly on the v0.1.0.5A massless SOL surface observer. It improves what the real sky looks like and how you frame it without enabling SOL landing yet or changing the live Newtonian universe.
 

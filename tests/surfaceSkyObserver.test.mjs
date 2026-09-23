@@ -7,7 +7,6 @@ import { surfaceEngineSupport } from '../src/surface/surfaceProfiles.js';
 import {
   createSurfaceSkyObserverRegion,
   defaultSurfaceSkyAnchor,
-  preferredSurfaceSkyFocusBody,
   surfaceSkyObserverSupport,
   SURFACE_SKY_PROFILE_ID,
 } from '../src/surface/surfaceSkyObserver.js';
@@ -72,18 +71,7 @@ test('moon observer defaults use the physical sub-parent point at the live simul
   }
 });
 
-test('planet observer defaults prefer the most prominent child satellite so Earth opens with the Moon high in the sky', () => {
-  const earth = byId('planet-earth');
-  const moon = byId('moon-luna');
-  const t = 123456;
-  assert.equal(preferredSurfaceSkyFocusBody(earth, sol.bodies)?.id, moon.id);
-  const anchor = defaultSurfaceSkyAnchor(earth, sol.bodies, null, t);
-  const inertialUp = bodyFixedDirectionToInertial(earth, anchor, t, new Float64Array(3));
-  const moonDirection = normalizedDelta(moon, earth);
-  assert.ok(dot(inertialUp, moonDirection) > 0.999999999);
-});
-
-test('surface-sky anchor retains spacecraft-facing fallback when no parent, satellite or star is available', () => {
+test('planet observer defaults use the body-fixed point beneath the spacecraft direction', () => {
   const earth = byId('planet-earth');
   const t = 123456;
   const ship = new Float64Array([
@@ -91,7 +79,7 @@ test('surface-sky anchor retains spacecraft-facing fallback when no parent, sate
     earth.position[1] + earth.radius * 0.4,
     earth.position[2] - earth.radius * 0.2,
   ]);
-  const anchor = defaultSurfaceSkyAnchor(earth, [earth], ship, t);
+  const anchor = defaultSurfaceSkyAnchor(earth, sol.bodies, ship, t);
   const inertialUp = bodyFixedDirectionToInertial(earth, anchor, t, new Float64Array(3));
   const shipDirection = normalizedDelta({ position: ship }, earth);
   assert.ok(dot(inertialUp, shipDirection) > 0.999999999);

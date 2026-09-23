@@ -1,6 +1,6 @@
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { captureBodyFixedSurfaceAnchor, hasPhysicalRotationModel, inertialDirectionToBodyFixed } from '../core/planetaryRotation.js';
-import { BODY_KIND, PHYSICS } from '../core/constants.js';
+import { PHYSICS } from '../core/constants.js';
 import { hashSeed } from '../util/prng.js';
 
 export const SURFACE_SKY_PROFILE_ID = 'sol-reference-sky-observer-v1';
@@ -53,39 +53,16 @@ export function surfaceSkyObserverSupport(body, bodies = []) {
   };
 }
 
-export function preferredSurfaceSkyFocusBody(body, bodies = []) {
-  if (!body) return null;
-  const parent = body.parentId ? bodies.find((candidate) => candidate?.id === body.parentId) : null;
-  if (parent?.position) return parent;
-
-  const satellites = bodies.filter((candidate) => candidate?.parentId === body.id && candidate?.position && Number(candidate?.radius) > 0);
-  if (satellites.length) {
-    satellites.sort((a, b) => {
-      const apparent = (candidate) => {
-        const dx = finite(candidate.position[0]) - finite(body.position?.[0]);
-        const dy = finite(candidate.position[1]) - finite(body.position?.[1]);
-        const dz = finite(candidate.position[2]) - finite(body.position?.[2]);
-        const distance = Math.max(1, Math.hypot(dx, dy, dz));
-        return Math.max(0, finite(candidate.radius)) / distance;
-      };
-      return apparent(b) - apparent(a);
-    });
-    return satellites[0];
-  }
-
-  return bodies.find((candidate) => candidate?.kind === BODY_KIND.STAR && candidate?.position) ?? null;
-}
-
 export function defaultSurfaceSkyAnchor(body, bodies = [], shipPosition = null, simulationTimeSeconds = 0) {
   if (!body) return [1, 0, 0];
-  const focus = preferredSurfaceSkyFocusBody(body, bodies);
-  if (focus?.position && body?.position) {
-    const towardFocus = [
-      finite(focus.position[0]) - finite(body.position[0]),
-      finite(focus.position[1]) - finite(body.position[1]),
-      finite(focus.position[2]) - finite(body.position[2]),
+  const parent = body.parentId ? bodies.find((candidate) => candidate?.id === body.parentId) : null;
+  if (parent?.position && body?.position) {
+    const towardParent = [
+      finite(parent.position[0]) - finite(body.position[0]),
+      finite(parent.position[1]) - finite(body.position[1]),
+      finite(parent.position[2]) - finite(body.position[2]),
     ];
-    const bodyFixed = inertialDirectionToBodyFixed(body, towardFocus, simulationTimeSeconds, new Float64Array(3));
+    const bodyFixed = inertialDirectionToBodyFixed(body, towardParent, simulationTimeSeconds, new Float64Array(3));
     return normalize3(bodyFixed);
   }
   if (shipPosition && body?.position) {

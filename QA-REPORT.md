@@ -1,8 +1,20 @@
-# Universe Explorer v0.1.0.5B.1 QA Report
+# Universe Explorer v0.1.0.5B.2 QA Report
 
-Physical iPhone acceptance of 5B exposed a usability/first-view issue rather than an astronomy failure: Earth inherited a ship-relative observer site where the Sun could be the only above-horizon candidate and sit at the atmospheric horizon. 5B.1 changes only observer-site selection and target feedback.
+## Surface Sky UX Clarity Hotfix
 
-Automated hotfix checks: full QA 338/338 PASS; Earth preferred focus = Moon; Earth default Moon altitude = 90.000° at SOL reference initialization; Moon physical angular diameter remains 0.505683°; compact observer HUD exposes the current target; NEXT reports selection count. Protected solver/flight/render/landing files remain unchanged from 5B.
+- Baseline: **Universe Explorer v0.1.0.5B — Celestial Surface Presentation**.
+- Scope is UI-only: separate observer location from viewing target, expose target astronomy details, and make NEXT explicit about below-horizon targets.
+- The observer site, celestial body states, finite-disk phase/eclipse math, FOV presets, surface renderer geometry, flight, FRAME, gravity, integrator and landing stack are unchanged.
+- Byte-for-byte comparison against v0.1.0.5B shows changes only in release/docs/tests plus `index.html`, `src/main.js`, and `src/app/app.js`. No physics, renderer, surface-world, observer-model, SOL-data or landing module changed.
+
+## Automated result
+
+- Untouched v0.1.0.5B baseline before edits: **336/336 tests pass**.
+- v0.1.0.5B.2 worktree after the UI patch: **340/340 tests pass**.
+- Four new focused tests cover location/target identity, target astronomy details, below-horizon NEXT selection, and framing/FOV isolation.
+- Final ZIP integrity: **PASS**.
+- Clean GitHub-package extraction: **340/340 tests pass**.
+- Local static HTTP smoke: **4/4 HTTP 200** for the shell, versioned `main.js`, versioned `app.js`, and unchanged stylesheet.
 
 # Universe Explorer v0.1.0.5B QA Report
 
