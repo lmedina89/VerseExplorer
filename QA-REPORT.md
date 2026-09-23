@@ -1,55 +1,41 @@
-# Universe Explorer v0.1.0.6A.2 — QA Report
+# Universe Explorer v0.1.0.6A.3 — QA Report
 
-## Scope
+## Validation summary
 
-This release is a presentation/usability pass on the validated v0.1.0.6A.1 surface SKY SPAWN bridge. It adds a physically closer NEAR circular shell, restores visible distance differences in the preview, collapses the spawn setup card while aiming, strengthens landed Sun presence with bounded FOV-aware glare, and improves resolved orbit planet/moon texture filtering/detail residency. It does not redesign the authoritative simulation.
+- Full static/syntax/test command: **PASS**.
+- Node test suite: **398/398 passed**.
+- Static required-file structure: **PASS (61 required files)**.
+- All JavaScript / module syntax checks: **PASS**.
+- New focused compact-object bridge coverage includes existing LAB-definition reuse, destructive compact placement, landed compact rendering, UI exposure, and active-surface-parent destruction recovery.
 
-## Surface-spawn distance model
+## Protected-core comparison against v0.1.0.6A.2
 
-- Surface choices are NEAR / LOW / MEDIUM / HIGH.
-- Reference SOL preset altitudes: Earth 200 / 400 / 2,000 / 20,000 km; Moon 25 / 100 / 500 / 2,000 km; Mars 125 / 250 / 1,000 / 6,000 km.
-- Generic parents derive NEAR from `max(25 km, 0.02 × parent radius)` while retaining the prior bounded LOW/MEDIUM/HIGH rules.
-- The insertion point remains the exact intersection between the current landed reticle ray and the selected orbital shell.
-- Circular speed and period remain `sqrt(G(M+m)/r)` and the corresponding two-body period at insertion; subsequent motion is the existing live mutual Newtonian N-body solution.
-- NEAR does not claim atmospheric-drag, oblateness/J2, mascon or other nonspherical-gravity stability.
-
-## Preview/readability model
-
-The prior surface preview had a large minimum ghost radius (`8.5` render units), which visually flattened different orbital distances. 6A.2 uses the physical asteroid radius divided by live line-of-sight distance to derive angular size, maps that onto the presentation sky shell, and keeps only a tiny `0.08`-unit ghost floor. A separate amber ring retains a `1.9`-unit aiming floor. PREVIEW adds the `preview-compact` UI state so the setup card collapses to shell + altitude/LOS + COMMIT/CANCEL while the player aims.
-
-## Sun visual-presence model
-
-The landed Sun retains the existing physical apparent diameter, atmosphere transmission/color, eclipse fraction and horizon visibility. 6A.2 adds one bounded additive glare sprite plus a white-core blend. Glare scales upward for wide/naked-eye FOV and backs off at telescope FOV, preserving photosphere detail. Ground illumination still comes from the existing optics/irradiance path.
-
-## Orbit planet/moon visual polish
-
-- Reference/procedural resolved textures use linear magnification, linear mipmapped minification and higher anisotropy.
-- Lazy global albedo/detail residency begins at apparent radius 0.004 rad instead of 0.006 rad.
-- Lazy close normal/roughness detail begins at 0.022 rad instead of 0.030 rad.
-- Physical sphere radius, body orientation, canonical environment and orbital state are unchanged.
-
-## Protected-core audit target
-
-The following authoritative areas must remain byte-for-byte identical to v0.1.0.6A.1:
+The following protected simulation areas are byte-for-byte unchanged from the validated 6A.2 baseline:
 
 - `src/core/`
 - `src/physics/`
 - `src/data/`
 - `src/surface/`
+- `src/experiments/labSpawner.js` — existing neutron-star / pulsar / black-hole definitions are reused, not duplicated or rewritten.
+- `src/render/celestialFactory.js` — existing compact-object visual implementation is reused, not duplicated or rewritten.
 
-Intentional functional changes are limited to `src/experiments/orbitSandbox.js`, app/UI presentation, `src/render/surfaceWorld.js`, `src/render/celestialFactory.js`, renderer cache edges, styles, tests and release documentation.
+Changed runtime code is limited to the surface-spawn bridge / app integration / surface presentation path plus version-cache wiring and documentation/tests.
 
-## Automated validation
+## Scientific / sandbox behavior checked
 
-- Worktree `npm run check`: PASS (static structure + JavaScript syntax).
-- Worktree full regression: **393 / 393 PASS**.
-- Protected-core diff versus the exact 6A.1 baseline: `src/core/`, `src/physics/`, `src/data/`, and `src/surface/` are byte-for-byte identical.
-- New 6A.2 acceptance tests cover body-aware NEAR shells, monotonic LOS/apparent-size separation, true-size preview ghost with separate aiming ring, compact PREVIEW UI state, FOV-aware solar glare, and earlier/higher-quality orbit texture detail.
-- Preliminary GitHub ZIP integrity: PASS.
-- Preliminary clean extraction static/syntax check: PASS.
-- Preliminary clean extraction full regression: **393 / 393 PASS**.
-- Preliminary local GitHub-style HTTP smoke: **12 / 12 PASS**, including shell/style/modules plus Earth and Sun reference textures.
+- Surface SKY SPAWN can request ASTEROID, NEUTRON STAR, PULSAR, or BLACK HOLE.
+- Compact-object physical definitions come from the existing LAB experiment registry.
+- COMMIT preserves compact mass/radius/gravity metadata; there is no system-stability mass or distance clamp.
+- Intentionally destructive compact-object overlap is allowed and explicitly reported.
+- After COMMIT, the existing mutual Newtonian velocity-Verlet solver is authoritative.
+- Landed rendering reuses the existing compact-object visual factory so compact objects no longer fall back to microscopic generic reflective spheres.
+- Surface display proxies affect presentation only; physical mass/radius/state and science telemetry remain authoritative.
+- If live impact/absorption removes the currently landed parent world, the invalid surface session is safely torn down and control returns to the live space state without recreating the destroyed body.
 
-## Final package freeze
+## Final package verification
 
-The release ZIP is rebuilt after this report is written. Final clean-extraction/static/regression/HTTP verification is performed against those exact delivered bytes; the release is only handed off if those checks remain green.
+- ZIP integrity: **PASS**.
+- Clean extraction: **PASS**.
+- GitHub-style local HTTP smoke: **12/12 routes/assets returned HTTP 200 with non-empty content**.
+- Smoke coverage includes the root shell, 6A.3 cache-busted CSS/main/app/renderer/surface-renderer/orbit-sandbox modules, unchanged compact-object factory/LAB spawner, Earth/Sun reference textures, and `EXPLORER-VERSION.json`.
+- The final deliverable is packaged from the repository root so it can be uploaded directly to the GitHub Pages repository.

@@ -22,7 +22,7 @@ import { massivePairPhysicsStepLimitSeconds } from '../physics/massivePairStepCo
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { ExperimentRegistry } from '../experiments/experimentRegistry.js';
 import { registerLabExperiments, MATERIALS, asteroidDefinitionFromParams, sphereRadiusFromMassDensity } from '../experiments/labSpawner.js';
-import { SANDBOX_BODY_LIMIT, buildSandboxOrbitPlan, buildSandboxOrbitPolyline, buildSurfaceSkySandboxOrbitPlan, sandboxParentCandidates } from '../experiments/orbitSandbox.js?v=ue0106a2';
+import { SANDBOX_BODY_LIMIT, buildSandboxOrbitPlan, buildSandboxOrbitPolyline, buildSurfaceSkySandboxOrbitPlan, sandboxParentCandidates } from '../experiments/orbitSandbox.js?v=ue0106a3';
 import { ParticleExperimentManager, PARTICLE_MODES } from '../experiments/particles/particleExperimentManager.js';
 import { CosmicPhenomenonRegistry } from '../cosmic/phenomenonRegistry.js';
 import { SpaceWeatherManager } from '../cosmic/spaceWeather.js';
@@ -31,7 +31,7 @@ import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, 
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105f';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a2';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3';
 import { Hud } from '../ui/hud.js?v=ue0105f';
 import { SystemMapController } from '../ui/systemMap.js?v=ue0105f';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105f';
@@ -360,7 +360,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.6A.2 online. SKY SPAWN is available while actually landed: aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.6A.3 online. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -1499,6 +1499,7 @@ export class UniverseLabApp {
     const body = this.registry.create(definition);
     this.rebuildBodyCaches();
     this.renderer.syncBodies(this.bodies);
+    if (this.renderer.surfaceWorld?.bodyCatalog) this.renderer.surfaceWorld.bodyCatalog.set(body.id, body);
     this.syncSandboxStateUi();
     this.invalidatePredictions();
     return body;
@@ -2496,6 +2497,7 @@ export class UniverseLabApp {
       if (parentLabel) parentLabel.textContent = `${eligibility.parent.name} · CURRENT SURFACE`;
       const count = this.root.querySelector('#surfaceSpawnCount');
       if (count) count.textContent = `${this.sandboxBodyCount()}/${SANDBOX_BODY_LIMIT}`;
+      this.syncSurfaceSpawnTypeUi();
     }
     return visible;
   }
@@ -2509,13 +2511,59 @@ export class UniverseLabApp {
     return this.setSurfaceSkySpawnPanel(true);
   }
 
+  surfaceSkySpawnBodyDefinition() {
+    const type = this.root.querySelector('#surfaceSpawnType')?.value ?? 'asteroid';
+    if (type === 'asteroid') return null;
+    const requestedMass = safeNumber(this.root.querySelector('#surfaceSpawnCompactMass')?.value, type === 'black-hole' ? 3 : 1.4);
+    const previewContext = {
+      userBodySerial: this.userBodySerial,
+      ship: this.ship,
+      addBody: (definition) => definition,
+    };
+    if (type === 'black-hole') {
+      return this.experiments.run('spawn-black-hole', previewContext, { solarMasses: requestedMass });
+    }
+    if (type === 'pulsar' || type === 'neutron-star') {
+      return this.experiments.run('spawn-neutron-star', previewContext, {
+        compactType: type,
+        solarMasses: requestedMass,
+        spinPeriodSeconds: 0.65,
+        magneticFieldTesla: 1e8,
+      });
+    }
+    throw new Error(`Unsupported SKY SPAWN body type: ${type}`);
+  }
+
+  syncSurfaceSpawnTypeUi({ resetMass = false } = {}) {
+    const type = this.root.querySelector('#surfaceSpawnType')?.value ?? 'asteroid';
+    const mass = this.root.querySelector('#surfaceSpawnCompactMass');
+    const massRow = this.root.querySelector('#surfaceSpawnMassRow');
+    const exotic = type === 'black-hole' || type === 'neutron-star' || type === 'pulsar';
+    if (massRow) massRow.hidden = !exotic;
+    if (mass) {
+      mass.disabled = !exotic;
+      if (resetMass) mass.value = type === 'black-hole' ? '3' : '1.4';
+      mass.min = type === 'black-hole' ? '0.1' : '1.05';
+      mass.max = type === 'black-hole' ? '100' : '2.35';
+      mass.step = type === 'black-hole' ? '0.1' : '0.05';
+    }
+    const warning = this.root.querySelector('#surfaceSpawnExoticWarning');
+    if (warning) {
+      warning.hidden = !exotic;
+      warning.textContent = type === 'black-hole'
+        ? 'BLACK HOLE · live Newtonian mass. NEAR can catastrophically disrupt the parent system; no safety clamp will protect SOL after COMMIT.'
+        : `${type === 'pulsar' ? 'PULSAR' : 'NEUTRON STAR'} · live compact-object gravity. Close placement can catastrophically disturb nearby bodies after COMMIT.`;
+    }
+  }
+
   surfaceSkySandboxPlan(astronomy = null) {
     const eligibility = this.surfaceSkySpawnEligibility();
     if (!eligibility.ok) throw new Error(eligibility.reason);
     const solution = astronomy ?? this.solveAstronomicalObserver();
     const observer = solution?.observer;
     const altitudePreset = this.root.querySelector('#surfaceSpawnAltitude')?.value ?? 'near';
-    return buildSurfaceSkySandboxOrbitPlan({ parent: eligibility.parent, observer, altitudePreset });
+    const bodyDefinition = this.surfaceSkySpawnBodyDefinition();
+    return buildSurfaceSkySandboxOrbitPlan({ parent: eligibility.parent, observer, altitudePreset, bodyDefinition });
   }
 
   updateSurfaceSkySpawnReadout(plan, statusPrefix = 'LIVE PREVIEW') {
@@ -2525,8 +2573,14 @@ export class UniverseLabApp {
     set('#surfaceSpawnLookValue', `${(plan.lookAltitudeRad * 180 / Math.PI).toFixed(1)}° alt · ${(plan.lookRangeMeters / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })} km line-of-sight`);
     set('#surfaceSpawnSpeedValue', `${(plan.circularSpeedMps / 1000).toFixed(3)} km/s`);
     set('#surfaceSpawnPeriodValue', formatPlannerDuration(plan.periodSeconds));
-    const nearBoundary = plan.altitudePreset === 'near' ? ' NEAR is a circular state in the gravity model; atmospheric drag and non-spherical gravity are not modeled.' : '';
-    set('#surfaceSpawnStatus', `${statusPrefix} · reticle direction defines the insertion point on the ${plan.altitudePreset.toUpperCase()} orbital shell. Amber marker/orbit are preview-only until COMMIT.${nearBoundary}`);
+    const bodyLabel = plan.body?.kind === BODY_KIND.BLACK_HOLE ? 'BLACK HOLE'
+      : plan.body?.kind === BODY_KIND.NEUTRON_STAR ? (plan.body?.compactType === 'pulsar' ? 'PULSAR' : 'NEUTRON STAR')
+        : 'ASTEROID';
+    set('#surfaceSpawnBodyValue', bodyLabel);
+    const nearBoundary = plan.altitudePreset === 'near' ? ' NEAR is a circular initial state in the current gravity model; atmospheric drag and non-spherical gravity are not modeled.' : '';
+    const overlap = plan.immediateOverlap ? ' WARNING: the selected compact object physically overlaps the parent at insertion; COMMIT may cause an immediate catastrophic collision/absorption event.' : '';
+    const disruption = plan.exotic ? ' EXTREME GRAVITY: the simulator will not protect the reference system after COMMIT.' : '';
+    set('#surfaceSpawnStatus', `${statusPrefix} · ${bodyLabel} · reticle direction defines the insertion point on the ${plan.altitudePreset.toUpperCase()} orbital shell. Amber marker/orbit are preview-only until COMMIT.${nearBoundary}${overlap}${disruption}`);
     const count = this.root.querySelector('#surfaceSpawnCount');
     if (count) count.textContent = `${this.sandboxBodyCount()}/${SANDBOX_BODY_LIMIT}`;
   }
@@ -2584,7 +2638,11 @@ export class UniverseLabApp {
       // Re-solve at the exact commit instant. The parent can move and rotate while the preview is armed.
       const astronomy = this.solveAstronomicalObserver();
       const plan = this.surfaceSkySandboxPlan(astronomy);
-      const name = `SKY Asteroid ${this.userBodySerial++}`;
+      const label = plan.body?.kind === BODY_KIND.BLACK_HOLE ? 'Black Hole'
+        : plan.body?.kind === BODY_KIND.NEUTRON_STAR ? (plan.body?.compactType === 'pulsar' ? 'Pulsar' : 'Neutron Star')
+          : 'Asteroid';
+      const name = `SKY ${label} ${this.userBodySerial++}`;
+      const inheritedWarning = String(plan.body?.scientificWarning ?? '').trim();
       const body = this.addBody({
         ...plan.body,
         name,
@@ -2594,7 +2652,7 @@ export class UniverseLabApp {
         sandboxOrbitDirection: 'prograde',
         sandboxSpawnSource: 'surface-reticle',
         sandboxCreatedAtSimSeconds: this.clock.elapsedSimSeconds,
-        scientificWarning: 'Surface-reticle sandbox asteroid. Initial position is the live surface look-ray intersection with the selected orbital shell; initial velocity is a calculated circular prograde tangent. Subsequent motion is the live mutual Newtonian N-body solution and may be perturbed.',
+        scientificWarning: `${inheritedWarning}${inheritedWarning ? ' ' : ''}Surface-reticle SKY SPAWN uses the live look-ray insertion point and a calculated prograde circular initial velocity. After COMMIT the body participates in the live mutual Newtonian N-body solution; no sandbox safety clamp protects the reference system from disruption.`,
       });
       this.sandboxModified = true;
       this.surfaceSession.skyFocusBodyId = body.id;
@@ -2604,7 +2662,8 @@ export class UniverseLabApp {
       this.selectTarget(body.id);
       this.invalidatePredictions();
       this.setSurfaceSkySpawnPanel(false);
-      this.hud.notify(`${name} spawned from the surface reticle around ${plan.parentName}: ${(plan.altitudeMeters / 1000).toFixed(0)} km orbital shell · ${(plan.circularSpeedMps / 1000).toFixed(3)} km/s prograde circular insertion. It is now a real gravity source; SOL is MODIFIED / SANDBOX.`, 8000);
+      const catastrophe = plan.exotic ? ' Extreme compact-object gravity is live immediately; the system is not protected from disruption.' : '';
+      this.hud.notify(`${name} spawned from the surface reticle around ${plan.parentName}: ${(plan.altitudeMeters / 1000).toFixed(0)} km orbital shell · ${(plan.circularSpeedMps / 1000).toFixed(3)} km/s prograde circular insertion. It is now a real gravity source; SOL is MODIFIED / SANDBOX.${catastrophe}`, 9000);
       return body;
     } catch (error) {
       this.hud.notify(`SKY SPAWN commit rejected: ${error.message}`);
@@ -3012,6 +3071,12 @@ export class UniverseLabApp {
     const maxGravityFragments = secondaryImpact ? 0 : Math.max(0, Math.min(SIMULATION.impactFragmentsPerEvent, fragmentBudgetRemaining, SIMULATION.directGravityBodyLimit - this.massiveBodies.length + 1));
     const resolution = resolveImpact(event, { maxGravityFragments, fragmentGraceSeconds: SIMULATION.impactFragmentGraceSeconds });
     const { analysis, classification, crater } = resolution;
+    const activeSurfaceBodyId = this.surfaceSession?.active ? this.surfaceSession.bodyId : null;
+    const destroyedSurfaceParent = activeSurfaceBodyId && resolution.deleteIds.includes(activeSurfaceBodyId)
+      ? this.registry.get(activeSurfaceBodyId)
+      : null;
+    const surfaceWasRunning = this.running;
+    const surfaceTimeScale = this.clock.timeScale;
 
     for (const id of resolution.deleteIds) this.registry.delete(id);
     for (const fragment of resolution.createBodies) {
@@ -3040,6 +3105,16 @@ export class UniverseLabApp {
     this.hud.notify(`IMPACT ${classification.mode.toUpperCase()}: ${analysis.impactor.name} → ${analysis.target.name} · ${formatEnergy(analysis.centerOfMassEnergyJ)} · ${analysis.impactAngleDegrees.toFixed(1)}°${craterText}${fragmentText}.`, 7600);
 
     if (this.targetId && !this.registry.has(this.targetId)) this.selectTarget(analysis.target.id);
+
+    if (destroyedSurfaceParent) {
+      this.recoverSurfaceRuntime({
+        body: null,
+        reason: `Surface parent ${destroyedSurfaceParent.name} was destroyed or absorbed by the live impact simulation.`,
+        restoreOrbit: false,
+        previousRunning: surfaceWasRunning,
+        previousTimeScale: surfaceTimeScale,
+      });
+    }
   }
 
   physicsStep(dt) {
@@ -3650,6 +3725,8 @@ export class UniverseLabApp {
     $('#surfaceSkyCenter').addEventListener('click', () => this.centerSurfaceSkyTarget());
     $('#surfaceFovButton').addEventListener('click', () => this.cycleSurfaceSkyFov());
     $('#surfaceSpawnButton').addEventListener('click', () => this.toggleSurfaceSkySpawnPanel());
+    $('#surfaceSpawnType').addEventListener('change', () => { this.syncSurfaceSpawnTypeUi({ resetMass: true }); if (this.surfaceSandboxPreviewActive) this.refreshSurfaceSkySandboxPreview(this.solveAstronomicalObserver()); });
+    $('#surfaceSpawnCompactMass').addEventListener('input', () => { if (this.surfaceSandboxPreviewActive) this.refreshSurfaceSkySandboxPreview(this.solveAstronomicalObserver()); });
     $('#surfaceSpawnAltitude').addEventListener('change', () => { if (this.surfaceSandboxPreviewActive) this.refreshSurfaceSkySandboxPreview(this.solveAstronomicalObserver()); });
     $('#surfaceSpawnPreview').addEventListener('click', () => this.previewSurfaceSkySandbox());
     $('#surfaceSpawnCommit').addEventListener('click', () => this.commitSurfaceSkySandbox());

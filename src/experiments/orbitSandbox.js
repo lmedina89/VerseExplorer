@@ -155,7 +155,7 @@ export function buildSandboxOrbitPlan({ parent, shipPosition, altitudePreset = '
 
 
 
-export function buildSurfaceSkySandboxOrbitPlan({ parent, observer, altitudePreset = 'low' } = {}) {
+export function buildSurfaceSkySandboxOrbitPlan({ parent, observer, altitudePreset = 'low', bodyDefinition = null } = {}) {
   if (!parent || !(finite(parent.mass) > 0) || !(finite(parent.radius) > 0)) throw new Error('A finite massive parent body is required.');
   if (parent.kind !== BODY_KIND.PLANET && parent.kind !== BODY_KIND.MOON) throw new Error('Surface SKY SPAWN supports planet/moon parent bodies only.');
   if (!observer?.valid || observer.parentBodyId !== parent.id) throw new Error('A valid surface observer on the parent body is required.');
@@ -168,11 +168,16 @@ export function buildSurfaceSkySandboxOrbitPlan({ parent, observer, altitudePres
   const presetKey = ['near', 'low', 'medium', 'high'].includes(String(altitudePreset)) ? String(altitudePreset) : 'low';
   const altitudes = sandboxAltitudePresets(parent);
   const altitudeMeters = altitudes[presetKey];
-  const mass = SANDBOX_ASTEROID.massKg;
-  const density = SANDBOX_ASTEROID.densityKgM3;
-  const radius = sphereRadiusFromMassDensity(mass, density);
+  const defaultMass = SANDBOX_ASTEROID.massKg;
+  const defaultDensity = SANDBOX_ASTEROID.densityKgM3;
+  const supplied = bodyDefinition && typeof bodyDefinition === 'object' ? bodyDefinition : null;
+  const mass = Math.max(1, finite(supplied?.mass, defaultMass));
+  const density = supplied?.densityKgM3 == null ? defaultDensity : Math.max(1, finite(supplied.densityKgM3, defaultDensity));
+  const radius = Math.max(1, finite(supplied?.radius, sphereRadiusFromMassDensity(mass, density)));
+  const exotic = supplied?.kind === BODY_KIND.BLACK_HOLE || supplied?.kind === BODY_KIND.NEUTRON_STAR;
   const orbitalRadiusMeters = finite(parent.radius) + altitudeMeters;
-  if (!(orbitalRadiusMeters > finite(parent.radius) + radius * 2)) throw new Error('Selected orbit does not clear the parent surface.');
+  const immediateOverlap = orbitalRadiusMeters <= finite(parent.radius) + radius;
+  if (!exotic && !(orbitalRadiusMeters > finite(parent.radius) + radius * 2)) throw new Error('Selected orbit does not clear the parent surface.');
 
   const observerPosition = observer.inertialPosition;
   const q = subtract3(observerPosition, parent.position);
@@ -181,7 +186,8 @@ export function buildSurfaceSkySandboxOrbitPlan({ parent, observer, altitudePres
   const discriminant = b * b - c;
   if (!(discriminant >= 0) || !Number.isFinite(discriminant)) throw new Error('The reticle ray does not intersect the selected orbital shell.');
   const lookRangeMeters = -b + Math.sqrt(discriminant);
-  if (!(lookRangeMeters > radius * 2) || !Number.isFinite(lookRangeMeters)) throw new Error('The selected sky spawn point is too close to the observer.');
+  if (!(lookRangeMeters > 0) || !Number.isFinite(lookRangeMeters)) throw new Error('The selected sky spawn point is not in front of the observer.');
+  if (!exotic && !(lookRangeMeters > radius * 2)) throw new Error('The selected sky spawn point is too close to the observer.');
 
   const position = new Float64Array([
     finite(observerPosition?.[0]) + look[0] * lookRangeMeters,
@@ -228,13 +234,16 @@ export function buildSurfaceSkySandboxOrbitPlan({ parent, observer, altitudePres
     axis,
     radial,
     tangent,
+    immediateOverlap,
+    exotic,
     body: {
-      kind: BODY_KIND.ASTEROID,
+      ...(supplied ?? {}),
+      kind: supplied?.kind ?? BODY_KIND.ASTEROID,
       mass,
       radius,
-      densityKgM3: density,
-      materialId: SANDBOX_ASTEROID.materialId,
-      color: SANDBOX_ASTEROID.color,
+      densityKgM3: supplied?.densityKgM3 ?? density,
+      materialId: supplied?.materialId ?? SANDBOX_ASTEROID.materialId,
+      color: supplied?.color ?? SANDBOX_ASTEROID.color,
       gravitySource: true,
       generated: false,
       parentId: parent.id,

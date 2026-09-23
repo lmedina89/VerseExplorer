@@ -1,3 +1,17 @@
+# Universe Explorer
+
+**v0.1.0.6A.3 — Compact Object Surface Bridge.** Built directly from the validated 6A.2 checkpoint. Surface SKY SPAWN now reuses the existing LAB definitions for **NEUTRON STAR, PULSAR and BLACK HOLE** alongside ASTEROID, including their established masses/radii/compact-object metadata and live Newtonian gravity. Compact-object commits are intentionally not protected from destabilizing SOL: warnings remain, but NEAR placement is allowed to produce catastrophic N-body consequences. Landed astronomy now recognizes compact objects and reuses the same black-hole/neutron-star visual factory used in space, fixing the case where a space-spawned black hole became effectively invisible after landing.
+
+## 0.1.0.6A.3 acceptance focus
+- Land, open SPAWN, select BLACK HOLE or NEUTRON STAR/PULSAR, choose a shell, PREVIEW, then COMMIT.
+- A black hole spawned in space before landing must remain visible from the landed surface when above the horizon.
+- Compact-object preview/commit preserves the existing LAB mass/radius definition; no sandbox safety clamp reduces its gravity.
+- NEAR compact-object placement may strongly disrupt/capture/eject/collide with planets and moons. This is intentional sandbox behavior.
+- Surface DETAILS continues to report the physical disk/angular geometry; enlarged accretion/magnetosphere structures remain labeled rendering proxies.
+- If an extreme compact-object encounter destroys/absorbs the world you are standing on, the surface session must terminate cleanly and return to the live space state rather than crashing on a deleted parent.
+
+## Previous validated checkpoint
+
 # Universe Explorer exploration branch
 
 **v0.1.0.6A.2 — Surface Spawn & Visual Presence Pass.** Built directly from the validated 6A.1 surface-first SKY SPAWN checkpoint. Surface spawning now exposes **NEAR / LOW / MEDIUM / HIGH** body-aware circular shells, the preview ghost follows true apparent angular size instead of being flattened to one large marker size, and PREVIEW collapses the setup card so the reticle/sky stay visible while aiming. Landed Sun presentation gains a restrained FOV-aware glare/white-core layer, while orbit-resolved planet/moon textures use better mip/anisotropic filtering and become detailed slightly earlier. Physics, body radii, orbital state, atmosphere equations and landing systems are unchanged.

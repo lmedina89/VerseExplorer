@@ -7,11 +7,12 @@ import { surfaceColorAt, surfaceHeightAt, surfaceZoneWeights, surfacePois } from
 import { surfaceEyePosition } from '../surface/surfaceSession.js';
 import { surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { stellarIrradiancePresentation } from './stellarIrradiance.js';
-import { createPlanetarySurfacePresentationMaps, createReferenceStellarPresentationMap } from './celestialFactory.js?v=ue0105f';
+import { BODY_KIND } from '../core/constants.js';
+import { createCelestialVisual, createPlanetarySurfacePresentationMaps, createReferenceStellarPresentationMap, updateCelestialVisual } from './celestialFactory.js?v=ue0106a2';
 
 function disposeMaterial(material) {
   if (!material) return;
-  if (material.map?.userData?.surfaceOwned) material.map.dispose?.();
+  if (material.map?.userData?.surfaceOwned || material.userData?.disposeMap) material.map?.dispose?.();
   material.dispose?.();
 }
 
@@ -292,6 +293,21 @@ function compressedSkyShellDistance(rangeMeters, minRangeMeters, maxRangeMeters)
   const hi = Math.log(maxRange);
   const t = Math.max(0, Math.min(1, (Math.log(range) - lo) / Math.max(1e-12, hi - lo)));
   return minShell + (maxShell - minShell) * t;
+}
+
+function isSurfaceCompactBody(body) {
+  return body?.kind === BODY_KIND.BLACK_HOLE || body?.kind === BODY_KIND.NEUTRON_STAR;
+}
+
+function compactSurfaceProxyAngularRadius(body, rangeMeters) {
+  const proxyRadiusMeters = Math.max(1, Number(body?.visualRadiusMeters ?? body?.radius) || 1);
+  const range = Math.max(1, Number(rangeMeters) || 1);
+  const raw = Math.atan2(proxyRadiusMeters, range);
+  // Keep the existing LAB compact-object presentation recognizable from the surface while
+  // bounding its base proxy so the extended accretion/magnetosphere geometry remains renderable
+  // inside the compressed local sky shell. The physical radius/gravity are never changed.
+  const cap = body?.kind === BODY_KIND.BLACK_HOLE ? THREE.MathUtils.degToRad(3.0) : THREE.MathUtils.degToRad(4.0);
+  return Math.max(1e-6, Math.min(cap, raw));
 }
 
 function poiColor(poi) {
@@ -1047,12 +1063,25 @@ export class SurfaceWorldVisual {
 
     for (const observed of renderedObservations) {
       liveIds.add(observed.id);
+      const sourceBody = this.bodyCatalog.get(observed.id) ?? null;
       const wantsStar = observed.kind === 'star';
+      const wantsCompact = isSurfaceCompactBody(sourceBody);
+      const desiredSurfaceKind = wantsStar ? 'star' : wantsCompact ? `compact:${sourceBody.kind}` : 'reflective-body';
       let visual = this.astronomicalBodies.get(observed.id);
-      if (!visual || (visual.userData?.surfaceCelestialKind === 'star') !== wantsStar) {
+      if (!visual || visual.userData?.surfaceCelestialKind !== desiredSurfaceKind) {
         if (visual) { this.scene.remove(visual); disposeTree(visual); }
-        visual = wantsStar ? createSurfaceStarDisk(observed, this.bodyCatalog.get(observed.id) ?? this.star) : createSurfacePhaseSphere(observed, this.bodyCatalog.get(observed.id) ?? null);
+        if (wantsStar) visual = createSurfaceStarDisk(observed, sourceBody ?? this.star);
+        else if (wantsCompact) {
+          visual = createCelestialVisual(sourceBody);
+          visual.userData.surfaceCelestialKind = desiredSurfaceKind;
+          visual.userData.surfaceCompactProxy = true;
+          visual.traverse((node) => {
+            const materials = Array.isArray(node.material) ? node.material : node.material ? [node.material] : [];
+            for (const material of materials) material.fog = false;
+          });
+        } else visual = createSurfacePhaseSphere(observed, sourceBody);
         visual.name = `surface-celestial-${observed.id}`;
+        if (!visual.userData.surfaceCelestialKind) visual.userData.surfaceCelestialKind = desiredSurfaceKind;
         this.astronomicalBodies.set(observed.id, visual);
         this.scene.add(visual);
       }
@@ -1120,6 +1149,15 @@ export class SurfaceWorldVisual {
             ? 3.2 * daylightGain * exposure.directStellarTransmission
             : 0;
         }
+      } else if (wantsCompact && sourceBody) {
+        const proxyAngularRadius = compactSurfaceProxyAngularRadius(sourceBody, observed.rangeMeters);
+        const proxyRadiusOnShell = shellDistance * Math.tan(proxyAngularRadius);
+        const baseRenderRadius = Math.max(1e-6, Number(visual.userData?.renderRadius) || 1);
+        visual.scale.setScalar(Math.max(1e-6, proxyRadiusOnShell / baseRenderRadius));
+        // Reuse the same LAB compact-object animation/presentation logic used in space. Only the
+        // placement/scale are adapted to the compressed surface sky; physical mass/radius remain
+        // the authoritative N-body values and DETAILS continues to report physical angular size.
+        updateCelestialVisual(visual, sourceBody, this.star, 1 / 60, simulationTimeSeconds, observed);
       } else {
         const angularRadius = Math.max(0, Math.min(Math.PI * 0.499, Number(observed.apparentAngularRadiusRad) || 0));
         const physicalRadius = shellDistance * Math.sin(angularRadius);
@@ -1184,10 +1222,13 @@ export class SurfaceWorldVisual {
     const localZ = ix * north[0] + iy * north[1] + iz * north[2];
     const shell = preview.shellDistance;
     preview.group.position.set(Number(eye[0]) + localX * shell, Number(eye[1]) + localY * shell, Number(eye[2]) + localZ * shell);
-    const angularRadius = Math.asin(Math.max(0, Math.min(0.99, Number(plan.body?.radius || 0) / Math.max(1, magnitude))));
-    // The ghost now follows true apparent angular size. A very small floor prevents distant
-    // previews from disappearing entirely, while the separate amber ring remains the aiming aid.
-    // This makes NEAR/LOW/MEDIUM/HIGH visibly different instead of flattening them to one size.
+    const compactPreview = isSurfaceCompactBody(plan.body);
+    const angularRadius = compactPreview
+      ? compactSurfaceProxyAngularRadius(plan.body, magnitude)
+      : Math.asin(Math.max(0, Math.min(0.99, Number(plan.body?.radius || 0) / Math.max(1, magnitude))));
+    // Ordinary bodies use true physical angular size. Compact-object previews use the same
+    // bounded LAB visual proxy that the committed surface renderer uses, while gravity/radius
+    // remain physical. The separate amber ring is only an aiming aid.
     const physicalGhostRadius = Math.max(0.08, shell * Math.tan(Math.max(angularRadius, 1e-6)));
     const aimingRingRadius = Math.max(1.9, physicalGhostRadius * 1.35);
     preview.ghost.scale.setScalar(physicalGhostRadius);

@@ -1,3 +1,15 @@
+# Universe Explorer v0.1.0.6A.3 — Compact Object Surface Bridge
+
+- Surface SKY SPAWN now exposes ASTEROID, NEUTRON STAR, PULSAR and BLACK HOLE.
+- Neutron-star/pulsar/black-hole definitions are obtained through the existing LAB experiment registry instead of duplicated physical presets.
+- Compact-object COMMIT keeps full existing mass/radius/gravity values; warnings do not clamp or protect the reference system from disruption.
+- Intentional compact-object overlap at insertion is warned but allowed, permitting immediate catastrophic outcomes through existing collision/black-hole sink handling.
+- Landed sky now routes black holes and neutron stars through the existing `createCelestialVisual` / `updateCelestialVisual` compact renderer rather than a generic reflective sphere.
+- Space-spawned compact objects therefore remain visually represented after landing when they are above the horizon.
+- Surface compact rendering adapts presentation scale only; authoritative mass, physical radius, gravity, N-body state and DETAILS physical angular size remain unchanged.
+- If live impact/absorption deletes the planet or moon currently under the landed observer, Explorer now tears down the invalid surface session and returns safely to the live space state instead of leaving the renderer attached to a deleted world.
+- New compact-object surface regression coverage added.
+
 # Universe Explorer v0.1.0.6A.2 — Surface Spawn & Visual Presence Pass
 
 - Adds body-aware **NEAR / LOW / MEDIUM / HIGH** surface-spawn shells. Reference SOL values are Earth 200/400/2,000/20,000 km, Moon 25/100/500/2,000 km, and Mars 125/250/1,000/6,000 km.
