@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.4A.1 — Mobile Double-Tap Zoom Hotfix
+
+- Suppressed iOS Safari webpage-style double-tap zoom with `touch-action: manipulation` on the document and Explorer shell.
+- Preserved the existing `touch-action: none` behavior for the 3D viewport, LOOK pad, and hold-flight controls.
+- Added cache busting for `styles.css` so GitHub Pages/iPhone Safari does not retain the pre-hotfix stylesheet.
+- No physics, navigation, FRAME, renderer, SOL reference-data, landing, or HUD-density behavior was changed.
+
+---
+
 # Universe Explorer v0.1.0.4A — SOL Reference-System Foundation
 
 - Added a fixed `sol` generation profile without altering ORIGIN or ABYSSAL generation.

@@ -1,4 +1,14 @@
-# Universe Explorer v0.1.0.4A QA Report
+# Universe Explorer v0.1.0.4A.1 QA Report
+
+## Mobile double-tap zoom hotfix
+
+- Added document/shell `touch-action: manipulation` to suppress iOS Safari webpage-style double-tap zoom.
+- Preserved `touch-action: none` on the 3D viewport, LOOK pad, and flight hold controls.
+- Added a dedicated regression test covering the gesture policy and stylesheet cache-busting marker.
+- Full automated result: **318/318 tests pass** plus static structure and syntax validation.
+- Physics, navigation, FRAME, SOL data, rendering, landing policy, and HUD hierarchy are unchanged from v0.1.0.4A.
+
+---
 
 ## Result
 

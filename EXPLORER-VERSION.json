@@ -1,13 +1,28 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.4A",
-  "milestone": "SOL Reference-System Foundation",
-  "baseline": "Universe Explorer v0.1.0.3",
+  "version": "0.1.0.4A.1",
+  "milestone": "Mobile Double-Tap Zoom Hotfix",
+  "baseline": "Universe Explorer v0.1.0.4A",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
-  "generationProfiles": ["origin", "abyssal", "sol"],
+  "generationProfiles": [
+    "origin",
+    "abyssal",
+    "sol"
+  ],
   "solReferenceSeed": "SOL-J2000",
   "solReferenceEpoch": "J2000.0 / JD 2451545.0 TDB",
-  "solBodies": ["Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"],
+  "solBodies": [
+    "Sun",
+    "Mercury",
+    "Venus",
+    "Earth",
+    "Mars",
+    "Jupiter",
+    "Saturn",
+    "Uranus",
+    "Neptune"
+  ],
   "solLandingPolicy": "disabled pending validated real-world surface profiles",
-  "flightNavigationPolicy": "unchanged from v0.1.0.3"
+  "flightNavigationPolicy": "unchanged from v0.1.0.3",
+  "mobileGesturePolicy": "disable browser double-tap zoom via touch-action: manipulation; preserve existing game touch controls"
 }
