@@ -1,6 +1,6 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.4B",
+  "version": "0.1.0.4B.1",
   "milestone": "SOL Major Moons Foundation",
   "baseline": "Universe Explorer v0.1.0.4A.2",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
@@ -46,5 +46,6 @@
     "moon-triton"
   ],
   "solMoonReference": "JPL Planetary Satellite Mean Elements / Physical Parameters, epoch 2000-01-01.5 TDB",
-  "saveCompatibility": "SOL-only deterministic missing-moon backfill around restored parents at saved elapsed simulation time."
+  "saveCompatibility": "SOL-only deterministic missing-moon backfill around restored parents at saved elapsed simulation time.",
+  "label": "Mobile module-cache startup hotfix"
 }

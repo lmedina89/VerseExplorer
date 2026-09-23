@@ -507,3 +507,9 @@ Automated QA does **not** prove real iPhone WebGPU performance, touch feel, ther
 ## Next likely milestone
 
 After physical acceptance of v0.1.4.4, the sensible next step is **v0.1.4.5 Surface Exploration, Resources & POIs**: deeper scan interactions, sample/resource collection, caves/ruins, region-specific discoveries and first surface objectives while preserving the mobile streaming budget.
+
+## Universe Explorer v0.1.0.4B.1 — Mobile module-cache startup hotfix
+
+- Cache-busts the complete changed runtime import chain for `main.js` → `app.js` → `systemGenerator.js` / `solSystem.js` / `generationProfiles.js`.
+- Prevents Safari/GitHub Pages from combining the v0.1.0.4B app module with stale v0.1.0.4A.2 SOL modules, which could leave the shell stuck on `Initializing…`.
+- No flight, navigation, renderer, integrator, moon-state, LOOK-zone, or SOL physics behavior changed.

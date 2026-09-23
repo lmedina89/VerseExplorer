@@ -15,7 +15,7 @@ const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url
 if (!html.includes('three@0.185.0')) throw new Error('Three.js version is not pinned.');
 if (!html.includes('./src/main.js')) throw new Error('Main module missing from shell.');
 if (!html.includes('Universe Explorer v0.1.0.4B')) throw new Error('Explorer shell version is not v0.1.0.4B.');
-if (!html.includes('<div class="brand">UNIVERSE EXPLORER <span>v0.1.0.4B</span></div>')) throw new Error('Visible top-left build badge is not Universe Explorer v0.1.0.4B.');
+if (!html.includes('<div class="brand">UNIVERSE EXPLORER <span>v0.1.0.4B.1</span></div>')) throw new Error('Visible top-left build badge is not Universe Explorer v0.1.0.4B.1.');
 if (!html.includes('./src/main.js?v=155-ue0104b')) throw new Error('v0.1.0.4B main module cache marker missing.');
 if (!html.includes('ABYSSAL-155')) throw new Error('ABYSSAL-155 build marker missing.');
 if (pkg.version !== '0.1.5.5') throw new Error('package.json version mismatch.');

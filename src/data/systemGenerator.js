@@ -5,8 +5,8 @@ import { generateCosmicPhenomena } from '../cosmic/phenomenonGenerator.js';
 import { generateAnomalies } from '../cosmic/anomalyGenerator.js';
 import { breakupPeriodSeconds, bulkDensityKgM3, gasGiantPropertiesFromSamples } from '../physics/planetaryProperties.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
-import { GENERATION_PROFILE_IDS, resolveGenerationProfile } from './generationProfiles.js';
-import { generateSolSystem } from './solSystem.js?v=ue0104b';
+import { GENERATION_PROFILE_IDS, resolveGenerationProfile } from './generationProfiles.js?v=ue0104b1';
+import { generateSolSystem } from './solSystem.js?v=ue0104b1';
 
 const STAR_NAMES = ['Aster', 'Vesper', 'Orison', 'Nadir', 'Eidra', 'Khepri', 'Ilyon', 'Morrow', 'Sable', 'Caelum'];
 const PLANET_TYPES = [

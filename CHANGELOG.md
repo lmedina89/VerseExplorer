@@ -560,3 +560,9 @@ Built from v0.1.4.1 Extreme Objects, Space Weather & Scientific Overlays.
 - Three.js remains pinned to 0.185.0.
 - No `.github/workflows/*` files in the mobile distributable.
 - No landing code added.
+
+## Universe Explorer v0.1.0.4B.1 — Mobile module-cache startup hotfix
+
+- Cache-busts the complete changed runtime import chain for `main.js` → `app.js` → `systemGenerator.js` / `solSystem.js` / `generationProfiles.js`.
+- Prevents Safari/GitHub Pages from combining the v0.1.0.4B app module with stale v0.1.0.4A.2 SOL modules, which could leave the shell stuck on `Initializing…`.
+- No flight, navigation, renderer, integrator, moon-state, LOOK-zone, or SOL physics behavior changed.

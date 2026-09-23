@@ -6,8 +6,8 @@ import { captureBodyFixedSurfaceAnchor, hasPhysicalRotationModel, inertialDirect
 import { SaveSystem } from '../core/saveSystem.js';
 import { applyGeneratedBodyCompatibility } from '../core/generatedBodyCompatibility.js';
 import { PHYSICS, SIMULATION, BODY_KIND } from '../core/constants.js';
-import { generateSystem } from '../data/systemGenerator.js';
-import { generateSolReferenceMoonUpgrades } from '../data/solSystem.js';
+import { generateSystem } from '../data/systemGenerator.js?v=ue0104b1';
+import { generateSolReferenceMoonUpgrades } from '../data/solSystem.js?v=ue0104b1';
 import { DirectGravitySolver } from '../physics/gravity/directGravitySolver.js';
 import { VelocityVerletIntegrator } from '../physics/integrators/velocityVerlet.js';
 import { CollisionMonitor, CollisionStateBuffer } from '../physics/collisionMonitor.js';
@@ -346,7 +346,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.4B online. ORIGIN and ABYSSAL remain unchanged; SOL now adds seven reference moons to the fixed J2000 Sun + eight-planet foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.4B.1 online. ORIGIN and ABYSSAL remain unchanged; SOL now adds seven reference moons to the fixed J2000 Sun + eight-planet foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
