@@ -7,7 +7,7 @@ import { surfaceColorAt, surfaceHeightAt, surfaceZoneWeights, surfacePois } from
 import { surfaceEyePosition } from '../surface/surfaceSession.js';
 import { surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { stellarIrradiancePresentation } from './stellarIrradiance.js';
-import { createPlanetarySurfacePresentationMaps } from './celestialFactory.js?v=ue0105c1';
+import { createPlanetarySurfacePresentationMaps } from './celestialFactory.js?v=ue0105d1';
 
 function disposeMaterial(material) {
   if (!material) return;

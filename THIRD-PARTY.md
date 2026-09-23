@@ -1,5 +1,19 @@
 # Third-Party Software
 
+## Universe Explorer v0.1.0.5D.1 Earth reference albedo
+
+This release bundles one external visual asset derived from the user-supplied Sketchfab download:
+
+- **Title:** “Earth”
+- **Creator:** Akshat (`@shooter24994`)
+- **Source:** `https://sketchfab.com/3d-models/earth-41fc80d85dfd480281f21b74b2de2faa`
+- **License:** Creative Commons Attribution 4.0 (CC BY 4.0)
+- **License URL:** `https://creativecommons.org/licenses/by/4.0/`
+- **Modification/use in Universe Explorer:** the embedded 1024×512 diffuse/albedo JPEG was extracted from the supplied GLB and renamed `assets/textures/earth-akshat-albedo.jpg`. The original GLB geometry is not shipped or used at runtime. Universe Explorer applies the image to its existing physical Earth sphere as a visual-only albedo layer.
+
+Required attribution: This work uses “Earth” by Akshat, licensed under CC BY 4.0.
+
+
 ## Three.js
 
 Universe Lab v0.1.4.6.1.2 uses **Three.js 0.185.0**, imported from the pinned jsDelivr module URLs in `index.html` / the import map.

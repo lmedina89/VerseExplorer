@@ -1,3 +1,13 @@
+# Universe Explorer v0.1.0.5D.1 — Earth Reference Albedo
+
+- Adds the user-supplied Sketchfab **Earth** asset by Akshat as a visual-only reference albedo source.
+- Uses only the embedded 1024×512 diffuse/albedo image; the GLB geometry and material extension are not used at runtime.
+- Earth keeps the existing canonical sphere, physical radius, rotation, atmosphere, phase/eclipses, collisions, landing policy and orbital state.
+- The reference Earth albedo is loaded lazily only when Earth is sufficiently resolved in normal space view or the shared surface/landed celestial renderer.
+- Existing deterministic procedural bump/relief remains underneath the reference albedo; no real topography is claimed.
+- The asset is credited under **Creative Commons Attribution (CC BY 4.0)** in `THIRD-PARTY.md`.
+- No other SOL body receives a new external texture in this milestone.
+
 # Universe Explorer v0.1.0.5D — SOL Landing Expansion
 
 - Consolidates Mars, Europa, Titan and Triton landing into one release on top of the validated Moon path.

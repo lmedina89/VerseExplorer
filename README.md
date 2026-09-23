@@ -1,5 +1,15 @@
 # Universe Explorer
 
+**v0.1.0.5D.1 — Earth Reference Albedo.** Built from the verified v0.1.0.5D landing-expansion checkpoint. Earth now uses the licensed 1024×512 diffuse/albedo texture extracted from the user-supplied Sketchfab model **Earth** by Akshat when Earth is actually resolved enough to benefit. The existing physical Earth sphere, atmosphere, rotation, lighting, phase/eclipses, orbital state and landing policy are unchanged.
+
+## 5D.1 acceptance focus
+
+1. View Earth from space at medium/close range and confirm recognizable continents/oceans/cloud imagery appears once the disk resolves.
+2. From the Moon, use NEXT → Earth → CENTER and telescope FOV; the same licensed Earth albedo should appear in the landed/shared celestial renderer.
+3. Confirm Earth remains physically the same size and follows the same phase/terminator/eclipses as before.
+4. Confirm no other planet/moon visual changes and all v0.1.0.5D landing targets still work.
+5. The texture includes baked cloud imagery and is not a real-time weather/cloud layer; real topography is not claimed.
+
 **v0.1.0.5D — SOL Landing Expansion.** Built from the verified v0.1.0.5C.1 checkpoint. This is one consolidated release: the existing landing/on-foot/takeoff path now supports the Moon, Mars, Europa, Titan and Triton through explicit SOL surface profiles. Earth remains intentionally deferred.
 
 ## 5D acceptance focus

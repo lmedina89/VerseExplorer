@@ -72,6 +72,45 @@ function addGlow(group, color, scale, opacity = 0.3) {
 
 function clamp01(value) { return Math.max(0, Math.min(1, Number(value) || 0)); }
 
+
+const REFERENCE_PLANET_ALBEDO_ASSETS = Object.freeze({
+  'planet-earth': new URL('../../assets/textures/earth-akshat-albedo.jpg', import.meta.url).href,
+});
+
+function makeReferencePlanetAlbedoMap(body, { surfaceOwned = false } = {}) {
+  const url = REFERENCE_PLANET_ALBEDO_ASSETS[String(body?.id ?? '')];
+  if (!url) return null;
+  const texture = new THREE.TextureLoader().load(url);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.userData.referenceAsset = 'Sketchfab Earth by Akshat (CC BY 4.0)';
+  texture.userData.referenceAssetUrl = 'https://sketchfab.com/3d-models/earth-41fc80d85dfd480281f21b74b2de2faa';
+  texture.userData.surfaceOwned = Boolean(surfaceOwned);
+  return texture;
+}
+
+function makePlanetaryPresentationMaps(body, profile, { surfaceOwned = false } = {}) {
+  const referenceMap = makeReferencePlanetAlbedoMap(body, { surfaceOwned });
+  if (!referenceMap) {
+    const maps = makePlanetarySurfaceMaps(body, profile);
+    if (surfaceOwned) {
+      if (maps?.map?.userData) maps.map.userData.surfaceOwned = true;
+      if (maps?.bumpMap?.userData) maps.bumpMap.userData.surfaceOwned = true;
+    }
+    return { ...maps, source: 'procedural' };
+  }
+
+  // Preserve the existing deterministic bump/relief response while replacing only the visible
+  // global albedo with the licensed reference Earth texture. The reference GLB geometry is not
+  // used, so canonical radius, orientation, atmosphere, collision and physics remain unchanged.
+  const procedural = makePlanetarySurfaceMaps(body, profile);
+  procedural.map?.dispose?.();
+  if (surfaceOwned && procedural.bumpMap?.userData) procedural.bumpMap.userData.surfaceOwned = true;
+  return { map: referenceMap, bumpMap: procedural.bumpMap, source: 'reference-asset' };
+}
+
 function makePlanetarySurfaceMaps(body, profile) {
   const width = profile.textureWidth;
   const height = profile.textureHeight;
@@ -170,9 +209,7 @@ function makePlanetarySurfaceMaps(body, profile) {
 export function createPlanetarySurfacePresentationMaps(body, environment = null) {
   if (!body || body.kind === BODY_KIND.STAR) return null;
   const profile = planetaryMaterialProfile(body, environment);
-  const maps = makePlanetarySurfaceMaps(body, profile);
-  if (maps?.map?.userData) maps.map.userData.surfaceOwned = true;
-  if (maps?.bumpMap?.userData) maps.bumpMap.userData.surfaceOwned = true;
+  const maps = makePlanetaryPresentationMaps(body, profile, { surfaceOwned: true });
   return { ...maps, profile };
 }
 
@@ -310,10 +347,10 @@ export function applyPlanetaryPerceptualProfile(visual, apparentRadiusRad) {
   // Build close-detail maps only after the disk is genuinely resolved. This avoids allocating
   // global textures for every distant body at startup on iPhone Safari.
   if (!core.material.map && body && materialProfile && apparentRadiusRad >= 0.006) {
-    const maps = makePlanetarySurfaceMaps(body, materialProfile);
+    const maps = makePlanetaryPresentationMaps(body, materialProfile);
     core.material.map = maps.map;
     core.material.bumpMap = materialProfile.bumpScale > 0 ? maps.bumpMap : null;
-    if (!core.material.bumpMap) maps.bumpMap.dispose();
+    if (!core.material.bumpMap) maps.bumpMap?.dispose?.();
     core.material.bumpScale = materialProfile.bumpScale * profile.bumpMultiplier;
     core.material.color.setRGB(1,1,1);
     core.material.needsUpdate = true;

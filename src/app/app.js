@@ -30,7 +30,7 @@ import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, 
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105c';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0105d';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0105d1';
 import { Hud } from '../ui/hud.js?v=155';
 import { SystemMapController } from '../ui/systemMap.js?v=ue0105c';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105d';
@@ -350,7 +350,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.5D online. ORIGIN and ABYSSAL remain unchanged; SOL now enables the inherited physical landing/surface lifecycle for the Moon, Mars, Europa, Titan and Triton, while SURFACE SKY remains available and all other SOL landing stays locked. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.5D.1 online. ORIGIN and ABYSSAL remain unchanged; SOL now enables the inherited physical landing/surface lifecycle for the Moon, Mars, Europa, Titan and Triton, while SURFACE SKY remains available and all other SOL landing stays locked. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {

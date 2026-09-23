@@ -1,3 +1,16 @@
+# Universe Explorer v0.1.0.5D.1 — Earth Reference Albedo QA
+
+- Baseline: verified v0.1.0.5D SOL Landing Expansion.
+- Baseline regression before Earth asset integration: 357/357 passing.
+- Final worktree regression after Earth reference albedo integration: 360/360 passing.
+- Added checks: canonical Earth-only asset routing/lazy loading; bundled JPEG integrity; CC BY attribution metadata.
+- Visual scope: extracted 1024×512 diffuse/albedo JPEG only. User-supplied GLB geometry/material extension is not shipped or instantiated.
+- Protected simulation scope unchanged: gravity/integrator, ship dynamics, FRAME/transit, SOL state generation, astronomical observer/eclipses, planetary rotation, landing/takeoff, surface generation and weather.
+- Safari/GitHub Pages cache path versioned through index → main → app → threeRenderer → celestialFactory/surfaceWorld.
+- Candidate clean extraction: 360/360 tests passing.
+- ZIP integrity: PASS.
+- Local HTTP smoke: 7/7 requests returned 200, including `assets/textures/earth-akshat-albedo.jpg`.
+
 # Universe Explorer v0.1.0.5C QA Report
 
 ## SOL Moon Landing Bridge
