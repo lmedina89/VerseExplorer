@@ -1,8 +1,8 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.4A.1",
-  "milestone": "Mobile Double-Tap Zoom Hotfix",
-  "baseline": "Universe Explorer v0.1.0.4A",
+  "version": "0.1.0.4A.2",
+  "milestone": "Mobile LOOK Touch-Zone Widening Hotfix",
+  "baseline": "Universe Explorer v0.1.0.4A.1",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
   "generationProfiles": [
     "origin",
@@ -24,5 +24,6 @@
   ],
   "solLandingPolicy": "disabled pending validated real-world surface profiles",
   "flightNavigationPolicy": "unchanged from v0.1.0.3",
-  "mobileGesturePolicy": "disable browser double-tap zoom via touch-action: manipulation; preserve existing game touch controls"
+  "mobileGesturePolicy": "disable browser double-tap zoom via touch-action: manipulation; preserve existing game touch controls",
+  "lookTouchPolicy": "wider horizontal LOOK hit target in MINIMAL, FLIGHT and FULL; visible ring size and pointer-delta steering sensitivity preserved"
 }

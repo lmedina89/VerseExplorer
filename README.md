@@ -1,6 +1,14 @@
 # Universe Explorer exploration branch
 
-**v0.1.0.4A SOL Reference-System Foundation.** This branch preserves the Universe Explorer v0.1.0.3 HUD hierarchy and the inherited Universe Lab v0.1.5.5 simulation/navigation stack while adding a third, fixed **SOL** profile.
+**v0.1.0.4A.2 Mobile LOOK Touch-Zone Widening Hotfix.** This branch preserves the Universe Explorer v0.1.0.3 HUD hierarchy and the inherited Universe Lab v0.1.5.5 simulation/navigation stack while adding a third, fixed **SOL** profile.
+
+
+## v0.1.0.4A.2 LOOK touch-zone hotfix
+
+- The LOOK control now has a wider transparent horizontal touch target in MINIMAL, FLIGHT and FULL.
+- The visible LOOK ring stays at its previous size; this is a usability change, not a HUD enlargement.
+- Steering remains pointer-delta based with the same sensitivity constants.
+- Surface exploration LOOK sizing is unchanged.
 
 ## v0.1.0.4A SOL foundation
 

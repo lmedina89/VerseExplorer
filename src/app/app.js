@@ -345,7 +345,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.4A.1 online. ORIGIN and ABYSSAL remain unchanged; SOL adds a fixed J2000 Sun + eight-planet reference foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.4A.2 online. ORIGIN and ABYSSAL remain unchanged; SOL adds a fixed J2000 Sun + eight-planet reference foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {

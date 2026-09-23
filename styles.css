@@ -169,3 +169,32 @@ button.is-held{box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 0 18px rgba(10
   .explorer-hud-min .look-pad{width:78px;height:78px;bottom:max(8px,env(safe-area-inset-bottom))}
   .explorer-hud-min .flight-controls{bottom:max(8px,env(safe-area-inset-bottom));transform:scale(.82)}
 }
+
+/* Universe Explorer v0.1.0.4A.2 — wider mobile LOOK touch zone.
+   Input-only geometry: the transparent LOOK hit box extends farther to the right in
+   MINIMAL, FLIGHT and FULL while the visible circular ring retains its prior size.
+   Pointer-delta steering sensitivity and surface-exploration controls are unchanged. */
+.app-shell:not(.surface-active) .look-pad{width:156px;--ue-look-ring-size:116px}
+.app-shell:not(.surface-active) .look-ring{width:var(--ue-look-ring-size);height:var(--ue-look-ring-size)}
+.explorer-hud-min:not(.surface-active) .look-pad{width:148px;--ue-look-ring-size:92px}
+@media (max-width:760px){
+  .app-shell:not(.surface-active) .look-pad{width:142px;--ue-look-ring-size:102px}
+  .explorer-hud-min:not(.surface-active) .look-pad{width:136px;--ue-look-ring-size:92px}
+}
+@media (max-height:650px){
+  .app-shell:not(.surface-active) .look-pad{width:130px;--ue-look-ring-size:88px}
+  .explorer-hud-min:not(.surface-active) .look-pad{width:124px;--ue-look-ring-size:84px}
+}
+@media (orientation:portrait){
+  .app-shell:not(.surface-active) .look-pad{width:132px;--ue-look-ring-size:84px}
+  .explorer-hud-min:not(.surface-active) .look-pad{width:126px;--ue-look-ring-size:72px}
+}
+@media (orientation:portrait) and (max-width:390px){
+  .app-shell:not(.surface-active) .look-pad{width:124px;--ue-look-ring-size:78px}
+  .explorer-hud-min:not(.surface-active) .look-pad{width:120px;--ue-look-ring-size:72px}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .app-shell:not(.surface-active) .look-pad{width:130px;--ue-look-ring-size:88px}
+  .explorer-hud-min:not(.surface-active) .look-pad{width:124px;--ue-look-ring-size:78px}
+}
+

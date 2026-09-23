@@ -1,3 +1,13 @@
+# Universe Explorer v0.1.0.4A.2 — Mobile LOOK Touch-Zone Widening Hotfix
+
+- Widened the transparent LOOK hit target horizontally in MINIMAL, FLIGHT and FULL HUD modes.
+- Preserved the prior circular LOOK ring sizes so the HUD does not become visually heavier.
+- Preserved pointer-delta steering sensitivity and all flight/navigation behavior.
+- Surface-exploration LOOK geometry is intentionally unchanged by this HUD hotfix.
+- Updated the stylesheet cache marker for GitHub Pages/iPhone Safari.
+
+---
+
 # Universe Explorer v0.1.0.4A.1 — Mobile Double-Tap Zoom Hotfix
 
 - Suppressed iOS Safari webpage-style double-tap zoom with `touch-action: manipulation` on the document and Explorer shell.

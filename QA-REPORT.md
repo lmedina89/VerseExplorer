@@ -1,4 +1,14 @@
-# Universe Explorer v0.1.0.4A.1 QA Report
+# Universe Explorer v0.1.0.4A.2 QA Report
+
+## Mobile LOOK touch-zone widening hotfix
+
+- Expanded the transparent LOOK hit target across MINIMAL, FLIGHT and FULL.
+- Preserved prior visible ring dimensions and the existing pointer-delta sensitivity constants.
+- Surface exploration geometry remains outside this change.
+- Added dedicated regression coverage for hit geometry and steering constants.
+- Worktree and clean-package automated result: **320/320 tests pass** plus static structure and syntax validation.
+
+---
 
 ## Mobile double-tap zoom hotfix
 
@@ -12,13 +22,13 @@
 
 ## Result
 
-**PASS — 317/317 automated tests.**
+**PASS — 320/320 automated tests.**
 
-The v0.1.0.3 tree was used as the only source baseline. All 308 inherited regression tests remain green, including exact ORIGIN deterministic signatures, ABYSSAL behavior, FRAME isolation, flight/navigation, WebKit hold-release, rendering/static contracts, landing/surface systems and save compatibility.
+The v0.1.0.3 tree remains the behavioral source baseline. All 308 inherited regression tests remain green, including exact ORIGIN deterministic signatures, ABYSSAL behavior, FRAME isolation, flight/navigation, WebKit hold-release, rendering/static contracts, landing/surface systems and save compatibility.
 
-Nine SOL-specific tests add coverage for: profile resolution, fixed-seed determinism, exact Sun + eight-planet population, reference mass/radius/semi-major axes, barycentric rest-frame residuals, reference atmosphere bypass, landing lockout, seven-day Newtonian integration and fixed-profile UI controls.
+Nine SOL-specific tests bring the SOL foundation to 317 tests, the mobile double-tap regression brings the count to 318, and two LOOK-zone tests bring this hotfix to 320.
 
-Static structure and `node --check` pass for the complete source/test tree. The final acceptance gate that cannot be automated here remains physical iPhone/Safari rendering and touch interaction.
+Static structure and `node --check` pass for the complete source/test tree. Clean ZIP extraction reruns 320/320 successfully. The remaining acceptance gate is physical iPhone/Safari feel of the widened transparent LOOK hit target.
 
 ---
 
