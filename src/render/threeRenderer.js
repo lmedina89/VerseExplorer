@@ -1,14 +1,14 @@
 import * as THREE from 'three/webgpu';
 import { createStarfieldView } from './starfield.js';
 import { createInertialStarCatalog } from '../core/inertialStarCatalog.js';
-import { createCelestialVisual, updateCelestialVisual, applyStellarPerceptualProfile, syncPlanetaryAtmosphereVisual, syncPlanetaryRealismVisual, applyPlanetaryPerceptualProfile } from './celestialFactory.js?v=ue0105f';
+import { createCelestialVisual, updateCelestialVisual, applyStellarPerceptualProfile, syncPlanetaryAtmosphereVisual, syncPlanetaryRealismVisual, applyPlanetaryPerceptualProfile } from './celestialFactory.js?v=ue0106a2';
 import { createCosmicPhenomenonVisual, updateCosmicPhenomenonVisual } from './cosmicPhenomena.js';
 import { syncSpaceWeatherVisuals } from './spaceWeatherVisuals.js';
 import { updateScientificOverlayVisual } from './scientificOverlayVisuals.js';
 import { BODY_KIND, SIMULATION } from '../core/constants.js';
 import { computeObservationCameraPose } from './observationCamera.js';
 import { apparentAngularRadius, stellarPerceptualProfile } from './stellarPerception.js';
-import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0106a1';
+import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0106a2';
 import { rendererBackendPolicy } from './backendPolicy.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { CockpitView } from './cockpitView.js?v=ue0105f';

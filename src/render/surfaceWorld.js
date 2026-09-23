@@ -164,8 +164,22 @@ function createSurfaceStarDisk(observed, starBody = null) {
   }));
   glow.userData.role = 'stellar-glow-proxy';
   group.add(glow);
+  const glare = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: makeGlowTexture('#fff8df'),
+    color: 0xfff8df,
+    transparent: true,
+    opacity: 0.12,
+    depthWrite: false,
+    depthTest: true,
+    blending: THREE.AdditiveBlending,
+    toneMapped: false,
+  }));
+  glare.userData.role = 'stellar-glare-proxy';
+  glare.renderOrder = 7;
+  group.add(glare);
   group.userData.disk = disk;
   group.userData.glow = glow;
+  group.userData.glare = glare;
   return group;
 }
 
@@ -1059,24 +1073,43 @@ export class SurfaceWorldVisual {
         const physicalDiameter = 2 * shellDistance * Math.tan(angularRadius);
         const disk = visual.userData.disk;
         const glow = visual.userData.glow;
+        const glare = visual.userData.glare;
         const visibleFraction = Math.max(0, Math.min(1, Number(observed.observerStarVisibleFraction ?? 1)));
         // Physical transmission is retained for ground illumination. The visible solar disk uses
         // a bounded HDR display mapping instead of treating atmospheric transmission as alpha:
         // even an attenuated Sun is vastly brighter than a blue daytime sky to the human eye.
-        const clearAirDiskGain = Math.max(0.58, Math.pow(Math.max(0, exposure.directStellarTransmission), 0.18));
+        const directTransmission = Math.max(0, Math.min(1, exposure.directStellarTransmission));
+        const clearAirDiskGain = Math.max(0.58, Math.pow(directTransmission, 0.18));
         const weatherDiskGain = 0.28 + 0.72 * Math.sqrt(Math.max(0, Math.min(1, transmission)));
         const diskDisplayOpacity = 0.98 * visibleFraction * clearAirDiskGain * weatherDiskGain;
+        // Wide naked-eye fields get a restrained glare response; telescope fields progressively
+        // suppress it so the photosphere remains inspectable instead of becoming a white blob.
+        const fov = Math.max(1, Number(this.camera?.fov) || 70);
+        const nakedEyeGlare = Math.max(0, Math.min(1, (fov - 4) / 24));
+        const whiteBlend = Math.min(0.74, 0.12 + 0.62 * Math.pow(directTransmission, 0.32) * (0.45 + 0.55 * nakedEyeGlare));
+        const starRgb = exposure.starColorAtObserverRgb;
+        const diskRgb = starRgb.map((channel, index) => channel + ((index === 2 ? 0.985 : 1) - channel) * whiteBlend);
         if (disk) {
           if (disk.userData?.referencePhotosphere) disk.scale.setScalar(physicalDiameter);
           else disk.scale.set(physicalDiameter, physicalDiameter, 1);
           disk.material.opacity = diskDisplayOpacity;
-          disk.material.color.setRGB(...exposure.starColorAtObserverRgb);
+          disk.material.color.setRGB(...diskRgb);
         }
         if (glow) {
-          const glowDiameter = physicalDiameter * 3.2;
+          const glowDiameter = physicalDiameter * (3.4 + nakedEyeGlare * 0.8);
           glow.scale.set(glowDiameter, glowDiameter, 1);
-          glow.material.opacity = 0.30 * visibleFraction * Math.max(0.10, Math.pow(Math.max(0, exposure.directStellarTransmission), 0.22)) * weatherDiskGain;
-          glow.material.color.setRGB(...exposure.starColorAtObserverRgb);
+          glow.material.opacity = (0.24 + nakedEyeGlare * 0.16) * visibleFraction * Math.max(0.10, Math.pow(directTransmission, 0.22)) * weatherDiskGain;
+          glow.material.color.setRGB(...starRgb);
+        }
+        if (glare) {
+          const glareDiameter = physicalDiameter * (5.0 + nakedEyeGlare * 3.0);
+          glare.scale.set(glareDiameter, glareDiameter, 1);
+          glare.material.opacity = (0.055 + nakedEyeGlare * 0.12) * visibleFraction * Math.max(0.08, Math.pow(directTransmission, 0.30)) * weatherDiskGain;
+          glare.material.color.setRGB(
+            starRgb[0] + (1 - starRgb[0]) * 0.72,
+            starRgb[1] + (1 - starRgb[1]) * 0.72,
+            starRgb[2] + (0.98 - starRgb[2]) * 0.72,
+          );
         }
         if (observed === starObservation) {
           this.sun.position.set(eye[0] + direction[0] * 900, eye[1] + direction[1] * 900, eye[2] + direction[2] * 900);
@@ -1152,9 +1185,13 @@ export class SurfaceWorldVisual {
     const shell = preview.shellDistance;
     preview.group.position.set(Number(eye[0]) + localX * shell, Number(eye[1]) + localY * shell, Number(eye[2]) + localZ * shell);
     const angularRadius = Math.asin(Math.max(0, Math.min(0.99, Number(plan.body?.radius || 0) / Math.max(1, magnitude))));
-    const physicalMarkerRadius = Math.max(8.5, shell * Math.tan(Math.max(angularRadius, 0.0012)));
-    preview.ghost.scale.setScalar(physicalMarkerRadius);
-    preview.ring.scale.setScalar(physicalMarkerRadius);
+    // The ghost now follows true apparent angular size. A very small floor prevents distant
+    // previews from disappearing entirely, while the separate amber ring remains the aiming aid.
+    // This makes NEAR/LOW/MEDIUM/HIGH visibly different instead of flattening them to one size.
+    const physicalGhostRadius = Math.max(0.08, shell * Math.tan(Math.max(angularRadius, 1e-6)));
+    const aimingRingRadius = Math.max(1.9, physicalGhostRadius * 1.35);
+    preview.ghost.scale.setScalar(physicalGhostRadius);
+    preview.ring.scale.setScalar(aimingRingRadius);
     preview.ring.lookAt(this.camera.position);
     preview.group.visible = true;
 

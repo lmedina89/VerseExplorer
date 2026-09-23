@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('0.1.0.6A.1 exposes SKY SPAWN directly in the actual landed surface HUD', () => {
+test('0.1.0.6A.2 exposes SKY SPAWN directly in the actual landed surface HUD', () => {
   const html = read('index.html');
   for (const id of ['surfaceSpawnButton','surfaceSpawnPanel','surfaceSpawnParent','surfaceSpawnAltitude','surfaceSpawnAltitudeValue','surfaceSpawnLookValue','surfaceSpawnSpeedValue','surfaceSpawnPeriodValue','surfaceSpawnPreview','surfaceSpawnCommit','surfaceSpawnCancel','surfaceSpawnStatus']) {
     assert.match(html, new RegExp(`id="${id}"`));
@@ -30,5 +30,7 @@ test('surface preview remains presentation-only until COMMIT', () => {
   const app = read('src/app/app.js');
   assert.match(app, /this\.surfaceSandboxPreviewActive = true/);
   assert.match(app, /this\.renderer\.setSurfaceSandboxPreview/);
-  assert.match(app, /COMMIT inserts the asteroid into the real N-body simulation/);
+  assert.match(app, /this\.surfaceSandboxPreviewActive = true/);
+  assert.match(app, /this\.renderer\.setSurfaceSandboxPreview/);
+  assert.match(app, /this\.addBody\(/);
 });

@@ -1,3 +1,13 @@
+# Universe Explorer v0.1.0.6A.2 — Surface Spawn & Visual Presence Pass
+
+- Adds body-aware **NEAR / LOW / MEDIUM / HIGH** surface-spawn shells. Reference SOL values are Earth 200/400/2,000/20,000 km, Moon 25/100/500/2,000 km, and Mars 125/250/1,000/6,000 km.
+- Keeps surface spawn exactly on the live reticle ray, but changes the ghost from a large fixed minimum marker to true angular-size presentation with only a tiny visibility floor; a separate amber ring remains the aiming aid.
+- PREVIEW collapses the large SKY SPAWN setup card into a compact aiming strip so the reticle and surrounding sky remain visible on phone screens.
+- Adds a restrained additive solar glare/white-core layer in landed sky rendering. Glare is stronger at naked-eye/wide FOV and progressively reduced at telescope FOV so the photosphere remains inspectable.
+- Improves resolved orbit planet/moon presentation with linear mipmapping, higher anisotropic filtering and slightly earlier lazy albedo/normal-detail residency.
+- NEAR remains a circular insertion in the current gravity model; atmospheric drag, oblateness/mascons and long-term orbital stability are not newly solved.
+- Gravity/integrator, canonical SOL body state, ship dynamics, landing transitions/session, planetary rotation and atmospheric-optics equations remain unchanged.
+
 # Universe Explorer v0.1.0.6A.1 — Surface Sky Spawn Bridge
 
 - Restores SKY SPAWN to the intended **actual landed/on-foot surface** workflow rather than requiring flight mode.

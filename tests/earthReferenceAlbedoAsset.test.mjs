@@ -12,7 +12,7 @@ const assetPath = join(root, 'assets/textures/earth-akshat-albedo.jpg');
 
 test('Earth reference albedo is isolated to canonical SOL Earth and loaded lazily', () => {
   assert.match(factory, /'planet-earth': new URL\('\.\.\/\.\.\/assets\/textures\/earth-akshat-albedo\.jpg'/);
-  assert.match(factory, /apparentRadiusRad >= 0\.006/);
+  assert.match(factory, /apparentRadiusRad >= 0\.004/);
   assert.match(factory, /makePlanetaryPresentationMaps\(body, materialProfile\)/);
   assert.match(factory, /createPlanetarySurfacePresentationMaps/);
 });

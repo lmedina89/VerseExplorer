@@ -12,9 +12,9 @@ export const SANDBOX_BODY_LIMIT = 5;
 
 const SOL_PARENT_ORDER = Object.freeze(['planet-earth', 'moon-luna', 'planet-mars']);
 const SOL_ALTITUDES_METERS = Object.freeze({
-  'planet-earth': Object.freeze({ low: 400_000, medium: 2_000_000, high: 20_000_000 }),
-  'moon-luna': Object.freeze({ low: 100_000, medium: 500_000, high: 2_000_000 }),
-  'planet-mars': Object.freeze({ low: 250_000, medium: 1_000_000, high: 6_000_000 }),
+  'planet-earth': Object.freeze({ near: 200_000, low: 400_000, medium: 2_000_000, high: 20_000_000 }),
+  'moon-luna': Object.freeze({ near: 25_000, low: 100_000, medium: 500_000, high: 2_000_000 }),
+  'planet-mars': Object.freeze({ near: 125_000, low: 250_000, medium: 1_000_000, high: 6_000_000 }),
 });
 
 function finite(value, fallback = 0) {
@@ -88,6 +88,7 @@ export function sandboxAltitudePresets(parent) {
   if (known) return { ...known };
   const radius = Math.max(1, finite(parent?.radius, PHYSICS.EARTH_RADIUS));
   return {
+    near: Math.max(25_000, radius * 0.02),
     low: Math.max(100_000, radius * 0.08),
     medium: Math.max(500_000, radius * 0.35),
     high: Math.max(2_000_000, radius * 1.5),
@@ -97,7 +98,7 @@ export function sandboxAltitudePresets(parent) {
 export function buildSandboxOrbitPlan({ parent, shipPosition, altitudePreset = 'low' } = {}) {
   if (!parent || !(finite(parent.mass) > 0) || !(finite(parent.radius) > 0)) throw new Error('A finite massive parent body is required.');
   if (parent.kind !== BODY_KIND.PLANET && parent.kind !== BODY_KIND.MOON) throw new Error('0.1.0.6A supports planet/moon parent bodies only.');
-  const presetKey = ['low', 'medium', 'high'].includes(String(altitudePreset)) ? String(altitudePreset) : 'low';
+  const presetKey = ['near', 'low', 'medium', 'high'].includes(String(altitudePreset)) ? String(altitudePreset) : 'low';
   const altitudes = sandboxAltitudePresets(parent);
   const altitudeMeters = altitudes[presetKey];
   const mass = SANDBOX_ASTEROID.massKg;
@@ -164,7 +165,7 @@ export function buildSurfaceSkySandboxOrbitPlan({ parent, observer, altitudePres
   const lookAltitudeRad = Math.asin(Math.max(-1, Math.min(1, dot3(look, localUp))));
   if (!(lookAltitudeRad >= 0)) throw new Error('Aim the reticle at or above the local horizon before previewing a sky spawn.');
 
-  const presetKey = ['low', 'medium', 'high'].includes(String(altitudePreset)) ? String(altitudePreset) : 'low';
+  const presetKey = ['near', 'low', 'medium', 'high'].includes(String(altitudePreset)) ? String(altitudePreset) : 'low';
   const altitudes = sandboxAltitudePresets(parent);
   const altitudeMeters = altitudes[presetKey];
   const mass = SANDBOX_ASTEROID.massKg;

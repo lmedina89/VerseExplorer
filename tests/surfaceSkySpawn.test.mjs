@@ -31,7 +31,7 @@ function observerAtEarthSurface({ forward = [0.25, 0.65, 0.72] } = {}) {
   };
 }
 
-test('0.1.0.6A.1 surface SKY SPAWN inserts exactly along the live reticle ray', () => {
+test('0.1.0.6A.2 surface SKY SPAWN inserts exactly along the live reticle ray', () => {
   const observer = observerAtEarthSurface();
   const plan = buildSurfaceSkySandboxOrbitPlan({ parent: earth, observer, altitudePreset: 'low' });
   const observerToSpawn = norm(sub([...plan.body.position], [...observer.inertialPosition]));

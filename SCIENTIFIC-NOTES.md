@@ -1,3 +1,15 @@
+# Universe Explorer v0.1.0.6A.2 — spawn-distance and visual-presence boundary
+
+The new **NEAR** surface-spawn option is still a calculated circular state around the current parent, not a full orbit-lifetime model. Earth NEAR is 200 km, Moon NEAR is 25 km and Mars NEAR is 125 km in the reference SOL presets. Explorer does **not** newly solve atmospheric drag, oblateness/J2, lunar mascons, nonspherical gravity, radiation pressure or station-keeping; therefore a numerically circular NEAR state may not represent a long-lived real-world orbit. After COMMIT, the existing mutual Newtonian N-body solver remains authoritative.
+
+Surface preview size now follows the asteroid's physical radius and live line-of-sight distance through angular geometry. Only a tiny visibility floor remains for the ghost; the larger amber ring is explicitly an aiming aid. This fixes the previous presentation issue where LOW/MEDIUM/HIGH could appear nearly identical despite different physical shells.
+
+The added solar glare is an HDR/perceptual rendering layer only. Solar position, angular radius, eclipse fraction, atmosphere transmission and ground illumination remain inherited from the existing astronomy/optics models. Wide fields receive more glare/white-core washout; narrow telescope fields reduce that layer to preserve photosphere texture. This is not calibrated human-eye radiance or camera exposure simulation.
+
+Orbit planet/moon polish is also presentation-only: resolved textures use higher-quality mip/anisotropic filtering and lazy albedo/normal detail becomes resident at slightly smaller apparent angular radii. No body radius, albedo science value, lighting geometry, atmosphere state, collision geometry or orbital state is changed.
+
+---
+
 # Universe Explorer v0.1.0.6A.1 — Surface Sky Spawn scientific boundary
 
 SKY SPAWN is now exposed from the **actual landed/on-foot surface**, but it still does not introduce a second physics engine. PREVIEW is presentation-only. Explorer reads the live surface observer position and center-reticle forward vector, intersects that ray with the selected orbital shell, and derives a circular prograde initial state at that exact point. The reticle must be at or above the local geometric horizon; below-horizon insertion is rejected rather than allowing a path through the parent world.

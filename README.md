@@ -1,5 +1,15 @@
 # Universe Explorer exploration branch
 
+**v0.1.0.6A.2 — Surface Spawn & Visual Presence Pass.** Built directly from the validated 6A.1 surface-first SKY SPAWN checkpoint. Surface spawning now exposes **NEAR / LOW / MEDIUM / HIGH** body-aware circular shells, the preview ghost follows true apparent angular size instead of being flattened to one large marker size, and PREVIEW collapses the setup card so the reticle/sky stay visible while aiming. Landed Sun presentation gains a restrained FOV-aware glare/white-core layer, while orbit-resolved planet/moon textures use better mip/anisotropic filtering and become detailed slightly earlier. Physics, body radii, orbital state, atmosphere equations and landing systems are unchanged.
+
+## 0.1.0.6A.2 acceptance focus
+
+1. Land on Earth, open SPAWN and compare **NEAR → LOW → MEDIUM → HIGH** while aiming near zenith. The ghost should visibly shrink with distance; the amber ring remains an aiming aid.
+2. Tap PREVIEW and confirm the large setup card collapses into a compact strip so the sky and center reticle remain visible.
+3. On Earth, CENTER the Sun at 70°/15°/5°/1.5° FOV. Wide-field views should show a bright but restrained glare; narrow telescope views should preserve more photosphere detail instead of becoming a white blob.
+4. View Earth/other resolved planets from orbit and confirm slightly crisper albedo/limb/detail presentation without a major mobile performance hit.
+5. COMMIT a NEAR asteroid and verify it enters the existing live N-body solver; NEAR is a circular insertion in the current gravity model, not a claim that atmospheric drag or non-spherical gravity are modeled.
+
 **v0.1.0.6A.1 — Surface Sky Spawn Bridge.** Built directly on the 6A orbit-insertion foundation, but restores the feature to its intended surface-first workflow. While actually landed/on-foot, press **SPAWN**, aim the center reticle anywhere at or above the local horizon, choose LOW / MEDIUM / HIGH, then PREVIEW. The amber ghost and projected orbit follow the live look direction; COMMIT re-solves the exact surface observer and parent state at that instant and inserts the physical asteroid on that line of sight into the existing mutual Newtonian N-body simulation.
 
 ## 0.1.0.6A.1 acceptance focus

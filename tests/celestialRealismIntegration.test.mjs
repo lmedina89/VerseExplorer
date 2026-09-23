@@ -36,8 +36,8 @@ test('generated planet/moon flattening proxy remains bounded over a population',
 test('renderer keeps near-orbit maps lazy and canonical body rotation visual-only', async () => {
   const factory=await readFile(new URL('../src/render/celestialFactory.js',import.meta.url),'utf8');
   const renderer=await readFile(new URL('../src/render/threeRenderer.js',import.meta.url),'utf8');
-  assert.match(factory,/apparentRadiusRad >= 0\.006/);
-  assert.match(factory,/apparentRadiusRad >= 0\.030/);
+  assert.match(factory,/apparentRadiusRad >= 0\.004/);
+  assert.match(factory,/apparentRadiusRad >= 0\.022/);
   assert.match(factory,/makePlanetaryCloseDetailMaps/);
   assert.match(factory,/closeOrbitDetailResident/);
   assert.match(factory,/normalMap\.repeat\.set/);

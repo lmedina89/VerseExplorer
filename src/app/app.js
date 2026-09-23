@@ -22,7 +22,7 @@ import { massivePairPhysicsStepLimitSeconds } from '../physics/massivePairStepCo
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { ExperimentRegistry } from '../experiments/experimentRegistry.js';
 import { registerLabExperiments, MATERIALS, asteroidDefinitionFromParams, sphereRadiusFromMassDensity } from '../experiments/labSpawner.js';
-import { SANDBOX_BODY_LIMIT, buildSandboxOrbitPlan, buildSandboxOrbitPolyline, buildSurfaceSkySandboxOrbitPlan, sandboxParentCandidates } from '../experiments/orbitSandbox.js?v=ue0106a1';
+import { SANDBOX_BODY_LIMIT, buildSandboxOrbitPlan, buildSandboxOrbitPolyline, buildSurfaceSkySandboxOrbitPlan, sandboxParentCandidates } from '../experiments/orbitSandbox.js?v=ue0106a2';
 import { ParticleExperimentManager, PARTICLE_MODES } from '../experiments/particles/particleExperimentManager.js';
 import { CosmicPhenomenonRegistry } from '../cosmic/phenomenonRegistry.js';
 import { SpaceWeatherManager } from '../cosmic/spaceWeather.js';
@@ -31,7 +31,7 @@ import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, 
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105f';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a1';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a2';
 import { Hud } from '../ui/hud.js?v=ue0105f';
 import { SystemMapController } from '../ui/systemMap.js?v=ue0105f';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105f';
@@ -360,7 +360,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.6A.1 online. SKY SPAWN is available while actually landed: aim the center reticle above the horizon, choose an orbital band, PREVIEW, then COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.6A.2 online. SKY SPAWN is available while actually landed: aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -2514,7 +2514,7 @@ export class UniverseLabApp {
     if (!eligibility.ok) throw new Error(eligibility.reason);
     const solution = astronomy ?? this.solveAstronomicalObserver();
     const observer = solution?.observer;
-    const altitudePreset = this.root.querySelector('#surfaceSpawnAltitude')?.value ?? 'low';
+    const altitudePreset = this.root.querySelector('#surfaceSpawnAltitude')?.value ?? 'near';
     return buildSurfaceSkySandboxOrbitPlan({ parent: eligibility.parent, observer, altitudePreset });
   }
 
@@ -2525,7 +2525,8 @@ export class UniverseLabApp {
     set('#surfaceSpawnLookValue', `${(plan.lookAltitudeRad * 180 / Math.PI).toFixed(1)}° alt · ${(plan.lookRangeMeters / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })} km line-of-sight`);
     set('#surfaceSpawnSpeedValue', `${(plan.circularSpeedMps / 1000).toFixed(3)} km/s`);
     set('#surfaceSpawnPeriodValue', formatPlannerDuration(plan.periodSeconds));
-    set('#surfaceSpawnStatus', `${statusPrefix} · reticle direction defines the insertion point on the ${plan.altitudePreset.toUpperCase()} orbital shell. Amber marker/orbit are preview-only until COMMIT.`);
+    const nearBoundary = plan.altitudePreset === 'near' ? ' NEAR is a circular state in the gravity model; atmospheric drag and non-spherical gravity are not modeled.' : '';
+    set('#surfaceSpawnStatus', `${statusPrefix} · reticle direction defines the insertion point on the ${plan.altitudePreset.toUpperCase()} orbital shell. Amber marker/orbit are preview-only until COMMIT.${nearBoundary}`);
     const count = this.root.querySelector('#surfaceSpawnCount');
     if (count) count.textContent = `${this.sandboxBodyCount()}/${SANDBOX_BODY_LIMIT}`;
   }
@@ -2539,7 +2540,10 @@ export class UniverseLabApp {
     if (commit) commit.disabled = false;
     if (cancel) cancel.disabled = false;
     const plan = this.refreshSurfaceSkySandboxPreview(this.solveAstronomicalObserver());
-    if (plan) this.hud.notify('SKY SPAWN preview armed. Aim the center reticle anywhere above the horizon; the amber marker follows your live look direction. COMMIT inserts the asteroid into the real N-body simulation.');
+    if (plan) {
+      this.root.querySelector('#surfaceSpawnPanel')?.classList.add('preview-compact');
+      this.hud.notify('SKY SPAWN preview armed. The setup panel is compact so the sky stays visible; aim the center reticle above the horizon and COMMIT when the placement looks right.');
+    }
     return plan;
   }
 
@@ -2562,10 +2566,11 @@ export class UniverseLabApp {
     }
   }
 
-  clearSurfaceSkySandboxPreview(message = 'Aim the reticle above the horizon, choose an orbital band, then PREVIEW. The marker is enlarged for visibility; the committed asteroid keeps its physical radius.') {
+  clearSurfaceSkySandboxPreview(message = 'Aim the reticle above the horizon, choose a shell, then PREVIEW. NEAR is the closest supported circular shell; the amber ring is only an aiming aid.') {
     this.surfaceSandboxPreviewActive = false;
     this.sandboxPreviewPlan = null;
     this.renderer.clearSurfaceSandboxPreview();
+    this.root.querySelector('#surfaceSpawnPanel')?.classList.remove('preview-compact');
     const commit = this.root.querySelector('#surfaceSpawnCommit'); if (commit) commit.disabled = true;
     const cancel = this.root.querySelector('#surfaceSpawnCancel'); if (cancel) cancel.disabled = true;
     const status = this.root.querySelector('#surfaceSpawnStatus'); if (status) status.textContent = message;

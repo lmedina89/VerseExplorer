@@ -73,6 +73,16 @@ function addGlow(group, color, scale, opacity = 0.3) {
 function clamp01(value) { return Math.max(0, Math.min(1, Number(value) || 0)); }
 
 
+
+function tuneResolvedTexture(texture, anisotropy = 8) {
+  if (!texture) return texture;
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.anisotropy = anisotropy;
+  return texture;
+}
+
 const REFERENCE_PLANET_ALBEDO_ASSETS = Object.freeze({
   'planet-earth': new URL('../../assets/textures/earth-akshat-albedo.jpg', import.meta.url).href,
 });
@@ -88,7 +98,7 @@ export function createReferenceStellarPresentationMap(body, { surfaceOwned = fal
   // silently flipping the photosphere when TextureLoader is used directly.
   texture.flipY = false;
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  tuneResolvedTexture(texture, 8);
   texture.userData.referenceAsset = 'Sun by SebastianSosnowski (CC BY 4.0)';
   texture.userData.referenceAssetUrl = 'https://sketchfab.com/3d-models/sun-9ef1c68fbb944147bcfcc891d3912645';
   texture.userData.surfaceOwned = Boolean(surfaceOwned);
@@ -106,7 +116,7 @@ function makeReferencePlanetAlbedoMap(body, { surfaceOwned = false } = {}) {
   // geographic north at the canonical north pole without changing Earth spin/orbit state.
   texture.flipY = false;
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  tuneResolvedTexture(texture, 8);
   texture.userData.referenceAsset = 'Sketchfab Earth by Akshat (CC BY 4.0)';
   texture.userData.referenceAssetUrl = 'https://sketchfab.com/3d-models/earth-41fc80d85dfd480281f21b74b2de2faa';
   texture.userData.surfaceOwned = Boolean(surfaceOwned);
@@ -222,8 +232,8 @@ function makePlanetarySurfaceMaps(body, profile) {
     }
   }
   ctx.putImageData(image,0,0); bumpCtx.putImageData(bumpImage,0,0);
-  const map = new THREE.CanvasTexture(canvas); map.wrapS=THREE.RepeatWrapping; map.wrapT=THREE.ClampToEdgeWrapping; map.colorSpace=THREE.SRGBColorSpace; map.anisotropy=4;
-  const bumpMap = new THREE.CanvasTexture(bumpCanvas); bumpMap.wrapS=THREE.RepeatWrapping; bumpMap.wrapT=THREE.ClampToEdgeWrapping; bumpMap.anisotropy=2;
+  const map = new THREE.CanvasTexture(canvas); map.wrapS=THREE.RepeatWrapping; map.wrapT=THREE.ClampToEdgeWrapping; map.colorSpace=THREE.SRGBColorSpace; tuneResolvedTexture(map, 8);
+  const bumpMap = new THREE.CanvasTexture(bumpCanvas); bumpMap.wrapS=THREE.RepeatWrapping; bumpMap.wrapT=THREE.ClampToEdgeWrapping; tuneResolvedTexture(bumpMap, 4);
   return { map, bumpMap };
 }
 
@@ -320,9 +330,9 @@ function makePlanetaryCloseDetailMaps(body, profile) {
   normalCtx.putImageData(normalImage, 0, 0);
   roughCtx.putImageData(roughImage, 0, 0);
   const normalMap = new THREE.CanvasTexture(normalCanvas);
-  normalMap.wrapS = THREE.RepeatWrapping; normalMap.wrapT = THREE.RepeatWrapping; normalMap.anisotropy = 4;
+  normalMap.wrapS = THREE.RepeatWrapping; normalMap.wrapT = THREE.RepeatWrapping; tuneResolvedTexture(normalMap, 6);
   const roughnessMap = new THREE.CanvasTexture(roughCanvas);
-  roughnessMap.wrapS = THREE.RepeatWrapping; roughnessMap.wrapT = THREE.RepeatWrapping; roughnessMap.anisotropy = 2;
+  roughnessMap.wrapS = THREE.RepeatWrapping; roughnessMap.wrapT = THREE.RepeatWrapping; tuneResolvedTexture(roughnessMap, 4);
   return { normalMap, roughnessMap };
 }
 
@@ -368,7 +378,7 @@ export function applyPlanetaryPerceptualProfile(visual, apparentRadiusRad) {
   const body = visual.userData?.planetaryTextureSource;
   // Build close-detail maps only after the disk is genuinely resolved. This avoids allocating
   // global textures for every distant body at startup on iPhone Safari.
-  if (!core.material.map && body && materialProfile && apparentRadiusRad >= 0.006) {
+  if (!core.material.map && body && materialProfile && apparentRadiusRad >= 0.004) {
     const maps = makePlanetaryPresentationMaps(body, materialProfile);
     core.material.map = maps.map;
     core.material.bumpMap = materialProfile.bumpScale > 0 ? maps.bumpMap : null;
@@ -384,7 +394,7 @@ export function applyPlanetaryPerceptualProfile(visual, apparentRadiusRad) {
   // so bodies that already look good at medium distance keep that identity. A compact repeating
   // normal/roughness texture only becomes resident once the disk is large enough to reveal the
   // limitations of the global map.
-  if (!core.material.normalMap && body && materialProfile && !materialProfile.gas && apparentRadiusRad >= 0.030) {
+  if (!core.material.normalMap && body && materialProfile && !materialProfile.gas && apparentRadiusRad >= 0.022) {
     const detailMaps = makePlanetaryCloseDetailMaps(body, materialProfile);
     if (detailMaps) {
       core.material.normalMap = detailMaps.normalMap;
