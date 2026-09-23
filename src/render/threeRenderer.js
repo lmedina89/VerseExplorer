@@ -8,7 +8,7 @@ import { updateScientificOverlayVisual } from './scientificOverlayVisuals.js';
 import { BODY_KIND, SIMULATION } from '../core/constants.js';
 import { computeObservationCameraPose } from './observationCamera.js';
 import { apparentAngularRadius, stellarPerceptualProfile } from './stellarPerception.js';
-import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105a';
+import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105b';
 import { rendererBackendPolicy } from './backendPolicy.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { CockpitView } from './cockpitView.js?v=155';
@@ -586,6 +586,14 @@ export class UniverseRenderer {
     this.targetMarker.visible = false;
     this.surfaceWorld.render(this.renderer, session, realTimeSeconds, transition, astronomy);
     return true;
+  }
+
+  setSurfaceFovDegrees(degrees = 70) {
+    return this.surfaceWorld?.setFovDegrees(degrees) ?? null;
+  }
+
+  getSurfaceFovDegrees() {
+    return this.surfaceWorld?.getFovDegrees() ?? null;
   }
 
   getStats() {

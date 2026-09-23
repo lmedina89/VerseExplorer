@@ -378,3 +378,10 @@ The mobile planner hotfix changes CSS/layout only. Planner propagation, finite-d
 ## Universe Explorer v0.1.0.5A — observer-only SOL surface view
 
 `surfaceSkyObserver.js` is a thin policy/region adapter over the existing astronomy stack. It does not own an ephemeris, eclipse solver or separate sky simulation. `UniverseLabApp.enterSurfaceSky()` creates an observer-only surface session, `AstronomicalObserverModel.solveSurface()` reconstructs the body-fixed observer, and the existing `SurfaceWorldVisual` consumes the canonical astronomical solution. In observer-only mode procedural scatter, POIs, weather, parked-ship scenery and landing transitions are suppressed. Normal `physicsStep()` continues, keeping the spacecraft and universe authoritative.
+
+
+## Universe Explorer v0.1.0.5B — surface celestial presentation layer
+
+The 5B layer remains downstream of the authoritative simulation. The existing `AstronomicalObserverModel` still supplies body direction, range, horizon state, apparent angular radius, phase illumination and finite-disk occultation. 5B adds only presentation metadata/controls: a body rotation axis projected into the observer-local basis for Saturn ring orientation, a ring mesh scaled relative to Saturn's physical disk, target-centering by observer yaw/pitch, and camera FOV presets.
+
+None of these operations changes body position/velocity, ship position/velocity, observer site, gravity, integration, FRAME, landing transitions or eclipse/phase equations. The later SOL Landing Bridge must consume this same shared surface-sky presentation instead of creating a separate landed sky.

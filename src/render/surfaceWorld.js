@@ -143,6 +143,34 @@ function createSurfaceStarDisk(observed) {
   return group;
 }
 
+const SATURN_RING_BANDS = Object.freeze([
+  // NASA/NSSDCA Saturn ring radii in Saturn equatorial-radius units. The main visible C/B/A
+  // system is rendered with the Cassini Division left physically open; faint D/F/G/E rings
+  // are intentionally omitted from this mobile presentation layer.
+  Object.freeze({ inner: 1.239, outer: 1.526, color: 0xb8aa88, opacity: 0.34, name: 'C' }),
+  Object.freeze({ inner: 1.526, outer: 1.950, color: 0xe4d5ad, opacity: 0.72, name: 'B' }),
+  Object.freeze({ inner: 2.030, outer: 2.270, color: 0xd8c8a2, opacity: 0.58, name: 'A' }),
+]);
+
+function createSaturnMainRings() {
+  const group = new THREE.Group();
+  group.name = 'saturn-main-rings';
+  group.userData.role = 'physical-main-ring-presentation';
+  group.userData.axis = new THREE.Vector3(0, 0, 1);
+  for (const band of SATURN_RING_BANDS) {
+    const geometry = new THREE.RingGeometry(band.inner, band.outer, 96, 1);
+    const material = new THREE.MeshBasicMaterial({
+      color: band.color, transparent: true, opacity: band.opacity, side: THREE.DoubleSide,
+      depthWrite: false, depthTest: true, toneMapped: true,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = `saturn-ring-${band.name}`;
+    mesh.userData.baseOpacity = band.opacity;
+    group.add(mesh);
+  }
+  return group;
+}
+
 function createSurfacePhaseSphere(observed) {
   const geometry = new THREE.SphereGeometry(1, 28, 18);
   const position = geometry.getAttribute('position');
@@ -153,10 +181,34 @@ function createSurfacePhaseSphere(observed) {
   mesh.userData.surfaceCelestialKind = 'reflective-body';
   mesh.userData.baseColor = Number(observed.color) >>> 0;
   mesh.userData.lastAppearanceTime = -Infinity;
-  return mesh;
+  if (observed.id !== 'planet-saturn') return mesh;
+
+  const group = new THREE.Group();
+  group.userData.surfaceCelestialKind = 'reflective-body';
+  group.userData.phaseMesh = mesh;
+  group.userData.rings = createSaturnMainRings();
+  group.add(mesh, group.userData.rings);
+  return group;
 }
 
-function updateSurfacePhaseSphere(mesh, observed, simulationTimeSeconds = 0) {
+function updateSurfaceRingPresentation(visual, observed) {
+  const rings = visual?.userData?.rings;
+  if (!rings) return;
+  const axis = observed?.rotationAxisLocal ?? [0, 1, 0];
+  const target = rings.userData.axis;
+  target.set(Number(axis[0]) || 0, Number(axis[1]) || 0, Number(axis[2]) || 0);
+  if (target.lengthSq() < 1e-12) target.set(0, 1, 0);
+  target.normalize();
+  rings.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), target);
+  const illumination = Math.max(0.06, Math.min(1, Number(observed?.stellarVisibilityAtBody ?? 1)));
+  for (const ring of rings.children) {
+    if (ring.material) ring.material.opacity = (ring.userData.baseOpacity ?? ring.material.opacity ?? 0.5) * illumination;
+  }
+}
+
+function updateSurfacePhaseSphere(visual, observed, simulationTimeSeconds = 0) {
+  const mesh = visual?.userData?.phaseMesh ?? visual;
+  if (!mesh?.geometry) return;
   const last = Number(mesh.userData.lastAppearanceTime);
   if (Number.isFinite(last) && Math.abs(simulationTimeSeconds - last) < 0.25) return;
   mesh.userData.lastAppearanceTime = simulationTimeSeconds;
@@ -173,6 +225,7 @@ function updateSurfacePhaseSphere(mesh, observed, simulationTimeSeconds = 0) {
     colors.setXYZ(i, base.r * lambert, base.g * lambert, base.b * lambert);
   }
   colors.needsUpdate = true;
+  updateSurfaceRingPresentation(visual, observed);
 }
 
 function compressedSkyShellDistance(rangeMeters, minRangeMeters, maxRangeMeters) {
@@ -768,6 +821,17 @@ export class SurfaceWorldVisual {
   resize(width, height) {
     this.camera.aspect = width / Math.max(1, height);
     this.camera.updateProjectionMatrix();
+  }
+
+  setFovDegrees(degrees = 70) {
+    const next = Math.max(1, Math.min(70, Number(degrees) || 70));
+    this.camera.fov = next;
+    this.camera.updateProjectionMatrix();
+    return next;
+  }
+
+  getFovDegrees() {
+    return Number(this.camera.fov) || 70;
   }
 
   ensureAstronomicalSky(astronomy) {

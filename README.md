@@ -1,5 +1,16 @@
 # Universe Explorer exploration branch
 
+**v0.1.0.5B — Celestial Surface Presentation.** This checkpoint builds directly on the v0.1.0.5A massless SOL surface observer. It improves what the real sky looks like and how you frame it without enabling SOL landing yet or changing the live Newtonian universe.
+
+## v0.1.0.5B celestial surface presentation
+
+- Saturn now carries a lightweight surface-sky rendering of the main C, B and A ring system at physical radial proportions, including the Cassini Division.
+- The ring plane follows Saturn's existing canonical spin axis rather than a camera-facing decorative halo.
+- SURFACE SKY exposes NEXT and CENTER controls for visible celestial targets; these alter observer yaw/pitch only.
+- Telescope FOV cycles 70° → 35° → 15° → 5° → 1.5° → 70°. The camera magnifies by narrowing FOV; body positions, radii and physical angular sizes remain unchanged.
+- Existing phase, finite-disk eclipse/occultation, horizon, atmospheric-optics and body-rotation models remain the same foundation.
+- SOL landing remains disabled in 5B. The original landing stack is intentionally reserved for the planned SOL Landing Bridge after this presentation checkpoint passes iPhone acceptance.
+
 **v0.1.0.4B — SOL Major Moons Foundation.** This branch preserves the v0.1.0.4A.2 mobile/HUD checkpoint and the inherited Universe Lab v0.1.5.5 simulation/navigation stack while extending the fixed SOL reference profile with seven major moons.
 
 ## v0.1.0.4B SOL major moons
@@ -531,3 +542,10 @@ For reference, the initial sub-parent views naturally produce approximately 1.83
 5. Confirm the HUD still reports latitude/longitude, star altitude/azimuth, local solar time, physical angular size/phase and eclipse state.
 6. Leave SURFACE SKY and confirm the spacecraft returns at its live, continuously evolved state rather than being repositioned.
 7. Regress normal ORIGIN/ABYSSAL landing, LOOK, THRUST/REV/BRAKE, APPROACH and FRAME.
+
+
+## Universe Explorer v0.1.0.5B — Celestial Surface Presentation
+
+This milestone builds on the 5A massless SOL surface observer. It adds physically proportioned Saturn main rings, visible-body NEXT/CENTER framing controls, and camera-only telescope FOV presets. It does **not** enable SOL landing, add SKY SPAWN, modify celestial scale/orbits, or change the spacecraft simulation.
+
+Suggested iPhone acceptance: open SOL → Titan → SURFACE SKY, CENTER Saturn, cycle FOV, and confirm the ringed planet remains physically placed while only framing changes. Repeat on Europa/Jupiter and Moon/Earth; then return to ship and recheck LOOK, THRUST, APPROACH and FRAME.

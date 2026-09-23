@@ -1,3 +1,16 @@
+# Universe Explorer v0.1.0.5B — Celestial Surface Presentation
+
+- Preserves the v0.1.0.5A massless SOL surface observer and the inherited flight/landing architecture.
+- Adds physically proportioned Saturn C/B/A main rings using NASA/NSSDCA radial ratios; the Cassini Division remains open.
+- Ring-plane orientation derives from Saturn's existing canonical inertial spin axis projected into the local surface observer basis.
+- Adds observer-only NEXT and CENTER controls; framing changes surface observer yaw/pitch only.
+- Adds telescope FOV presets at 70°, 35°, 15°, 5° and 1.5°. FOV changes camera projection only and never enlarges/moves celestial bodies.
+- Adds release-level Safari/GitHub Pages cache busting for every changed runtime edge.
+- Leaves SOL landing disabled for the dedicated landing-bridge milestone.
+- Full automated worktree result: 336/336 tests pass.
+
+---
+
 # Universe Explorer v0.1.0.4B — SOL Major Moons Foundation
 
 - Added seven physical SOL moons: Moon, Io, Europa, Ganymede, Callisto, Titan and Triton.
@@ -579,3 +592,16 @@ Built from v0.1.4.1 Extreme Objects, Space Weather & Scientific Overlays.
 - Existing ORIGIN/ABYSSAL detailed surface landing remains unchanged.
 - SKY SPAWN/orbit editing, telescope/FOV presentation, planet rings in the surface celestial renderer and validated real SOL terrain are intentionally deferred.
 - Cache-busts every newly changed runtime module edge to preserve the v0.1.0.4B.1 Safari/GitHub Pages startup fix.
+
+
+## Universe Explorer v0.1.0.5B — Celestial Surface Presentation
+
+- Built directly from the accepted v0.1.0.5A Surface Observer Bridge.
+- Adds physically proportioned Saturn C/B/A main-ring presentation to the existing surface celestial renderer, preserving the Cassini Division gap.
+- Adds observer-only **NEXT**, **CENTER**, and bounded **FOV** controls (70° / 35° / 15° / 5° / 1.5°).
+- Telescope/FOV changes only the camera projection; physical angular sizes, celestial positions, N-body state, and spacecraft state are unchanged.
+- CENTER changes only observer yaw/pitch toward the selected visible celestial body.
+- Adds local rotation-axis projection metadata for ring orientation without mutating canonical SOL body state or changing eclipse/phase geometry.
+- SOL landing remains disabled; the original ORIGIN/ABYSSAL landing stack is unchanged and reserved for the later SOL Landing Bridge milestone.
+- SKY SPAWN/orbit editing remains deferred.
+- Safari/GitHub Pages cache-busting is extended through every newly changed module edge.

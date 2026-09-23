@@ -1,3 +1,24 @@
+# Universe Explorer v0.1.0.5B QA Report
+
+## Celestial Surface Presentation
+
+- Baseline: **Universe Explorer v0.1.0.5A**.
+- Scope limited to surface-observer presentation, observer record metadata, renderer FOV/ring presentation, release wiring and tests.
+- Protected byte-identical systems from 5A: gravity solver, velocity-Verlet integrator, ship dynamics, flight computer, FRAME/transit, orbit insertion, system navigation, SOL data/generator, landing transition/session/generator/profiles, surface-sky provider, and stylesheet.
+- Saturn main rings use C/B/A physical radius ratios with Cassini Division preserved; plane orientation uses the canonical rotation axis projected into local observer coordinates.
+- NEXT/CENTER alter only `surfaceSession.yaw/pitch`; telescope presets alter only the surface camera FOV.
+- SOL landing remains disabled.
+
+## Automated result
+
+- Worktree: **336/336 tests pass**.
+- Clean GitHub-package extraction: **336/336 tests pass**; ZIP integrity validation passes.
+- Local static HTTP smoke: **6/6 HTTP 200**, covering the shell plus every changed/cache-busted runtime edge (`main`, `app`, `astronomicalObserver`, `threeRenderer`, `surfaceWorld`).
+- New 5B coverage checks Saturn ring proportions, bounded FOV presentation, observer-only framing isolation, local rotation-axis projection, and the updated Safari/GitHub Pages cache chain.
+- Physical iPhone Safari remains the visual/interaction acceptance gate.
+
+---
+
 # Universe Explorer v0.1.0.4B QA Report
 
 ## SOL Major Moons Foundation
@@ -381,3 +402,66 @@ The tests derive these from live radius/range geometry through the canonical obs
 ### Physical-device gate
 
 Automated QA cannot certify iPhone Safari visual composition, touch feel, atmospheric appearance or whether the first-frame parent body is comfortably framed on the user's exact device. Physical iPhone acceptance remains required before moving to v0.1.0.5B. In particular, verify Moon→Earth, Europa→Jupiter, Titan→Saturn and Triton→Neptune SURFACE SKY entry/LOOK/return behavior, and confirm normal B.1 ship flight remains intact afterward.
+
+---
+
+## Universe Explorer v0.1.0.5B — Celestial Surface Presentation QA
+
+### Baseline / scope
+
+- Exact baseline: **Universe Explorer v0.1.0.5A — Surface Observer Bridge**.
+- Scope is presentation-only for SOL SURFACE SKY: Saturn main rings, visible-body target framing, and bounded telescope/FOV presets.
+- No SOL landing, SKY SPAWN, terrain, new celestial bodies, orbit edits, or spacecraft/physics rewrite is included.
+- Changed runtime modules are limited to `src/app/app.js`, `src/main.js`, `src/core/astronomicalObserver.js`, `src/render/threeRenderer.js`, and `src/render/surfaceWorld.js`; `index.html` exposes the new observer controls/version.
+
+### Physical/presentation boundary
+
+- Celestial apparent angular sizes continue to come from physical radius/range geometry.
+- Telescope presets (70° / 35° / 15° / 5° / 1.5°) alter camera projection only.
+- CENTER/NEXT alter only the observer camera yaw/pitch/focus selection.
+- Saturn C/B/A ring meshes are scaled relative to Saturn's physical rendered disk, preserving the Cassini Division gap.
+- `rotationAxisLocal` is a normalized observer-local projection of the canonical inertial rotation axis used only for visual ring orientation; canonical SOL body state is not mutated.
+- Existing phase illumination and finite-disk eclipse/occultation equations remain unchanged.
+
+### Protected-core comparison vs 5A
+
+The following are byte-for-byte identical to the accepted 5A baseline:
+
+- `src/physics/gravity/directGravitySolver.js`
+- `src/physics/integrators/velocityVerlet.js`
+- `src/physics/shipDynamics.js`
+- `src/physics/flightComputer.js`
+- `src/physics/transitDrive.js`
+- `src/physics/frameOrbitInsertion.js`
+- `src/navigation/frameGuardRoute.js`
+- `src/navigation/systemNavigation.js`
+- `src/data/systemGenerator.js`
+- `src/data/solSystem.js`
+- `src/core/planetaryRotation.js`
+- `src/core/celestialAppearance.js`
+- `src/surface/landingTransition.js`
+- `src/surface/surfaceGenerator.js`
+- `src/surface/surfaceProfiles.js`
+- `src/surface/surfaceSession.js`
+- `src/surface/surfaceWeather.js`
+
+### Automated verification
+
+- Full frozen-worktree test suite: **336/336 PASS**.
+- New 5B presentation coverage: **4/4 PASS** for physical Saturn ring proportions, bounded FOV controls, yaw/pitch-only target framing, and non-mutating local rotation-axis projection.
+- Static required-file/module-cache checks: **PASS**.
+- JavaScript/MJS syntax checks: **PASS**.
+- Safari/GitHub Pages cache chain versions every changed runtime edge: `index → main.js → app.js → astronomicalObserver.js / threeRenderer.js → surfaceWorld.js`.
+
+### Physical-device acceptance gate
+
+Automated QA does not certify final iPhone visual composition. On-device acceptance should verify Titan → Saturn ring orientation/visibility, FOV cycling without geometry jumps, NEXT/CENTER touch usability, Moon → Earth and Europa → Jupiter framing, and RETURN TO SHIP followed by normal LOOK/THRUST/APPROACH/FRAME behavior.
+
+### Release archive verification
+
+- Candidate ZIP integrity: **PASS** (`unzip -t`).
+- Candidate archive clean extraction: **160 files**.
+- Clean-extracted full suite: **336/336 PASS**.
+- Local HTTP shell/module smoke: **9/9 HTTP 200** for `index.html`, `main.js`, `app.js`, `astronomicalObserver.js`, `threeRenderer.js`, `surfaceWorld.js`, `surfaceSkyObserver.js`, `systemGenerator.js`, and `solSystem.js`.
+- Clean extraction vs frozen worktree: **160 files, 0 byte mismatches**.
+- `.github/workflows/*`: **0 files**.

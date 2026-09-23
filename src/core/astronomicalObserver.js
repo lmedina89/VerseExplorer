@@ -185,6 +185,7 @@ function createBodyObservation() {
     phaseAngleRad: 0,
     illuminatedFraction: 1,
     illuminationDirectionLocal: new Float64Array([0, 0, 1]),
+    rotationAxisLocal: new Float64Array([0, 1, 0]),
     stellarVisibilityAtBody: 1,
     stellarEclipseFraction: 0,
     stellarEclipseState: 'none',
@@ -217,6 +218,16 @@ export function updateCelestialObservation(observer, body, target = createBodyOb
   target.physicalRadiusMeters = Math.max(0, finite(body?.radius));
   target.apparentAngularRadiusRad = apparentAngularRadiusRad(target.physicalRadiusMeters, target.rangeMeters);
   target.angularDiameterRad = target.apparentAngularRadiusRad * 2;
+  const axis = body?.rotationAxisInertial;
+  if (axis && Number(axis.length) >= 3) {
+    const ax = finite(axis[0]), ay = finite(axis[1], 1), az = finite(axis[2]);
+    const am = Math.hypot(ax, ay, az) || 1;
+    const nx = ax / am, ny = ay / am, nz = az / am;
+    set3(target.rotationAxisLocal,
+      nx * observer.horizonEast[0] + ny * observer.horizonEast[1] + nz * observer.horizonEast[2],
+      nx * observer.localUp[0] + ny * observer.localUp[1] + nz * observer.localUp[2],
+      nx * observer.horizonNorth[0] + ny * observer.horizonNorth[1] + nz * observer.horizonNorth[2]);
+  } else set3(target.rotationAxisLocal, 0, 1, 0);
   set3(target.localDirection,
     dot3(target.direction, observer.horizonEast),
     dot3(target.direction, observer.localUp),

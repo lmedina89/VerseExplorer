@@ -90,3 +90,8 @@ Physical iPhone Safari remains the release gate; automated QA verifies determini
 ## Universe Explorer v0.1.0.5A cache-chain note
 
 The v0.1.0.4B.1 startup regression established that changing a deep ES module without versioning the importing edge can let iOS Safari/GitHub Pages assemble a mixed old/new module graph. v0.1.0.5A therefore versions the complete changed chain: `index.html → main.js → app.js → systemMap.js / threeRenderer.js / surfaceSkyObserver.js`, with `threeRenderer.js → surfaceWorld.js` also versioned. Unchanged SOL generator imports retain their B.1 tag.
+
+
+## Universe Explorer v0.1.0.5B cache-chain note
+
+Because 5B changes `app.js`, `astronomicalObserver.js`, `threeRenderer.js`, and `surfaceWorld.js`, the Safari-safe chain is versioned as `index.html → main.js?v=155-ue0105b → app.js?v=155-ue0105b → astronomicalObserver.js?v=ue0105b / threeRenderer.js?v=ue0105b → surfaceWorld.js?v=ue0105b`. Unchanged 5A modules retain their 5A cache tags.

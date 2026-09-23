@@ -1,3 +1,13 @@
+# Universe Explorer v0.1.0.5B scientific notes
+
+## Surface celestial presentation boundary
+
+Saturn's main surface-sky ring presentation uses the NASA/NSSDCA ring-radius ratios relative to Saturn's equatorial radius: C ring 1.239–1.526 R, B ring 1.526–1.950 R, and A ring 2.030–2.270 R. The 1.950–2.030 R Cassini Division is intentionally left open. The ring plane is aligned to Saturn's already-authoritative spin axis. This is a lightweight visual disk model: ring-particle gravity, ring particle collisions, ring self-shadowing, Saturn-cast ring shadows, radiative transfer, spokes, fine ringlets and ring dynamics are not solved.
+
+Telescope FOV is camera projection only. A narrower FOV magnifies the same physically sized celestial disk; it does not alter body radius, range, orbit, phase, eclipse geometry or gravitational state. NEXT/CENTER similarly modifies only the massless surface observer's yaw/pitch.
+
+---
+
 # v0.1.5.4.2 scientific boundary notes — stellar irradiance & displayed daylight
 
 - Physical stellar irradiance is still `L / (4πr²)` through the existing `stellarFluxWm2()` helper and modeled stellar luminosity. At 1 AU from a 1 L☉ star the reference remains ~1361.17 W/m².
@@ -297,3 +307,12 @@ Moon observer sites default to the sub-parent point at the current simulation ep
 SOL local ground remains a flat, explicitly schematic horizon. It is not a terrain, geology, elevation or landing model. Atmospheric sky optics may consume the existing reference pressure/composition proxies where available, but v0.1.0.5A does not claim full radiative transfer, meteorology or validated local surface appearance.
 
 No SOL body is made landable by this milestone. No celestial radius, orbit, mass, velocity or light/eclipsing geometry is enlarged for spectacle. Dramatic parent-planet views arise from actual radius/range geometry; telescope/FOV presentation and ring rendering are deferred to later presentation work.
+
+
+## Universe Explorer v0.1.0.5B — celestial presentation boundary
+
+5B does not enlarge celestial bodies or alter their orbits for dramatic effect. Surface-body disks continue to use the canonical apparent angular radius from physical radius and observer range. Telescope presets change only camera field of view. Target centering changes only observer yaw/pitch.
+
+Saturn's visible main rings are rendered as C/B/A presentation bands using Saturn-radius ratios, with the Cassini Division left open. Ring geometry is oriented from Saturn's canonical inertial rotation axis projected into the local observer basis. This projection is presentation metadata only and does not mutate the SOL body record or participate in gravity.
+
+The eclipse/phase model itself is unchanged: finite-disk occultation and phase illumination remain supplied by the existing astronomical observer.
