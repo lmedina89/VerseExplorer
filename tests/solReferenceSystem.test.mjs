@@ -178,9 +178,9 @@ test('SOL reference environments bypass seeded proxies for planets and moons', (
   assert.equal(europaEnvironment.formationModel, 'observational-reference-v1');
 });
 
-test('0.1.0.5D keeps canonical SOL body flags unchanged while enabling the bounded surface-support set', () => {
+test('0.1.0.5E keeps canonical SOL body flags unchanged while enabling the expanded surface-support set', () => {
   const system = generateSystem('ignored', 'sol');
-  const enabled = new Set(['moon-luna', 'planet-mars', 'moon-europa', 'moon-titan', 'moon-triton']);
+  const enabled = new Set(['planet-earth', 'moon-luna', 'planet-mars', 'moon-europa', 'moon-titan', 'moon-triton']);
   for (const body of system.bodies.filter((entry) => [BODY_KIND.PLANET, BODY_KIND.MOON].includes(entry.kind))) {
     const support = surfaceEngineSupport(body, system.bodies);
     assert.equal(body.landable, false, body.name);
@@ -247,7 +247,7 @@ test('Explorer app wires the SOL moon save-upgrade path without replacing establ
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const app = await readFile(new URL('../src/app/app.js', import.meta.url), 'utf8');
   assert.match(html, /value="sol">SOL — reference Solar System \(J2000\)/);
-  assert.match(html, /Universe Explorer v0\.1\.0\.5D/);
+  assert.match(html, /Universe Explorer v0\.1\.0\.5E/);
   assert.match(app, /generateSolReferenceMoonUpgrades/);
   assert.match(app, /this\.system\.generationProfileId === 'sol'/);
   assert.match(app, /payload\.elapsedSimSeconds/);

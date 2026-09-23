@@ -32,3 +32,8 @@ test('Earth asset attribution records Akshat source and CC BY 4.0', () => {
   assert.match(thirdParty, /CC BY 4\.0/);
   assert.match(thirdParty, /earth-akshat-albedo\.jpg/);
 });
+
+
+test('Earth glTF-sourced albedo uses explicit north-up V orientation on SphereGeometry', () => {
+  assert.match(factory, /texture\.flipY\s*=\s*false/);
+});

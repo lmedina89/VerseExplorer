@@ -1,5 +1,16 @@
 # Universe Explorer
 
+**v0.1.0.5E — Earth Landing & Atmosphere Foundation.** Built from the verified v0.1.0.5D.1 checkpoint. Earth now joins the existing real landing/on-foot/takeoff path, uses the shared live celestial sky and one-atmosphere optical presentation, receives a terrestrial local proxy surface, and corrects the imported Earth albedo north/south orientation. The Earth asset remains visual-only; canonical Earth mass/radius/orbit/rotation and the core physics stack are unchanged.
+
+## 5E acceptance focus
+
+1. Verify Earth texture north/south orientation from space and from the Moon telescope view.
+2. Land on Earth, walk/look around, use NEXT/CENTER/FOV/DETAILS, then BOARD/TAKEOFF.
+3. In daylight, Earth should show a blue-weighted sky and horizon haze from the shared atmospheric-optics model; night/twilight continue to follow live Sun geometry.
+4. Earth ground is a deterministic terrestrial reference site, not a real geographic map.
+5. Moon/Mars/Europa/Titan/Triton landing and ORIGIN/ABYSSAL behavior must remain unchanged.
+
+
 **v0.1.0.5D.1 — Earth Reference Albedo.** Built from the verified v0.1.0.5D landing-expansion checkpoint. Earth now uses the licensed 1024×512 diffuse/albedo texture extracted from the user-supplied Sketchfab model **Earth** by Akshat when Earth is actually resolved enough to benefit. The existing physical Earth sphere, atmosphere, rotation, lighting, phase/eclipses, orbital state and landing policy are unchanged.
 
 ## 5D.1 acceptance focus

@@ -7,7 +7,7 @@ import { surfaceColorAt, surfaceHeightAt, surfaceZoneWeights, surfacePois } from
 import { surfaceEyePosition } from '../surface/surfaceSession.js';
 import { surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { stellarIrradiancePresentation } from './stellarIrradiance.js';
-import { createPlanetarySurfacePresentationMaps } from './celestialFactory.js?v=ue0105d1';
+import { createPlanetarySurfacePresentationMaps } from './celestialFactory.js?v=ue0105e';
 
 function disposeMaterial(material) {
   if (!material) return;
@@ -331,6 +331,27 @@ function createScatter(region, rng) {
       dummy.updateMatrix(); darkRocks.setMatrixAt(i, dummy.matrix);
     }
     group.add(darkRocks);
+    return group;
+  }
+
+  if (region.surfaceStyle === 'earth-terrestrial') {
+    // Earth v0.1.0.5E deliberately keeps local scenery conservative: low-density natural rocks
+    // only. Vegetation species, mapped land cover, hydrology and ecology are deferred rather
+    // than inventing them for an arbitrary procedural landing site.
+    const rockGeometry = new THREE.DodecahedronGeometry(1, 0);
+    const rockMaterial = new THREE.MeshStandardMaterial({ color: region.palette.rock, roughness: 0.98, metalness: 0.01 });
+    const rocks = new THREE.InstancedMesh(rockGeometry, rockMaterial, 96);
+    for (let i = 0; i < rocks.count; i += 1) {
+      const x = rng.range(-region.terrainSizeMeters * 0.46, region.terrainSizeMeters * 0.46);
+      const z = rng.range(-region.terrainSizeMeters * 0.46, region.terrainSizeMeters * 0.46);
+      const y = surfaceHeightAt(region, x, z);
+      const scale = rng.range(0.18, 1.15) * (rng.random() < 0.05 ? 1.8 : 1);
+      dummy.position.set(x, y + scale * 0.16, z);
+      dummy.rotation.set(rng.range(0, Math.PI), rng.range(0, Math.PI), rng.range(0, Math.PI));
+      dummy.scale.set(scale * rng.range(0.7, 1.35), scale * rng.range(0.35, 0.72), scale * rng.range(0.7, 1.35));
+      dummy.updateMatrix(); rocks.setMatrixAt(i, dummy.matrix);
+    }
+    group.add(rocks);
     return group;
   }
 

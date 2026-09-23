@@ -83,6 +83,10 @@ function makeReferencePlanetAlbedoMap(body, { surfaceOwned = false } = {}) {
   const texture = new THREE.TextureLoader().load(url);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
+  // The source image came from a glTF asset. glTF textures use the opposite V convention from
+  // a standalone TextureLoader map on SphereGeometry, so keep flipY disabled here. This puts
+  // geographic north at the canonical north pole without changing Earth spin/orbit state.
+  texture.flipY = false;
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   texture.userData.referenceAsset = 'Sketchfab Earth by Akshat (CC BY 4.0)';

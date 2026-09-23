@@ -16,6 +16,16 @@ export const SURFACE_ENGINE_PROFILES = Object.freeze({
 });
 
 export const SOL_LANDING_SURFACE_PROFILES = Object.freeze({
+  'planet-earth': Object.freeze({
+    family: SURFACE_ARCHITECTURE_FAMILIES.ATMOSPHERIC_ROCKY,
+    profileId: SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY,
+    regionId: 'earth-temperate-reference',
+    regionName: 'Temperate Terrestrial Survey',
+    regionSubtitle: 'Procedural terrestrial terrain beneath the SOL reference N₂/O₂ atmosphere',
+    capability: 'EARTH REFERENCE SURFACE · CURRENT BUILD',
+    surfaceStyle: 'earth-terrestrial',
+    reason: 'Earth landing reuses the established atmospheric-rocky stack with canonical SOL gravity, 1 atm reference atmosphere, rotation and live sky. Local terrain and near-ground weather remain deterministic presentation proxies, not mapped geography or a solved climate system.',
+  }),
   'moon-luna': Object.freeze({
     family: SURFACE_ARCHITECTURE_FAMILIES.AIRLESS_ROCKY,
     profileId: SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY,

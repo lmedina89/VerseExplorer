@@ -1,3 +1,7 @@
+# Universe Explorer v0.1.0.5E — Earth scientific boundary
+
+Earth surface gravity, radius, rotation, orbital state, 101325 Pa reference pressure, live Sun/Moon/planet geometry, finite-disk eclipses and atmospheric-optics inputs remain canonical/reference-driven. The local landed terrain is deliberately procedural and must not be interpreted as a real Earth location or elevation model. Ground color variation, near-ground rocks and fog are presentation proxies. Clouds baked into the current Earth albedo are static imagery; cloud dynamics, precipitation, vegetation/ecology, hydrology, ozone, greenhouse climate and global weather are not solved in this milestone.
+
 # v0.1.0.5D scientific boundary
 
 SOL landing uses authoritative bulk body/environment inputs already present in the reference dataset, but local terrain is not real mapped topography. Mars regolith/highlands, Europa fractures, Titan organic/ice terrain and Triton nitrogen-ice terrain are deterministic presentation proxies. Titan's dense haze uses a bounded aerosol/tint presentation layered onto the existing generic atmospheric-optics model; methane cloud microphysics, precipitation, composition-specific absorption and full multiple scattering are not solved.

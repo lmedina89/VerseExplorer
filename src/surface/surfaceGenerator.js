@@ -1,7 +1,7 @@
 import { PHYSICS } from '../core/constants.js';
 import { createRng, hashSeed } from '../util/prng.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
-import { SURFACE_ENGINE_PROFILES, surfaceEngineSupport } from './surfaceProfiles.js?v=ue0105d';
+import { SURFACE_ENGINE_PROFILES, surfaceEngineSupport } from './surfaceProfiles.js?v=ue0105e';
 
 const TAU = Math.PI * 2;
 
@@ -204,6 +204,22 @@ export function surfaceColorAt(region, x, z, height = surfaceHeightAt(region, x,
     const micro = fbm(x / 96 - 4.1, z / 96 + 6.4, region.seedHash ^ 0x438e1c97);
     const dust = clamp01((fbm(x / 460 + 5.2, z / 460 - 1.8, region.seedHash ^ 0xd1930ac7) + 1) * 0.5);
     const high = clamp01((height + 80) / 260);
+    if (region.surfaceStyle === 'earth-terrestrial') {
+      const moisture = clamp01((fbm(x / 650 + 1.9, z / 650 - 3.4, region.seedHash ^ 0x3b712c55) + 1) * 0.5);
+      const stone = clamp01((fbm(x / 185 - 8.1, z / 185 + 2.2, region.seedHash ^ 0x8f21aab7) + 1) * 0.5);
+      const vegetation = [0.15, 0.31, 0.11];
+      const soil = [0.31, 0.25, 0.15];
+      const rock = [0.39, 0.40, 0.36];
+      const dry = clamp01((1 - moisture) * 0.72 + high * 0.22);
+      const rocky = clamp01(stone * 0.50 + high * 0.38);
+      let r = vegetation[0] + (soil[0] - vegetation[0]) * dry;
+      let g = vegetation[1] + (soil[1] - vegetation[1]) * dry;
+      let b = vegetation[2] + (soil[2] - vegetation[2]) * dry;
+      const rk = rocky * 0.42;
+      r += (rock[0] - r) * rk; g += (rock[1] - g) * rk; b += (rock[2] - b) * rk;
+      const shade = Math.max(0.72, Math.min(1.20, 0.92 + high * 0.08 + micro * 0.07));
+      return [clamp01(r * shade), clamp01(g * shade), clamp01(b * shade)];
+    }
     const shade = Math.max(0.67, Math.min(1.22, 0.9 + high * 0.11 + micro * 0.08 + dust * 0.04));
     return [clamp01(base[0] * shade), clamp01(base[1] * shade), clamp01(base[2] * shade)];
   }
@@ -333,7 +349,17 @@ function generateAtmosphericRockyRegion(system, body, environment, support = {})
   const coldness = clamp01((300 - (Number(environment?.equilibriumTemperatureK) || 240)) / 180);
   const tone = 0.18 + (1 - albedo) * 0.13;
   const marsStyle = support.surfaceStyle === 'mars-regolith';
-  const palette = marsStyle ? {
+  const earthStyle = support.surfaceStyle === 'earth-terrestrial';
+  const palette = earthStyle ? {
+    name: 'Temperate terrestrial reference terrain',
+    skyTop: 0x1f6fbd,
+    skyHorizon: 0xb8d8e8,
+    fog: 0xa9c8d5,
+    ground: [0.18, 0.29, 0.13],
+    rock: 0x5b6257,
+    accent: 0x7d9158,
+    atmosphere: pressureAtm,
+  } : marsStyle ? {
     name: 'Mars basaltic/regolith highland',
     skyTop: 0x1d1513,
     skyHorizon: 0x8b4d34,
@@ -352,15 +378,15 @@ function generateAtmosphericRockyRegion(system, body, environment, support = {})
     accent: 0x8a776b,
     atmosphere: pressureAtm,
   };
-  const terrainSizeMeters = 3000;
-  const craterRadius = rng.range(250, 390);
+  const terrainSizeMeters = earthStyle ? 3600 : 3000;
+  const craterRadius = earthStyle ? rng.range(180, 300) : rng.range(250, 390);
   const craterAngle = rng.range(0, TAU);
-  const craterDistance = rng.range(520, 760);
+  const craterDistance = earthStyle ? rng.range(700, 980) : rng.range(520, 760);
   const crater = {
     x: Math.cos(craterAngle) * craterDistance,
     z: Math.sin(craterAngle) * craterDistance,
     radius: craterRadius,
-    depth: craterRadius * rng.range(0.16, 0.27),
+    depth: craterRadius * (earthStyle ? rng.range(0.025, 0.055) : rng.range(0.16, 0.27)),
   };
   const ridgeAngle = craterAngle + rng.range(1.2, 2.6);
   const ridge = { x: Math.cos(ridgeAngle) * rng.range(520, 780), z: Math.sin(ridgeAngle) * rng.range(520, 780) };
@@ -379,10 +405,10 @@ function generateAtmosphericRockyRegion(system, body, environment, support = {})
     surfaceModelVersion: 2,
     surfaceEngineProfile: SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY,
     surfaceArchitectureFamily: 'ATMOSPHERIC_ROCKY',
-    atmosphereMode: 'tenuous',
+    atmosphereMode: earthStyle ? 'atmospheric' : 'tenuous',
     weatherEnabled: pressurePa >= 100,
     anomalyVisualsEnabled: false,
-    skyMode: 'thin-atmosphere-proxy',
+    skyMode: earthStyle ? 'earth-reference-atmosphere' : 'thin-atmosphere-proxy',
     id: `${body.id}:${regionKey}`,
     regionKey,
     seed: regionSeed,
@@ -398,20 +424,20 @@ function generateAtmosphericRockyRegion(system, body, environment, support = {})
     atmospherePressurePa: pressurePa,
     atmosphereAtmProxy: pressureAtm,
     fogDensityProxy,
-    ambientSkyIntensity: 0.18,
+    ambientSkyIntensity: earthStyle ? 0.72 : 0.18,
     terrainSizeMeters,
-    terrainResolution: 82,
-    materialRoughness: 0.93,
-    materialMetalness: 0.025,
+    terrainResolution: earthStyle ? 92 : 82,
+    materialRoughness: earthStyle ? 0.88 : 0.93,
+    materialMetalness: earthStyle ? 0.01 : 0.025,
     palette,
     landing: { x: 0, z: 0, yaw: landingYaw },
     landedShip,
     terrain: {
-      roughness: 0.9 + rng.range(-0.05, 0.07),
-      broadAmplitude: 108,
-      mediumAmplitude: 31,
-      ridgeAmplitude: 44,
-      baseOffset: -24,
+      roughness: earthStyle ? 0.72 + rng.range(-0.04, 0.05) : 0.9 + rng.range(-0.05, 0.07),
+      broadAmplitude: earthStyle ? 52 : 108,
+      mediumAmplitude: earthStyle ? 15 : 31,
+      ridgeAmplitude: earthStyle ? 22 : 44,
+      baseOffset: earthStyle ? -8 : -24,
       crater,
       ridge,
       glassBasin,
@@ -422,7 +448,20 @@ function generateAtmosphericRockyRegion(system, body, environment, support = {})
       glass: { x: 18_200, z: 18_200, radius: 1 },
       mineral: { x: 18_300, z: 18_300, radius: 1 },
     },
-    weatherProfile: {
+    surfaceStyle: support.surfaceStyle ?? null,
+    weatherProfile: earthStyle ? {
+      enabled: true,
+      anomalyChance: 0,
+      allowAnomalous: false,
+      // Keep the first Earth landing conservative: clear intervals and ordinary fog only.
+      // Global weather, precipitation and cloud meteorology are deferred to a later model.
+      allowedTypes: ['fog-bank'],
+      preferred: ['fog-bank'],
+      firstEventMinSeconds: 55,
+      firstEventMaxSeconds: 110,
+      calmMinSeconds: 90,
+      calmMaxSeconds: 180,
+    } : {
       enabled: pressurePa >= 100,
       anomalyChance: 0,
       allowAnomalous: false,
@@ -433,12 +472,17 @@ function generateAtmosphericRockyRegion(system, body, environment, support = {})
       calmMinSeconds: 45,
       calmMaxSeconds: 105,
     },
-    normalPois: [
+    normalPois: earthStyle ? [
+      { id: `${regionKey}:lowland-basin`, type: 'geology', name: 'Lowland Basin', realityClass: 'known', x: crater.x, z: crater.z, scanRadiusMeters: 110, signal: 'Shallow terrestrial lowland proxy', summary: 'A deterministic local depression used to give the Earth reference site natural relief.', archive: 'Procedural terrain only; this is not a mapped geographic basin or elevation dataset.' },
+      { id: `${regionKey}:rocky-ridge`, type: 'geology', name: 'Rocky Ridge', realityClass: 'known', x: ridge.x, z: ridge.z, scanRadiusMeters: 100, signal: 'Exposed terrestrial ridge proxy', summary: 'A deterministic rocky rise generated for local Earth surface presentation.', archive: 'Terrain geometry is procedural and does not claim a real-world geographic location.' },
+    ] : [
       { id: `${regionKey}:weathered-rim`, type: 'geology', name: 'Weathered Crater Rim', realityClass: 'known', x: crater.x, z: crater.z, scanRadiusMeters: 105, signal: 'Impact-exposed rocky strata proxy', summary: 'A conventional crater rim modified by the local terrain/weather presentation model.', archive: 'Procedural geology only; stratigraphy, mineral chemistry, erosion rate and age are not solved.' },
       { id: `${regionKey}:highland-ridge`, type: 'geology', name: 'Highland Ridge', realityClass: 'known', x: ridge.x, z: ridge.z, scanRadiusMeters: 100, signal: 'Elevated fractured bedrock proxy', summary: 'A raised rocky ridge generated from the body-specific surface seed.', archive: 'Topography is deterministic but not a tectonic reconstruction or spectroscopic composition map.' },
     ],
     anomalies: [],
-    scientificStatus: 'Multi-world rocky exploration surface. Canonical gravity, pressure proxy, equilibrium temperature and body rotation drive the local presentation. Terrain and aerosols/weather are deterministic proxies; greenhouse climate, composition, erosion, hydrology and atmospheric radiative transfer are not solved yet.',
+    scientificStatus: earthStyle
+      ? 'Earth reference landing uses canonical SOL gravity, 101.325 kPa atmosphere, rotation and live celestial sky. The blue-sky/horizon response comes from the shared wavelength-dependent atmospheric-optics proxy. Local terrain, vegetation-like color variation and fog are deterministic presentation proxies only; geography, ecology, hydrology, clouds and weather are not globally solved.'
+      : 'Multi-world rocky exploration surface. Canonical gravity, pressure proxy, equilibrium temperature and body rotation drive the local presentation. Terrain and aerosols/weather are deterministic proxies; greenhouse climate, composition, erosion, hydrology and atmospheric radiative transfer are not solved yet.',
   };
 }
 

@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.5E — Earth Landing & Atmosphere Foundation
+
+- Enables Earth through the existing atmospheric-rocky landing/on-foot/takeoff stack without changing the canonical SOL Earth body record.
+- Corrects the glTF-derived Earth albedo V orientation so geographic north maps to the canonical north pole in both space and surface celestial views.
+- Adds a bounded Earth terrestrial surface style with varied green/brown/rock terrain, gentler relief, ordinary fog-only local weather, and no invented anomalies.
+- Uses the existing 101.325 kPa wavelength-dependent atmosphere optics for blue daylight, horizon haze, twilight/day-night response and live eclipse attenuation.
+- Keeps the CC BY Earth image lazy-loaded; GLB geometry is still not used.
+- Does not add mapped geography, real elevation, separate cloud dynamics, hydrology, global meteorology, SKY SPAWN or new orbital/landing physics.
+
 # Universe Explorer v0.1.0.5D.1 — Earth Reference Albedo
 
 - Adds the user-supplied Sketchfab **Earth** asset by Akshat as a visual-only reference albedo source.

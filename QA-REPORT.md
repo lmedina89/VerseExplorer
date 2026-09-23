@@ -1,3 +1,22 @@
+# Universe Explorer v0.1.0.5E — Earth Landing & Atmosphere Foundation QA
+
+- Baseline: verified v0.1.0.5D.1 Earth Reference Albedo checkpoint.
+- Untouched baseline regression before edits: **360/360 passing**.
+- Final worktree regression after Earth landing/atmosphere integration: **366/366 passing**.
+- Static structure validation: **PASS**.
+- Complete source/test JavaScript syntax check: **PASS**.
+- Earth albedo mapping now uses explicit glTF-compatible V orientation (`flipY=false`) without modifying the licensed source JPEG or changing Earth physics/rotation/orbit.
+- Earth is enabled only through the explicit SOL surface-support layer; the canonical SOL Earth body record and physical state remain unchanged.
+- Earth landing reuses the inherited atmospheric-rocky descent/touchdown/on-foot/BOARD-TAKEOFF lifecycle.
+- Earth atmosphere uses the existing wavelength-dependent atmosphere optics driven by the SOL reference pressure/gravity/live Sun geometry; the local blue-sky/horizon/fog presentation is a bounded rendering proxy, not a global weather/climate solution.
+- Earth ground is deterministic local procedural terrestrial presentation, not mapped geography/GIS/topography. Vegetation species, hydrology, ecology, separate cloud dynamics and global weather are deferred rather than invented.
+- Protected byte-identical systems vs 5D.1: direct gravity solver, velocity-Verlet integrator, ship dynamics, flight computer, transit drive, SOL state generator/system generator, astronomical observer/eclipses, planetary rotation, atmospheric optics, landing transition, surface session and surface weather.
+- Safari/GitHub Pages cache chain is isolated with the `ue0105e` release marker.
+- Candidate ZIP integrity: **PASS**.
+- Candidate clean extraction: **366/366 tests passing**, static structure **PASS**, complete source/test syntax **PASS**.
+- Local static HTTP smoke: **8/8 HTTP 200**, covering shell, stylesheet, cache-busted main/app/render modules, and `assets/textures/earth-akshat-albedo.jpg`.
+- Physical iPhone Safari remains the final visual/interaction acceptance gate for texture orientation, atmospheric appearance, touchdown/on-foot feel and takeoff continuity.
+
 # Universe Explorer v0.1.0.5D.1 — Earth Reference Albedo QA
 
 - Baseline: verified v0.1.0.5D SOL Landing Expansion.

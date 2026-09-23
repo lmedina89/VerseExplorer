@@ -11,6 +11,7 @@ const sol = generateSystem('ignored', 'sol');
 const byId = (id) => sol.bodies.find((body) => body.id === id);
 
 const expected = [
+  ['planet-earth', SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY, 'earth-temperate-reference', 'Temperate Terrestrial Survey'],
   ['moon-luna', SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY, 'airless-regolith', 'Regolith Survey Site'],
   ['planet-mars', SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY, 'mars-regolith-highland', 'Mars Highland Survey'],
   ['moon-europa', SURFACE_ENGINE_PROFILES.ICE_VOLATILE, 'europa-fractured-ice', 'Europa Fractured Ice Survey'],
@@ -18,7 +19,7 @@ const expected = [
   ['moon-triton', SURFACE_ENGINE_PROFILES.ICE_VOLATILE, 'triton-nitrogen-ice-plain', 'Triton Nitrogen-Ice Plain'],
 ];
 
-test('5D enables exactly Moon, Mars, Europa, Titan and Triton through explicit SOL surface profiles', () => {
+test('5E enables Earth plus the established Moon, Mars, Europa, Titan and Triton through explicit SOL surface profiles', () => {
   const enabled = new Set(expected.map(([id]) => id));
   for (const [id, profileId, regionId, regionName] of expected) {
     const body = byId(id);
@@ -90,7 +91,7 @@ test('Triton profile preserves trace reference atmosphere and cryogenic ice surf
   assert.equal(region.name, 'Triton Nitrogen-Ice Plain');
 });
 
-test('all five SOL landing worlds can use the inherited takeoff/orbit handoff without mutating their canonical body state', () => {
+test('all six SOL landing worlds can use the inherited takeoff/orbit handoff without mutating their canonical body state', () => {
   for (const [id, , regionId] of expected) {
     const body = byId(id);
     const region = generateSurfaceRegion(sol, body, regionId, sol.bodies);
