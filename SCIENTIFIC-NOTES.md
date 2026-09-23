@@ -1,3 +1,9 @@
+# v0.1.0.5D scientific boundary
+
+SOL landing uses authoritative bulk body/environment inputs already present in the reference dataset, but local terrain is not real mapped topography. Mars regolith/highlands, Europa fractures, Titan organic/ice terrain and Triton nitrogen-ice terrain are deterministic presentation proxies. Titan's dense haze uses a bounded aerosol/tint presentation layered onto the existing generic atmospheric-optics model; methane cloud microphysics, precipitation, composition-specific absorption and full multiple scattering are not solved.
+
+---
+
 # v0.1.0.5C scientific boundary — SOL Moon landing proof
 
 The Moon landing bridge does not alter the SOL Moon's mass, radius, barycentric position/velocity, rotation model, gravitational participation, phase/eclipse geometry or environment reference inputs. Surface gravity in the local region remains derived from the canonical Moon state (`GM/R²`, ~1.62 m/s²).

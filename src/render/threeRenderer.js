@@ -8,7 +8,7 @@ import { updateScientificOverlayVisual } from './scientificOverlayVisuals.js';
 import { BODY_KIND, SIMULATION } from '../core/constants.js';
 import { computeObservationCameraPose } from './observationCamera.js';
 import { apparentAngularRadius, stellarPerceptualProfile } from './stellarPerception.js';
-import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105c1';
+import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105d';
 import { rendererBackendPolicy } from './backendPolicy.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { CockpitView } from './cockpitView.js?v=155';

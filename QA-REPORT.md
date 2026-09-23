@@ -567,3 +567,20 @@ Verify on iPhone Safari after landing on the Moon:
 - Clean-extracted full suite: **350/350 PASS**.
 - Local HTTP Safari/GitHub Pages cache-chain smoke: **7/7 HTTP 200** for `index.html`, versioned `styles.css`, `main.js`, `app.js`, `threeRenderer.js`, `surfaceWorld.js`, and `celestialFactory.js`.
 - `.github/workflows/*`: **0 files**.
+
+
+## Universe Explorer v0.1.0.5D — SOL Landing Expansion QA
+
+- Baseline v0.1.0.5C.1: 350/350 tests PASS before edits.
+- Focused SOL landing expansion: Moon/Mars/Europa/Titan/Triton support, environment classification, takeoff handoff and Titan haze scope PASS.
+- Full worktree regression before packaging: 357/357 tests PASS.
+- Static structure + JavaScript syntax: PASS before packaging.
+- Protected-core diff and clean-package rerun are recorded below after final packaging.
+
+### Final package validation
+
+- Candidate ZIP integrity: PASS.
+- Clean extraction full QA: 357/357 tests PASS; static structure and JavaScript syntax PASS.
+- Clean extraction HTTP smoke: 7/7 runtime-chain requests returned HTTP 200 (`/`, main, app, threeRenderer, surfaceWorld, surfaceGenerator, surfaceProfiles).
+- Package file count: 164 files.
+- Protected physics/navigation/landing-state modules remain byte-identical to v0.1.0.5C.1; only the explicit surface-support/presentation chain plus release/tests/docs changed.

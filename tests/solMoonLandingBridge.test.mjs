@@ -13,17 +13,15 @@ const sol = generateSystem('ignored', 'sol');
 const moon = sol.bodies.find((body) => body.id === 'moon-luna');
 const earth = sol.bodies.find((body) => body.id === 'planet-earth');
 
-test('SOL Moon alone is bridged into the inherited airless landing profile', () => {
+test('SOL Moon remains on the inherited airless landing profile after the 5D expansion', () => {
   const support = surfaceEngineSupport(moon, sol.bodies);
   assert.equal(support.enabled, true);
   assert.equal(support.solReferenceProof, true);
+  assert.equal(support.solReferenceLanding, true);
   assert.equal(support.profileId, SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY);
   assert.deepEqual(availableSurfaceRegions(sol, moon, sol.bodies), [
     { id: 'airless-regolith', name: 'Regolith Survey Site', subtitle: 'Airless rocky reference surface' },
   ]);
-  for (const body of sol.bodies.filter((entry) => entry.referenceSystemId === 'sol' && entry.id !== 'moon-luna')) {
-    if (body.kind === 'planet' || body.kind === 'moon') assert.equal(surfaceEngineSupport(body, sol.bodies).enabled, false, body.name);
-  }
 });
 
 test('Moon landing region reuses the established physical airless surface stack without fake atmosphere, weather or anomalies', () => {

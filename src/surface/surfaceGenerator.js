@@ -1,7 +1,7 @@
 import { PHYSICS } from '../core/constants.js';
 import { createRng, hashSeed } from '../util/prng.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
-import { SURFACE_ENGINE_PROFILES, surfaceEngineSupport } from './surfaceProfiles.js?v=ue0105c';
+import { SURFACE_ENGINE_PROFILES, surfaceEngineSupport } from './surfaceProfiles.js?v=ue0105d';
 
 const TAU = Math.PI * 2;
 
@@ -239,8 +239,8 @@ function makeAnomalyPoi(template, i, rng) {
   };
 }
 
-function generateAirlessRockyRegion(system, body, environment) {
-  const regionKey = 'airless-regolith';
+function generateAirlessRockyRegion(system, body, environment, support = {}) {
+  const regionKey = support.regionId ?? 'airless-regolith';
   const regionSeed = `${system.seed}:${body.id}:surface:${regionKey}:surface-architecture-v1`;
   const rng = createRng(regionSeed);
   const seedHash = hashSeed(regionSeed);
@@ -287,8 +287,8 @@ function generateAirlessRockyRegion(system, body, environment) {
     seedHash,
     bodyId: body.id,
     bodyName: body.name,
-    name: 'Regolith Survey Site',
-    subtitle: 'Airless rocky moon proof surface',
+    name: support.regionName ?? 'Regolith Survey Site',
+    subtitle: support.regionSubtitle ?? 'Airless rocky moon proof surface',
     planetType: body.planetType ?? 'rocky',
     gravityMps2,
     temperatureK,
@@ -322,8 +322,8 @@ function generateAirlessRockyRegion(system, body, environment) {
 }
 
 
-function generateAtmosphericRockyRegion(system, body, environment) {
-  const regionKey = 'tenuous-rocky-highland';
+function generateAtmosphericRockyRegion(system, body, environment, support = {}) {
+  const regionKey = support.regionId ?? 'tenuous-rocky-highland';
   const regionSeed = `${system.seed}:${body.id}:surface:${regionKey}:multiworld-v1`;
   const rng = createRng(regionSeed);
   const seedHash = hashSeed(regionSeed);
@@ -332,7 +332,17 @@ function generateAtmosphericRockyRegion(system, body, environment) {
   const pressureAtm = Math.max(0, Number(environment?.atmospherePressureProxyAtm) || 0);
   const coldness = clamp01((300 - (Number(environment?.equilibriumTemperatureK) || 240)) / 180);
   const tone = 0.18 + (1 - albedo) * 0.13;
-  const palette = {
+  const marsStyle = support.surfaceStyle === 'mars-regolith';
+  const palette = marsStyle ? {
+    name: 'Mars basaltic/regolith highland',
+    skyTop: 0x1d1513,
+    skyHorizon: 0x8b4d34,
+    fog: 0x6a4031,
+    ground: [0.37, 0.19, 0.12],
+    rock: 0x54352c,
+    accent: 0xb96845,
+    atmosphere: pressureAtm,
+  } : {
     name: 'Tenuous rocky highland',
     skyTop: 0x10151c,
     skyHorizon: 0x4c403b,
@@ -379,8 +389,8 @@ function generateAtmosphericRockyRegion(system, body, environment) {
     seedHash,
     bodyId: body.id,
     bodyName: body.name,
-    name: 'Tenuous Highland Survey',
-    subtitle: 'Cold rocky terrain under a thin modeled atmosphere',
+    name: support.regionName ?? 'Tenuous Highland Survey',
+    subtitle: support.regionSubtitle ?? 'Cold rocky terrain under a thin modeled atmosphere',
     planetType: body.planetType ?? 'rocky',
     gravityMps2,
     temperatureK,
@@ -432,8 +442,8 @@ function generateAtmosphericRockyRegion(system, body, environment) {
   };
 }
 
-function generateIceVolatileRegion(system, body, environment) {
-  const regionKey = 'cryogenic-ice-shelf';
+function generateIceVolatileRegion(system, body, environment, support = {}) {
+  const regionKey = support.regionId ?? 'cryogenic-ice-shelf';
   const regionSeed = `${system.seed}:${body.id}:surface:${regionKey}:multiworld-v1`;
   const rng = createRng(regionSeed);
   const seedHash = hashSeed(regionSeed);
@@ -442,7 +452,35 @@ function generateIceVolatileRegion(system, body, environment) {
   const pressureAtm = Math.max(0, Number(environment?.atmospherePressureProxyAtm) || 0);
   const icePotential = clamp01(Number(environment?.icePotential01) || 0.6);
   const brightness = 0.42 + albedo * 0.34 + icePotential * 0.08;
-  const palette = {
+  const style = support.surfaceStyle ?? 'generic-ice';
+  const palette = style === 'titan-haze' ? {
+    name: 'Titan organic-rich ice plain',
+    skyTop: 0x342113,
+    skyHorizon: 0xb56d33,
+    fog: 0x81502d,
+    ground: [0.24, 0.19, 0.13],
+    rock: 0x43352b,
+    accent: 0xa87843,
+    atmosphere: pressureAtm,
+  } : style === 'europa-ice' ? {
+    name: 'Europa fractured ice plain',
+    skyTop: 0x000000,
+    skyHorizon: 0x000000,
+    fog: 0x000000,
+    ground: [0.68, 0.66, 0.57],
+    rock: 0x6d655d,
+    accent: 0xe8d8b2,
+    atmosphere: pressureAtm,
+  } : style === 'triton-ice' ? {
+    name: 'Triton nitrogen-ice plain',
+    skyTop: 0x010102,
+    skyHorizon: 0x020203,
+    fog: 0x08080b,
+    ground: [0.64, 0.66, 0.69],
+    rock: 0x555965,
+    accent: 0xd7d8e2,
+    atmosphere: pressureAtm,
+  } : {
     name: 'Cryogenic ice / rock shelf',
     skyTop: 0x000000,
     skyHorizon: 0x000000,
@@ -471,32 +509,38 @@ function generateIceVolatileRegion(system, body, environment) {
   const gravityMps2 = Number(environment?.surfaceGravityMps2) || (PHYSICS.G * body.mass / Math.max(1, body.radius * body.radius));
   const temperatureK = Number(environment?.currentEquilibriumTemperatureK ?? environment?.equilibriumTemperatureK) || equilibriumTemperatureK(system, body);
   const effectivelyAirless = pressurePa < 1;
+  const denseAtmosphere = pressurePa >= 1_000;
+  const atmosphereMode = denseAtmosphere ? 'atmospheric' : (effectivelyAirless ? 'airless' : 'trace');
+  const skyMode = denseAtmosphere ? 'dense-atmosphere-proxy' : (effectivelyAirless ? 'vacuum' : 'trace-atmosphere-proxy');
 
   return {
     version: 4,
     surfaceModelVersion: 2,
     surfaceEngineProfile: SURFACE_ENGINE_PROFILES.ICE_VOLATILE,
     surfaceArchitectureFamily: 'ICE_VOLATILE',
-    atmosphereMode: effectivelyAirless ? 'airless' : 'trace',
+    atmosphereMode,
     weatherEnabled: false,
     anomalyVisualsEnabled: false,
-    skyMode: effectivelyAirless ? 'vacuum' : 'trace-atmosphere-proxy',
+    skyMode,
     id: `${body.id}:${regionKey}`,
     regionKey,
     seed: regionSeed,
     seedHash,
     bodyId: body.id,
     bodyName: body.name,
-    name: 'Cryogenic Ice Shelf',
-    subtitle: 'Ice-rich volatile terrain reference surface',
+    name: support.regionName ?? 'Cryogenic Ice Shelf',
+    subtitle: support.regionSubtitle ?? 'Ice-rich volatile terrain reference surface',
     planetType: 'ice',
     gravityMps2,
     temperatureK,
     temperatureModel: 'radiative-equilibrium',
     atmospherePressurePa: pressurePa,
     atmosphereAtmProxy: pressureAtm,
-    fogDensityProxy: 0,
-    ambientSkyIntensity: 0.02,
+    fogDensityProxy: denseAtmosphere ? undefined : 0,
+    ambientSkyIntensity: denseAtmosphere ? 0.09 : 0.02,
+    baselineAerosolOpticalDepth550: style === 'titan-haze' ? 1.35 : null,
+    atmosphereTintRgb: style === 'titan-haze' ? [0.96, 0.55, 0.24] : null,
+    atmosphereTintStrength: style === 'titan-haze' ? 0.62 : 0,
     terrainSizeMeters,
     terrainResolution: 82,
     materialRoughness: 0.62,
@@ -534,6 +578,9 @@ export function availableSurfaceRegions(system, body, bodies = system?.bodies ??
   if (!system?.seed || !body?.id) return [];
   const support = surfaceEngineSupport(body, bodies);
   if (!support.enabled) return [];
+  if (support.regionId && support.regionName) {
+    return [{ id: support.regionId, name: support.regionName, subtitle: support.regionSubtitle ?? 'Reference exploration surface' }];
+  }
   if (support.profileId === SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY) {
     return [{ id: 'airless-regolith', name: 'Regolith Survey Site', subtitle: 'Airless rocky reference surface' }];
   }
@@ -555,13 +602,13 @@ export function generateSurfaceRegion(system, body, requestedRegionId = 'shatter
   const support = surfaceEngineSupport(body, bodies);
   if (!support.enabled) throw new Error(`Surface engine is not enabled for ${body.name ?? body.id}.`);
   if (support.profileId === SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY) {
-    return generateAirlessRockyRegion(system, body, support.environment ?? derivePlanetaryEnvironment(body, bodies));
+    return generateAirlessRockyRegion(system, body, support.environment ?? derivePlanetaryEnvironment(body, bodies), support);
   }
   if (support.profileId === SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY) {
-    return generateAtmosphericRockyRegion(system, body, support.environment ?? derivePlanetaryEnvironment(body, bodies));
+    return generateAtmosphericRockyRegion(system, body, support.environment ?? derivePlanetaryEnvironment(body, bodies), support);
   }
   if (support.profileId === SURFACE_ENGINE_PROFILES.ICE_VOLATILE) {
-    return generateIceVolatileRegion(system, body, support.environment ?? derivePlanetaryEnvironment(body, bodies));
+    return generateIceVolatileRegion(system, body, support.environment ?? derivePlanetaryEnvironment(body, bodies), support);
   }
   const profile = SURFACE_REGION_PROFILES[requestedRegionId] ?? SURFACE_REGION_PROFILES['shatterfall-basin'];
   const regionSeed = `${system.seed}:${body.id}:surface:${profile.id}:environment-v2`;

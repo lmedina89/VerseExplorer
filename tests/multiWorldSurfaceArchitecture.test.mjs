@@ -123,7 +123,7 @@ test('airless renderer path explicitly removes fog/weather/ambient atmospheric p
   assert.match(source, /region\.weatherEnabled === false \? null : createWeatherRig/);
   assert.match(source, /this\.isAirless \? 0\.025/);
   assert.match(source, /pressurePa: this\.isAirless \? 0 : this\._atmospherePressurePa/);
-  assert.match(source, /this\.isAirless \? \[0, 0, 0\] : exposure\.topSkyColorRgb/);
+  assert.match(source, /this\.isAirless \? \[0, 0, 0\] : topSkyColorRgb/);
 });
 
 

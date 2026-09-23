@@ -1,5 +1,16 @@
 # Universe Explorer
 
+**v0.1.0.5D — SOL Landing Expansion.** Built from the verified v0.1.0.5C.1 checkpoint. This is one consolidated release: the existing landing/on-foot/takeoff path now supports the Moon, Mars, Europa, Titan and Triton through explicit SOL surface profiles. Earth remains intentionally deferred.
+
+## 5D acceptance focus
+
+1. Verify Moon behavior is unchanged.
+2. Land/take off on Mars, Europa, Titan and Triton using the existing descent envelope.
+3. Confirm landed NEXT/CENTER/FOV/DETAILS and the live celestial sky work on every world.
+4. Mars uses its 636 Pa reference atmosphere; Europa remains effectively airless; Titan uses its 146.7 kPa reference atmosphere with a bounded orange-haze presentation proxy; Triton uses its 1.4 Pa trace atmosphere.
+5. Confirm Earth and all non-listed SOL worlds still refuse real landing while SURFACE SKY remains available on supported solid worlds.
+6. Local terrain is deterministic proxy terrain, not a claim of mapped real topography.
+
 **v0.1.0.5C.1 — Landed Celestial Controls & Surface Presentation.** Built directly from the verified v0.1.0.5C Moon-landing checkpoint. The landed Moon surface now shares NEXT/CENTER/FOV/DETAILS with the massless SURFACE SKY observer, HUD MIN is substantially smaller, and resolved celestial disks reuse the deterministic space-view albedo presentation. Moon remains the only SOL landing target.
 
 ## 5C.1 acceptance focus

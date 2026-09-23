@@ -1,3 +1,15 @@
+# Universe Explorer v0.1.0.5D — SOL Landing Expansion
+
+- Consolidates Mars, Europa, Titan and Triton landing into one release on top of the validated Moon path.
+- Adds explicit SOL surface-support records without mutating canonical `landable` flags or SOL mass/radius/orbit/environment data.
+- Mars uses the established atmospheric-rocky engine with the reference 636 Pa atmosphere and bounded dust/frost weather presentation.
+- Europa uses the ice/volatile engine as an effectively airless bright ice surface with no invented weather.
+- Titan uses the ice/volatile terrain engine with the reference 146.7 kPa dense N₂/CH₄ atmosphere; a profile-scoped aerosol/tint presentation approximates haze without claiming solved methane chemistry or weather.
+- Triton uses the ice/volatile engine with its 1.4 Pa trace N₂/CH₄ reference atmosphere and cryogenic terrain proxy.
+- Moon behavior remains on the existing airless-regolith path. Earth and every other SOL body remain landing-locked.
+- The inherited descent/touchdown/on-foot/BOARD/TAKEOFF state machine, Hill-screened orbit handoff, live surface astronomy and celestial controls are reused unchanged.
+- Full regression after implementation: 357/357 tests pass before final packaging.
+
 # Universe Explorer v0.1.0.5C.1 — Landed Celestial Controls & Surface Presentation
 
 - Landed/on-foot Moon surface now exposes the same NEXT / CENTER / FOV / DETAILS celestial presentation controls as SURFACE SKY.

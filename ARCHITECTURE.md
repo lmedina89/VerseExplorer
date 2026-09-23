@@ -1,3 +1,13 @@
+# v0.1.0.5D architecture delta — bounded SOL landing expansion
+
+The surface-support layer now owns an explicit whitelist for five SOL landing worlds: Moon, Mars, Europa, Titan and Triton. Canonical SOL body records remain `landable:false`; permission remains a presentation/exploration policy and does not alter gravity, collision radii, orbital states or reference environments. Each SOL profile selects one already-established surface-engine family and supplies world-specific region identity/presentation metadata.
+
+Mars dispatches to `ATMOSPHERIC_ROCKY`; Europa, Titan and Triton dispatch to `ICE_VOLATILE`; Moon remains `AIRLESS_ROCKY`. `surfaceGenerator` consumes the support record for deterministic region identity and bounded presentation overrides. Titan alone supplies a profile-scoped baseline aerosol optical depth and warm haze tint to the existing atmospheric-optics renderer; this is explicitly a visual proxy, not composition-aware radiative transfer.
+
+The landing transition/session/takeoff architecture, direct gravity, velocity-Verlet, ship dynamics, FRAME, SOL state generation, planetary rotation, astronomical observer, eclipse/phase math and surface celestial controls are unchanged.
+
+---
+
 # v0.1.0.5C.1 architecture delta — shared landed celestial presentation
 
 This update does not add a second sky or landing system. Both landed exploration and massless SURFACE SKY use the existing AstronomicalObserverModel + SurfaceWorldVisual. The app-level presentation state stores only selected sky target and telescope FOV. Resolved celestial disks lazily request the same deterministic planetary albedo-map generator used by the orbital renderer; this is presentation-only and does not alter authoritative body state.

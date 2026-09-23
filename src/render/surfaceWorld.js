@@ -37,6 +37,11 @@ function rgbCss(rgb = [0, 0, 0]) {
   return `rgb(${channel(rgb[0])},${channel(rgb[1])},${channel(rgb[2])})`;
 }
 
+function mixRgb(a = [0, 0, 0], b = [0, 0, 0], t = 0) {
+  const k = Math.max(0, Math.min(1, Number(t) || 0));
+  return [0, 1, 2].map((i) => Math.max(0, Math.min(1, (Number(a[i]) || 0) * (1 - k) + (Number(b[i]) || 0) * k)));
+}
+
 function updateSkyTexture(texture, topRgb, horizonRgb) {
   const canvas = texture?.userData?.skyCanvas;
   const ctx = texture?.userData?.skyContext;
@@ -898,7 +903,7 @@ export class SurfaceWorldVisual {
       starAltitudeRad: starObservation?.centerAltitudeRad,
       starVisibleFraction: starObservation?.observerStarVisibleFraction ?? 1,
       starRgb: hexRgb01(starObservation?.color ?? this.star?.color ?? 0xffffff),
-      aerosolOpticalDepth550: weatherAerosolOpticalDepth(weather),
+      aerosolOpticalDepth550: weatherAerosolOpticalDepth(weather) ?? (Number.isFinite(Number(this.region.baselineAerosolOpticalDepth550)) ? Number(this.region.baselineAerosolOpticalDepth550) : null),
       weatherTransmission: transmission,
     });
     const irradiance = stellarIrradiancePresentation(
@@ -908,11 +913,15 @@ export class SurfaceWorldVisual {
     );
     const daylightGain = irradiance.displayGain;
     this.lastStellarIrradiance = irradiance;
+    const atmosphereTint = Array.isArray(this.region.atmosphereTintRgb) ? this.region.atmosphereTintRgb : null;
+    const tintStrength = Math.max(0, Math.min(1, Number(this.region.atmosphereTintStrength) || 0));
+    const topSkyColorRgb = atmosphereTint ? mixRgb(exposure.topSkyColorRgb, atmosphereTint, tintStrength * Math.max(0.15, exposure.daylight)) : exposure.topSkyColorRgb;
+    const horizonSkyColorRgb = atmosphereTint ? mixRgb(exposure.horizonSkyColorRgb, atmosphereTint, Math.min(1, tintStrength * 1.12) * Math.max(0.2, exposure.daylight)) : exposure.horizonSkyColorRgb;
     const skyKey = [
-      ...exposure.topSkyColorRgb, ...exposure.horizonSkyColorRgb,
+      ...topSkyColorRgb, ...horizonSkyColorRgb,
     ].map((value) => Math.round(value * 255)).join(':');
     if (skyKey !== this._lastSkyOpticsKey && this.sky?.material?.map) {
-      updateSkyTexture(this.sky.material.map, exposure.topSkyColorRgb, exposure.horizonSkyColorRgb);
+      updateSkyTexture(this.sky.material.map, topSkyColorRgb, horizonSkyColorRgb);
       this._lastSkyOpticsKey = skyKey;
     }
     if (this.sky?.material?.color) this.sky.material.color.setScalar(this.isAirless ? 0 : 1);
@@ -921,9 +930,9 @@ export class SurfaceWorldVisual {
       : (this._profileHemiIntensity != null
           ? this._profileHemiIntensity * (0.12 + exposure.diffuseSkyLight * 0.88)
           : 0.04 + exposure.diffuseSkyLight * 1.48)) * daylightGain;
-    if (this.scene.background?.setRGB) this.scene.background.setRGB(...(this.isAirless ? [0, 0, 0] : exposure.topSkyColorRgb));
+    if (this.scene.background?.setRGB) this.scene.background.setRGB(...(this.isAirless ? [0, 0, 0] : topSkyColorRgb));
     if (this.scene.fog?.color?.setRGB) {
-      const haze = exposure.horizonSkyColorRgb;
+      const haze = horizonSkyColorRgb;
       this.scene.fog.color.setRGB(Math.max(0.015, haze[0]), Math.max(0.015, haze[1]), Math.max(0.015, haze[2]));
     }
     if (this.scene.fog) {

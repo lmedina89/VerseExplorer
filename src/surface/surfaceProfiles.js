@@ -15,6 +15,60 @@ export const SURFACE_ENGINE_PROFILES = Object.freeze({
   ICE_VOLATILE: 'ice-volatile-v1',
 });
 
+export const SOL_LANDING_SURFACE_PROFILES = Object.freeze({
+  'moon-luna': Object.freeze({
+    family: SURFACE_ARCHITECTURE_FAMILIES.AIRLESS_ROCKY,
+    profileId: SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY,
+    regionId: 'airless-regolith',
+    regionName: 'Regolith Survey Site',
+    regionSubtitle: 'Airless rocky reference surface',
+    capability: 'AIRLESS REFERENCE SURFACE · CURRENT BUILD',
+    surfaceStyle: 'moon-regolith',
+    proof: true,
+    reason: 'SOL Moon landing uses the inherited airless-rocky surface stack; local terrain is a deterministic regolith proxy, not a real lunar map.',
+  }),
+  'planet-mars': Object.freeze({
+    family: SURFACE_ARCHITECTURE_FAMILIES.ATMOSPHERIC_ROCKY,
+    profileId: SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY,
+    regionId: 'mars-regolith-highland',
+    regionName: 'Mars Highland Survey',
+    regionSubtitle: 'Basaltic/regolith terrain under the reference tenuous CO₂ atmosphere',
+    capability: 'MARS REFERENCE SURFACE · CURRENT BUILD',
+    surfaceStyle: 'mars-regolith',
+    reason: 'Mars landing uses the established atmospheric-rocky stack driven by the SOL reference gravity, pressure, albedo, rotation and live sky. Terrain remains a deterministic local proxy, not a real Mars map.',
+  }),
+  'moon-europa': Object.freeze({
+    family: SURFACE_ARCHITECTURE_FAMILIES.ICE_VOLATILE,
+    profileId: SURFACE_ENGINE_PROFILES.ICE_VOLATILE,
+    regionId: 'europa-fractured-ice',
+    regionName: 'Europa Fractured Ice Survey',
+    regionSubtitle: 'Bright ice-rich terrain under a tenuous O₂ exosphere',
+    capability: 'EUROPA REFERENCE SURFACE · CURRENT BUILD',
+    surfaceStyle: 'europa-ice',
+    reason: 'Europa landing uses the established ice/volatile stack with authoritative SOL gravity, reference exosphere, rotation and live Jupiter-system sky. Surface fractures and composition are presentation proxies, not mapped Europan geology.',
+  }),
+  'moon-titan': Object.freeze({
+    family: SURFACE_ARCHITECTURE_FAMILIES.ICE_VOLATILE,
+    profileId: SURFACE_ENGINE_PROFILES.ICE_VOLATILE,
+    regionId: 'titan-organic-ice-plain',
+    regionName: 'Titan Organic-Ice Plain',
+    regionSubtitle: 'Water-ice/organic-rich terrain beneath the dense N₂/CH₄ reference atmosphere',
+    capability: 'TITAN REFERENCE SURFACE · CURRENT BUILD',
+    surfaceStyle: 'titan-haze',
+    reason: 'Titan landing uses the established ice/volatile terrain stack with the SOL reference dense atmosphere, gravity, rotation and live Saturn sky. Haze/terrain presentation is a bounded proxy; methane weather and full atmospheric chemistry are not solved.',
+  }),
+  'moon-triton': Object.freeze({
+    family: SURFACE_ARCHITECTURE_FAMILIES.ICE_VOLATILE,
+    profileId: SURFACE_ENGINE_PROFILES.ICE_VOLATILE,
+    regionId: 'triton-nitrogen-ice-plain',
+    regionName: 'Triton Nitrogen-Ice Plain',
+    regionSubtitle: 'Cryogenic N₂-ice/rock terrain beneath a trace N₂/CH₄ atmosphere',
+    capability: 'TRITON REFERENCE SURFACE · CURRENT BUILD',
+    surfaceStyle: 'triton-ice',
+    reason: 'Triton landing uses the established ice/volatile stack with authoritative SOL gravity, trace atmosphere, retrograde orbital state, rotation and live Neptune sky. Local terrain is a deterministic cryogenic proxy, not mapped Triton topography.',
+  }),
+});
+
 function finite(value, fallback = null) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -125,23 +179,31 @@ export function surfaceEngineSupport(body, bodies = []) {
   const environment = derivePlanetaryEnvironment(body, bodies);
   const family = architectureFamilyForEnvironment(environment);
 
-  // Explorer v0.1.0.5C opens exactly one SOL landing proof: Earth's Moon.
-  // It reuses the already-tested generalized airless-rocky surface/landing stack while
-  // keeping the Moon's authoritative mass, radius, gravity, rotation and live sky state.
-  // The generated local terrain remains an explicitly procedural regolith proxy rather
-  // than a claim of real lunar topography. Every other SOL world stays landing-locked.
-  if (body.referenceSystemId === 'sol' && body.id === 'moon-luna') {
-    return {
-      enabled: true,
-      proof: true,
-      exploration: true,
-      solReferenceProof: true,
-      family: SURFACE_ARCHITECTURE_FAMILIES.AIRLESS_ROCKY,
-      profileId: SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY,
-      regionId: 'airless-regolith',
-      environment,
-      reason: 'SOL Moon landing proof using the existing airless-rocky surface stack; local terrain is a deterministic regolith proxy, not a real lunar map.',
-    };
+  // Explorer v0.1.0.5D expands the already-proven SOL landing bridge to a bounded
+  // reference set without changing canonical SOL body flags or the inherited landing state
+  // machine. Each world explicitly selects one established surface-engine family while its
+  // authoritative mass, radius, gravity, reference environment, rotation and live sky remain
+  // canonical. Local terrain is always labeled as a deterministic presentation proxy.
+  if (body.referenceSystemId === 'sol') {
+    const solProfile = SOL_LANDING_SURFACE_PROFILES[body.id] ?? null;
+    if (solProfile) {
+      return {
+        enabled: true,
+        proof: solProfile.proof === true,
+        exploration: true,
+        solReferenceProof: solProfile.proof === true,
+        solReferenceLanding: true,
+        family: solProfile.family,
+        profileId: solProfile.profileId,
+        regionId: solProfile.regionId,
+        regionName: solProfile.regionName,
+        regionSubtitle: solProfile.regionSubtitle,
+        capability: solProfile.capability,
+        surfaceStyle: solProfile.surfaceStyle,
+        environment,
+        reason: solProfile.reason,
+      };
+    }
   }
 
   if (body.referenceSystemId === 'sol' || body.surfacePolicy === 'sol-reference-landing-disabled-v1') {
@@ -237,6 +299,7 @@ export function surfaceEngineSupport(body, bodies = []) {
 export function surfaceCapabilityForBuild(body, bodies = []) {
   const support = surfaceEngineSupport(body, bodies);
   if (!support.environment) return null;
+  if (support.enabled && support.capability) return support.capability;
   if (support.enabled && support.profileId === SURFACE_ENGINE_PROFILES.LEGACY_HOME) return 'DETAILED SURFACE · CURRENT BUILD';
   if (support.enabled && support.proof) return 'AIRLESS REFERENCE SURFACE · CURRENT BUILD';
   if (support.enabled && support.profileId === SURFACE_ENGINE_PROFILES.ATMOSPHERIC_ROCKY) return 'ROCKY EXPLORATION SURFACE · CURRENT BUILD';
