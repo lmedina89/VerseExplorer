@@ -1,7 +1,18 @@
 # Universe Explorer exploration branch
 
-**v0.1.0.4A.2 Mobile LOOK Touch-Zone Widening Hotfix.** This branch preserves the Universe Explorer v0.1.0.3 HUD hierarchy and the inherited Universe Lab v0.1.5.5 simulation/navigation stack while adding a third, fixed **SOL** profile.
+**v0.1.0.4B — SOL Major Moons Foundation.** This branch preserves the v0.1.0.4A.2 mobile/HUD checkpoint and the inherited Universe Lab v0.1.5.5 simulation/navigation stack while extending the fixed SOL reference profile with seven major moons.
 
+## v0.1.0.4B SOL major moons
+
+- Added Moon, Io, Europa, Ganymede, Callisto, Titan and Triton as real mutually gravitating `BODY_KIND.MOON` bodies.
+- JPL mean satellite elements are evaluated at the existing J2000 reference epoch; JPL GM/radius values provide the bulk reference properties.
+- Moon uses JPL ecliptic elements. Outer-planet moon elements use the JPL-listed local Laplace-plane pole orientation before conversion into Explorer's inertial world frame.
+- Parent-relative states include the parent's inertial velocity; initial parent/moon subsystems preserve their reference barycenter before the complete SOL system is shifted to its global center-of-mass frame.
+- Triton's 157.3° mean inclination is represented dynamically as a retrograde orbit.
+- Explicit reference environments were added for all seven moons; Titan carries a dense N₂/CH₄ reference atmosphere while the Galilean satellites/Moon remain exosphere-class and Triton carries a trace N₂/CH₄ atmosphere.
+- Landing remains disabled for every SOL planet and moon. No procedural SOL terrain is injected.
+- Old v0.1.0.4A SOL saves receive only missing reference moons, phased to the saved elapsed simulation time around the restored parent state. Saved ship/planet state is not replaced.
+- ORIGIN and ABYSSAL generation, flight controls, FRAME, rendering architecture, and surface lifecycle are unchanged.
 
 ## v0.1.0.4A.2 LOOK touch-zone hotfix
 

@@ -7,6 +7,7 @@ import { SaveSystem } from '../core/saveSystem.js';
 import { applyGeneratedBodyCompatibility } from '../core/generatedBodyCompatibility.js';
 import { PHYSICS, SIMULATION, BODY_KIND } from '../core/constants.js';
 import { generateSystem } from '../data/systemGenerator.js';
+import { generateSolReferenceMoonUpgrades } from '../data/solSystem.js';
 import { DirectGravitySolver } from '../physics/gravity/directGravitySolver.js';
 import { VelocityVerletIntegrator } from '../physics/integrators/velocityVerlet.js';
 import { CollisionMonitor, CollisionStateBuffer } from '../physics/collisionMonitor.js';
@@ -345,7 +346,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.4A.2 online. ORIGIN and ABYSSAL remain unchanged; SOL adds a fixed J2000 Sun + eight-planet reference foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.4B online. ORIGIN and ABYSSAL remain unchanged; SOL now adds seven reference moons to the fixed J2000 Sun + eight-planet foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -2686,6 +2687,13 @@ export class UniverseLabApp {
         restored.surfaceRegionId = generated.surfaceRegionId;
       }
       this.registry.create(restored);
+    }
+    // SOL v0.1.0.4A saves predate the major-moon layer. Add only missing deterministic
+    // reference moons around the restored parent state at the saved simulation epoch; never
+    // replace an already-saved body or rewrite the ship/planet dynamics.
+    if (this.system.generationProfileId === 'sol') {
+      const moonUpgrades = generateSolReferenceMoonUpgrades(this.registry.values(), safeNumber(payload.elapsedSimSeconds, 0));
+      for (const moon of moonUpgrades) this.registry.create(moon);
     }
     this.rebuildBodyCaches();
     this.renderer.resetSystem(payload.seed);

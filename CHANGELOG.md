@@ -1,3 +1,20 @@
+# Universe Explorer v0.1.0.4B — SOL Major Moons Foundation
+
+- Added seven physical SOL moons: Moon, Io, Europa, Ganymede, Callisto, Titan and Triton.
+- Initialized moon states from JPL mean satellite elements at 2000-01-01.5 TDB and JPL satellite GM/radius values.
+- Converted JPL local Laplace-plane pole orientation into the Explorer inertial frame for the outer-planet satellites.
+- Preserved parent-system barycenters before the global SOL barycentric shift; moon velocity always includes parent inertial velocity.
+- Represented Triton's retrograde orbit directly in its inertial position/velocity state.
+- Added observational/reference environment metadata for all seven moons; no procedural atmosphere formation is used for SOL.
+- Kept all SOL landing disabled and prevented procedural surface auto-selection.
+- Added a SOL-only v0.1.0.4A save-upgrade path that backfills missing moons at the saved simulation epoch without replacing saved parent or ship state.
+- Added module cache busting for the changed SOL/app chain on GitHub Pages/iPhone Safari.
+- Added three net new automated checks; the full suite passes 323/323.
+- A separate two-year 300-second-step stress audit kept every added moon gravitationally bound.
+- Flight, navigation, FRAME, renderer architecture, HUD density, LOOK behavior and ORIGIN/ABYSSAL generation remain unchanged.
+
+---
+
 # Universe Explorer v0.1.0.4A.2 — Mobile LOOK Touch-Zone Widening Hotfix
 
 - Widened the transparent LOOK hit target horizontally in MINIMAL, FLIGHT and FULL HUD modes.

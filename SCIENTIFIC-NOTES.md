@@ -263,3 +263,23 @@ The first SOL increment intentionally includes only the Sun and eight major plan
 
 Known SOL surface pressures/albedo classes bypass the procedural formation/retention atmosphere proxy. No SOL landing surface is enabled in this milestone; enabling real-world landing requires a separately validated surface/environment profile rather than reusing fictional procedural terrain.
 
+
+
+---
+
+## Universe Explorer v0.1.0.4B — SOL major-moon scientific boundary
+
+The SOL moon layer uses JPL **Planetary Satellite Mean Elements** at epoch 2000-01-01.5 TDB plus JPL satellite GM and mean-radius reference values. The Moon's listed elements are ecliptic. Io, Europa, Ganymede, Callisto, Titan and Triton are listed relative to local Laplace planes; Explorer converts the JPL-listed Laplace-plane pole R.A./Dec. from J2000 equatorial coordinates into the existing inertial world frame before constructing each parent-relative Kepler state.
+
+The resulting states are reference initial conditions for the existing Newtonian finite-radius N-body solver, not a replacement for a JPL Horizons/SPICE precision ephemeris. Mean satellite elements deliberately average/approximate short-period perturbations. The live simulation includes mutual Newtonian perturbations after initialization but does not model planetary oblateness harmonics, tides, relativistic corrections, resonant ephemeris fitting or secular Laplace-plane evolution.
+
+The selected moon set is intentionally bounded to Moon, Io, Europa, Ganymede, Callisto, Titan and Triton. Triton's 157.3° mean inclination is retained, producing a real retrograde inertial orbit. Initial parent/moon subsystem centers of mass are preserved before the entire SOL system is shifted to a global barycentric rest frame.
+
+Reference environments bypass procedural formation RNG. Titan uses a 146.7 kPa N₂/CH₄ reference surface-pressure record; Triton uses an approximately 1.4 Pa N₂/CH₄ trace-atmosphere record; the Moon and Galilean satellites are treated as airless/exosphere-class solid worlds for the current environment UI. These records support diagnostics/rendering only. No SOL landing surface is enabled in v0.1.0.4B.
+
+Reference sources used for this milestone:
+- JPL Solar System Dynamics — Planetary Satellite Mean Elements: https://ssd.jpl.nasa.gov/sats/elem/
+- JPL Solar System Dynamics — Planetary Satellite Physical Parameters: https://ssd.jpl.nasa.gov/sats/phys_par/
+- NASA Titan facts / Huygens reference atmosphere: https://science.nasa.gov/saturn/moons/titan/facts/
+- NASA Triton overview: https://science.nasa.gov/neptune/moons/triton/
+

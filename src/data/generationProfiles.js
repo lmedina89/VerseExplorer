@@ -31,7 +31,7 @@ const SOL = Object.freeze({
   phenomenonOptions: null,
   anomalyOptions: null,
   mobileVisualParticleBudget: 40_000,
-  scientificStatus: 'Fixed J2000 Solar System reference foundation. Major-planet initial states are reference data rather than seeded procedural generation.',
+  scientificStatus: 'Fixed J2000 Solar System reference foundation. Major planets plus seven selected major moons use reference initial data rather than seeded procedural generation.',
 });
 
 const ABYSSAL = Object.freeze({

@@ -1,3 +1,44 @@
+# Universe Explorer v0.1.0.4B QA Report
+
+## SOL Major Moons Foundation
+
+- Baseline: **Universe Explorer v0.1.0.4A.2**.
+- Added seven deterministic SOL reference moons as real massive bodies in the existing Newtonian solver: Moon; Io, Europa, Ganymede, Callisto; Titan; Triton.
+- Existing Sun + eight planet IDs/reference data remain stable. Moon records add `parentId` hierarchy metadata without changing the flat gravity-body model.
+- Parent-relative satellite states are transformed into the simulation's inertial world frame and inherit the parent's barycentric velocity. Outer-planet satellite Laplace-plane poles are converted from J2000 equatorial reference data into the simulation ecliptic/world frame.
+- Triton's approximately 157.3° inclination is represented dynamically as a retrograde orbit.
+- All SOL moon environments are explicit reference records; procedural atmosphere/formation inference is bypassed. SOL landing remains disabled for all planets and moons.
+- SOL-only legacy-save upgrade adds only missing reference moons around the restored parent states, advancing their mean anomaly by saved simulation elapsed time. Existing saved planet and ship states are not replaced.
+
+## Regression result
+
+- Worktree automated result: **323/323 tests pass**, plus static structure and JavaScript syntax validation.
+- Clean GitHub-package extraction: **323/323 tests pass**; ZIP integrity validation passes.
+- Local static HTTP smoke: **6/6 HTTP 200**, covering the shell, cache-busted main/app/system/SOL modules, and retained A.2 stylesheet.
+- All **320** v0.1.0.4A.2 checks remain green, including ORIGIN/ABYSSAL deterministic behavior, flight/navigation/FRAME isolation, mobile input behavior, rendering/static contracts, save/load, landing/surface systems, and the widened LOOK-zone policy.
+- Three net-new SOL checks cover moon/hierarchy/reference-state behavior, retrograde Triton/bound-orbit behavior, and legacy SOL save backfill compatibility.
+- Flight controls, flight computer, FRAME/transit navigation, integrator, renderer, and surface engine behavior were not redesigned for this milestone.
+
+## Long-run dynamical stress audit
+
+A non-packaged validation advanced the complete 16-body SOL system for **two simulated years** with the normal **300 s maximum physics substep**. Every selected moon remained bound to its intended parent. Observed parent-distance / reference-semimajor-axis ranges were:
+
+- Moon: **0.93973–1.05889**
+- Io: **0.99356–1.00642**
+- Europa: **0.98918–1.01108**
+- Ganymede: **0.99772–1.00238**
+- Callisto: **0.99300–1.00707**
+- Titan: **0.97100–1.02901**
+- Triton: **1.00000–1.00001**
+
+This is a stability/sanity audit, not a claim of Horizons/SPICE ephemeris agreement over two years. The current satellite initialization uses JPL mean elements and omits higher-order perturbation fitting, tides, oblateness/J2, relativity, and precision resonant ephemeris corrections.
+
+## Physical acceptance gate
+
+Automated QA cannot certify iPhone Safari interaction/visual feel. Physical acceptance should confirm the SOL hierarchy is usable in NAV/targeting, moon FRAME approaches behave normally, flight feel is unchanged, old SOL saves receive the missing moons without resetting the ship, and LAND remains unavailable for SOL bodies.
+
+---
+
 # Universe Explorer v0.1.0.4A.2 QA Report
 
 ## Mobile LOOK touch-zone widening hotfix

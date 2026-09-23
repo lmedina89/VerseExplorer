@@ -20,3 +20,14 @@ The right-side diagnostics monitor, mounting rail, translucent CanvasTexture UI 
 ## v0.1.4.6.1.1 cockpit
 
 The interactive cockpit in `src/render/cockpitView.js` is original procedural geometry/code created for Universe Lab. No external cockpit model, GLB, texture pack, marketplace asset, or generated-image asset is bundled in this release. The added cockpit lamps/strips are original Three.js emissive geometry tied to live telemetry. Runtime Three.js remains pinned to 0.185.0 through the existing CDN import map.
+
+
+## Universe Explorer v0.1.0.4B reference data provenance
+
+No third-party art/code asset was added. The SOL major-moon data layer embeds numerical reference values transcribed from public NASA/JPL scientific tables:
+
+- JPL Solar System Dynamics, Planetary Satellite Mean Elements: `https://ssd.jpl.nasa.gov/sats/elem/`
+- JPL Solar System Dynamics, Planetary Satellite Physical Parameters: `https://ssd.jpl.nasa.gov/sats/phys_par/`
+- NASA Science Titan/Triton reference pages for atmosphere descriptions.
+
+The implementation, coordinate transforms, state construction, save migration, tests and rendering remain project code.

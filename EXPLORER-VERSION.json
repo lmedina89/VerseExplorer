@@ -1,8 +1,8 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.4A.2",
-  "milestone": "Mobile LOOK Touch-Zone Widening Hotfix",
-  "baseline": "Universe Explorer v0.1.0.4A.1",
+  "version": "0.1.0.4B",
+  "milestone": "SOL Major Moons Foundation",
+  "baseline": "Universe Explorer v0.1.0.4A.2",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
   "generationProfiles": [
     "origin",
@@ -16,14 +16,35 @@
     "Mercury",
     "Venus",
     "Earth",
+    "Moon",
     "Mars",
     "Jupiter",
+    "Io",
+    "Europa",
+    "Ganymede",
+    "Callisto",
     "Saturn",
+    "Titan",
     "Uranus",
-    "Neptune"
+    "Neptune",
+    "Triton"
   ],
   "solLandingPolicy": "disabled pending validated real-world surface profiles",
   "flightNavigationPolicy": "unchanged from v0.1.0.3",
   "mobileGesturePolicy": "disable browser double-tap zoom via touch-action: manipulation; preserve existing game touch controls",
-  "lookTouchPolicy": "wider horizontal LOOK hit target in MINIMAL, FLIGHT and FULL; visible ring size and pointer-delta steering sensitivity preserved"
+  "lookTouchPolicy": "wider horizontal LOOK hit target in MINIMAL, FLIGHT and FULL; visible ring size and pointer-delta steering sensitivity preserved",
+  "name": "SOL Major Moons Foundation",
+  "scope": "Adds seven J2000 reference moons and SOL-only save backfill; flight/navigation/rendering/landing policy remain unchanged.",
+  "solMoonCount": 7,
+  "solMoonIds": [
+    "moon-luna",
+    "moon-io",
+    "moon-europa",
+    "moon-ganymede",
+    "moon-callisto",
+    "moon-titan",
+    "moon-triton"
+  ],
+  "solMoonReference": "JPL Planetary Satellite Mean Elements / Physical Parameters, epoch 2000-01-01.5 TDB",
+  "saveCompatibility": "SOL-only deterministic missing-moon backfill around restored parents at saved elapsed simulation time."
 }
