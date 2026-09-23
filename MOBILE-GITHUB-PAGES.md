@@ -1,3 +1,7 @@
+# v0.1.0.5C.1 Safari/GitHub Pages cache chain
+
+Changed runtime chain: `index/styles/main → app → threeRenderer → surfaceWorld → celestialFactory`. Every changed edge is versioned `ue0105c1` so iPhone Safari cannot combine 5C JavaScript/CSS with 5C.1 presentation modules.
+
 # v0.1.0.5C Safari/GitHub Pages cache chain
 
 Moon landing support changes `surfaceProfiles.js`, and that capability is consumed through both landing generation and navigation/system-map paths. To prevent mixed-version iPhone Safari module graphs, v0.1.0.5C versions the chain `index → main → app → surfaceGenerator/surfaceProfiles/frameOrbitInsertion/systemMap`, with `surfaceGenerator → surfaceProfiles`, `frameOrbitInsertion → systemNavigation → surfaceProfiles`, and `systemMap → frameOrbitInsertion/systemNavigation` versioned to the same Explorer milestone.

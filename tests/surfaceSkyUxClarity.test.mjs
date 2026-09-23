@@ -33,7 +33,7 @@ test('NEXT can select finite below-horizon targets without changing astronomy or
   const cycleStart = app.indexOf('cycleSurfaceSkyTarget()');
   const cycleEnd = app.indexOf('\n  cycleSurfaceSkyFov()', cycleStart);
   const cycle = app.slice(cycleStart, cycleEnd);
-  assert.match(cycle, /SURFACE SKY VIEWING:/);
+  assert.match(cycle, /'SURFACE SKY' : 'LANDED SKY'/);
   assert.doesNotMatch(cycle, /ship\.position|ship\.velocity|physicsStep|placeShip/);
 });
 

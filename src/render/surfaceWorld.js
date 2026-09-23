@@ -7,6 +7,7 @@ import { surfaceColorAt, surfaceHeightAt, surfaceZoneWeights, surfacePois } from
 import { surfaceEyePosition } from '../surface/surfaceSession.js';
 import { surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { stellarIrradiancePresentation } from './stellarIrradiance.js';
+import { createPlanetarySurfacePresentationMaps } from './celestialFactory.js?v=ue0105c1';
 
 function disposeMaterial(material) {
   if (!material) return;
@@ -171,8 +172,8 @@ function createSaturnMainRings() {
   return group;
 }
 
-function createSurfacePhaseSphere(observed) {
-  const geometry = new THREE.SphereGeometry(1, 28, 18);
+function createSurfacePhaseSphere(observed, body = null) {
+  const geometry = new THREE.SphereGeometry(1, 40, 26);
   const position = geometry.getAttribute('position');
   const colors = new Float32Array(position.count * 3);
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -180,7 +181,9 @@ function createSurfacePhaseSphere(observed) {
   const mesh = new THREE.Mesh(geometry, material);
   mesh.userData.surfaceCelestialKind = 'reflective-body';
   mesh.userData.baseColor = Number(observed.color) >>> 0;
+  mesh.userData.surfaceBody = body;
   mesh.userData.lastAppearanceTime = -Infinity;
+  mesh.userData.surfaceAlbedoDetailed = false;
   if (observed.id !== 'planet-saturn') return mesh;
 
   const group = new THREE.Group();
@@ -212,7 +215,18 @@ function updateSurfacePhaseSphere(visual, observed, simulationTimeSeconds = 0) {
   const last = Number(mesh.userData.lastAppearanceTime);
   if (Number.isFinite(last) && Math.abs(simulationTimeSeconds - last) < 0.25) return;
   mesh.userData.lastAppearanceTime = simulationTimeSeconds;
-  const base = new THREE.Color(Number(observed.color) >>> 0);
+  if (!mesh.material?.map && mesh.userData.surfaceBody && Number(observed.apparentAngularRadiusRad) >= 0.002) {
+    const body = mesh.userData.surfaceBody;
+    const presentationMaps = createPlanetarySurfacePresentationMaps(body, body.referenceEnvironment ?? body.environmentFormation ?? null);
+    if (presentationMaps?.map) {
+      mesh.material.map = presentationMaps.map;
+      mesh.material.color.setRGB(1, 1, 1);
+      mesh.material.needsUpdate = true;
+      mesh.userData.surfaceAlbedoDetailed = true;
+    }
+    presentationMaps?.bumpMap?.dispose?.();
+  }
+  const base = mesh.material?.map ? new THREE.Color(0xffffff) : new THREE.Color(Number(observed.color) >>> 0);
   const light = observed.illuminationDirectionLocal ?? [0, 0, 1];
   const lx = Number(light[0]) || 0, ly = Number(light[1]) || 0, lz = Number(light[2]) || 0;
   const lm = Math.hypot(lx, ly, lz) || 1;
@@ -763,12 +777,13 @@ function createWeatherRig(region, rng) {
 }
 
 export class SurfaceWorldVisual {
-  constructor(region, body, star, starCatalog = null) {
+  constructor(region, body, star, starCatalog = null, bodies = []) {
     this.region = region;
     this.observerOnly = region?.observerOnly === true;
     this.body = body;
     this.star = star;
     this.starCatalog = starCatalog;
+    this.bodyCatalog = new Map((bodies ?? []).filter((entry) => entry?.id).map((entry) => [entry.id, entry]));
     this.astronomicalSky = null;
     this._astronomicalSkyProjectionTime = -Infinity;
     this.astronomicalBodies = new Map();
@@ -937,7 +952,7 @@ export class SurfaceWorldVisual {
       let visual = this.astronomicalBodies.get(observed.id);
       if (!visual || (visual.userData?.surfaceCelestialKind === 'star') !== wantsStar) {
         if (visual) { this.scene.remove(visual); disposeTree(visual); }
-        visual = wantsStar ? createSurfaceStarDisk(observed) : createSurfacePhaseSphere(observed);
+        visual = wantsStar ? createSurfaceStarDisk(observed) : createSurfacePhaseSphere(observed, this.bodyCatalog.get(observed.id) ?? null);
         visual.name = `surface-celestial-${observed.id}`;
         this.astronomicalBodies.set(observed.id, visual);
         this.scene.add(visual);

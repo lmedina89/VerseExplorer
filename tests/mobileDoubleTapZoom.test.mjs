@@ -10,5 +10,5 @@ test('Explorer shell suppresses Safari double-tap page zoom without weakening fl
   assert.match(css, /\.viewport\{[^}]*touch-action:none/);
   assert.match(css, /\.look-pad\{[^}]*touch-action:none/);
   assert.match(css, /\.app-shell button\{touch-action:none/);
-  assert.match(html, /styles\.css\?v=155-ue0104a2/);
+  assert.match(html, /styles\.css\?v=155-ue0105c1/);
 });

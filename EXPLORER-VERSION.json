@@ -1,9 +1,9 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.5C",
-  "name": "SOL Moon Landing Bridge",
-  "milestone": "Moon-only SOL landing proof through inherited surface lifecycle",
-  "baseline": "Universe Explorer v0.1.0.5B.2",
+  "version": "0.1.0.5C.1",
+  "name": "Landed Celestial Controls & Surface Presentation",
+  "milestone": "Shared landed/SURFACE SKY celestial controls, compact MIN surface HUD, and detailed resolved planet disks",
+  "baseline": "Universe Explorer v0.1.0.5C",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
   "generationProfiles": [
     "origin",
@@ -21,9 +21,9 @@
   "planetDefaultSitePolicy": "body-fixed point beneath current spacecraft direction",
   "surfaceSkySavePolicy": "observer camera is not serialized as a landed surface session; physical ship/system save state remains canonical",
   "flightNavigationPolicy": "Newtonian gravity/integrator, ship dynamics, flight computer, FRAME/transit, SOL reference states, eclipse/phase astronomy and Surface Sky geometry remain unchanged from v0.1.0.5B.2",
-  "mobileCachePolicy": "version every changed runtime import edge for Safari/GitHub Pages, including the Moon landing surface-support/system-map/orbit-insertion chain",
-  "scope": "Moon-only SOL landing bridge. No Earth/Mars/Europa/Titan/Triton landing enablement and no new landing engine.",
-  "surfaceSkyPresentationPolicy": "physical angular sizes remain authoritative; presentation adds Saturn main rings, target-centering controls and bounded camera FOV only",
+  "mobileCachePolicy": "version every changed runtime edge for Safari/GitHub Pages: index/styles/main -> app -> threeRenderer -> surfaceWorld -> celestialFactory.",
+  "scope": "Presentation-only landed-surface refinement. Moon remains the only SOL landing target; no physics, landing transition, orbit, eclipse, terrain-generation, or other SOL landing changes.",
+  "surfaceSkyPresentationPolicy": "Resolved planet/moon disks lazily reuse the same deterministic global albedo-map generator as the space renderer while retaining authoritative angular size, phase, eclipse state and position.",
   "saturnRingPresentation": "main C/B/A rings rendered at NASA/NSSDCA radial ratios with Cassini Division preserved; ring plane follows canonical Saturn spin axis; no ring particle dynamics/self-shadow/radiative transfer",
   "surfaceSkyFovPresetsDeg": [
     70,
@@ -34,7 +34,7 @@
   ],
   "surfaceSkyRingPolicy": "Saturn C/B/A main rings are presentation geometry scaled from published Saturn-radius ratios; ring particles are not individual gravity sources",
   "surfaceSkyFovPolicy": "camera-only FOV presets 70/35/15/5/1.5 degrees; no celestial position, radius, orbit or spacecraft state is modified",
-  "surfaceSkyFocusPolicy": "NEXT cycles finite celestial targets without altering their geometry; CENTER changes observer yaw/pitch only; below-horizon targets are explicitly labeled instead of silently omitted.",
+  "surfaceSkyFocusPolicy": "NEXT/CENTER/FOV/DETAILS are shared by reference SURFACE SKY and fully landed surface sessions. CENTER changes observer yaw/pitch only; NEXT changes selected presentation target; below-horizon and off-screen targets are explicitly labeled.",
   "moonLandingSurfacePolicy": "Moon mass/radius/gravity/rotation and live sky remain authoritative SOL state; local regolith terrain/geology are deterministic procedural proxies, not a real lunar topographic map",
   "moonLandingTransitionPolicy": "reuse inherited scripted descent \u2192 touchdown \u2192 on-foot exploration \u2192 BOARD/TAKEOFF \u2192 Hill-screened circular return-orbit handoff"
 }

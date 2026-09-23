@@ -8,7 +8,7 @@ import { updateScientificOverlayVisual } from './scientificOverlayVisuals.js';
 import { BODY_KIND, SIMULATION } from '../core/constants.js';
 import { computeObservationCameraPose } from './observationCamera.js';
 import { apparentAngularRadius, stellarPerceptualProfile } from './stellarPerception.js';
-import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105b';
+import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105c1';
 import { rendererBackendPolicy } from './backendPolicy.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { CockpitView } from './cockpitView.js?v=155';
@@ -560,9 +560,9 @@ export class UniverseRenderer {
   }
 
 
-  enterSurface(region, body, star) {
+  enterSurface(region, body, star, bodies = []) {
     this.exitSurface();
-    this.surfaceWorld = new SurfaceWorldVisual(region, body, star, this.starCatalog);
+    this.surfaceWorld = new SurfaceWorldVisual(region, body, star, this.starCatalog, bodies);
     const rect = this.container.getBoundingClientRect();
     this.surfaceWorld.resize(Math.max(2, Math.floor(rect.width)), Math.max(2, Math.floor(rect.height)));
   }

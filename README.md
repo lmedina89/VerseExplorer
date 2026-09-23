@@ -1,3 +1,15 @@
+# Universe Explorer
+
+**v0.1.0.5C.1 — Landed Celestial Controls & Surface Presentation.** Built directly from the verified v0.1.0.5C Moon-landing checkpoint. The landed Moon surface now shares NEXT/CENTER/FOV/DETAILS with the massless SURFACE SKY observer, HUD MIN is substantially smaller, and resolved celestial disks reuse the deterministic space-view albedo presentation. Moon remains the only SOL landing target.
+
+## 5C.1 acceptance focus
+
+1. Land on the Moon and verify NEXT/CENTER/FOV/DETAILS appear after touchdown.
+2. CENTER Earth and cycle 70° → 35° → 15° → 5° → 1.5°. Earth should keep real angular size/phase but show visible surface variation once resolved.
+3. Cycle HUD to MIN: the large WX/SIGNAL panel and SCAN/SPRINT controls should collapse away while FOUND, SHIP, VIEWING and celestial controls remain.
+4. Select a target behind the camera or below the horizon and confirm DETAILS reports OFF SCREEN or BELOW HORIZON.
+5. Take off and verify normal Moon orbit/flight behavior is unchanged.
+
 # Universe Explorer exploration branch
 
 **v0.1.0.5C — SOL Moon Landing Bridge.** Built directly from the verified v0.1.0.5B.2 checkpoint. This opens exactly one SOL landing proof: Earth's Moon. It reuses the inherited Universe Lab airless-rocky descent/touchdown/on-foot/takeoff lifecycle and the same live celestial sky already used by SURFACE SKY. The Moon's SOL mass, radius, gravity, rotation, orbit, phase/eclipse geometry and other-body positions remain authoritative. The local regolith terrain is a deterministic procedural exploration proxy, not a real lunar terrain map. Every other SOL world remains landing-disabled.

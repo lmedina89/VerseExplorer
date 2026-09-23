@@ -1,3 +1,7 @@
+# v0.1.0.5C.1 architecture delta — shared landed celestial presentation
+
+This update does not add a second sky or landing system. Both landed exploration and massless SURFACE SKY use the existing AstronomicalObserverModel + SurfaceWorldVisual. The app-level presentation state stores only selected sky target and telescope FOV. Resolved celestial disks lazily request the same deterministic planetary albedo-map generator used by the orbital renderer; this is presentation-only and does not alter authoritative body state.
+
 # v0.1.0.5C architecture delta — Moon-only SOL landing bridge
 
 `surfaceEngineSupport()` is the sole capability gate changed for SOL landing. `moon-luna` is admitted to the already-existing `AIRLESS_ROCKY` generalized surface profile; all other SOL bodies remain rejected. The canonical Moon body object is not mutated or marked procedurally landable.

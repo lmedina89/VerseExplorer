@@ -508,3 +508,62 @@ Automated QA does not certify final iPhone visual composition. On-device accepta
 - Local HTTP shell/module smoke: **9/9 HTTP 200** for `index.html`, `main.js`, `app.js`, `astronomicalObserver.js`, `threeRenderer.js`, `surfaceWorld.js`, `surfaceSkyObserver.js`, `systemGenerator.js`, and `solSystem.js`.
 - Clean extraction vs frozen worktree: **160 files, 0 byte mismatches**.
 - `.github/workflows/*`: **0 files**.
+
+---
+
+## Universe Explorer v0.1.0.5C.1 — Landed Celestial Controls & Surface Presentation QA
+
+### Baseline / scope
+
+- Exact baseline: **Universe Explorer v0.1.0.5C — SOL Moon Landing Bridge**.
+- Scope is presentation/UI only after successful physical-device Moon landing acceptance.
+- Landed Moon/on-foot mode now exposes the same celestial target controls as SURFACE SKY: NEXT, CENTER, bounded telescope FOV presets, DETAILS, and shared target/FOV state.
+- MIN surface HUD is deliberately compacted; WX/SIGNAL and SCAN/SPRINT are hidden there while core location/ship/found/viewing information and celestial controls remain available.
+- Surface celestial disks can lazily reuse the deterministic global albedo-map generator already used by the space renderer. This improves resolved views such as Earth from the Moon without changing body geometry, angular size, phase, eclipse state, orbit, or lighting equations.
+- Detailed albedo textures are allocated only when a disk is sufficiently resolved, protecting mobile memory for tiny distant targets.
+
+### Protected-core comparison vs 5C
+
+Byte-for-byte unchanged from the accepted 5C baseline include:
+
+- gravity solver and velocity-Verlet integrator
+- ship dynamics and flight computer
+- transit/FRAME math and navigation
+- canonical SOL state generation and moon states
+- astronomical observer geometry, phase, eclipse and occultation math
+- planetary rotation
+- landing-transition state machine
+- surface generator, profiles, session and weather
+- Moon landing capability gate and takeoff/orbit handoff
+- terrain generation
+
+Runtime changes are limited to shared landed celestial UI state/control wiring and visual presentation modules (`app.js`, `threeRenderer.js`, `surfaceWorld.js`, `celestialFactory.js`) plus version/cache tags.
+
+### Automated verification
+
+- Untouched 5C baseline before edits: **345/345 PASS**.
+- Focused 5C.1 coverage during implementation: **20/20 PASS**.
+- Final frozen-worktree full suite: **350/350 PASS**.
+- Static required-file/cache checks: **PASS**.
+- JavaScript/MJS syntax checks: **PASS**.
+- Protected diff: **PASS**; only the agreed UI/render/cache/test/docs files differ from 5C.
+
+### Physical-device acceptance gate
+
+Verify on iPhone Safari after landing on the Moon:
+
+1. NEXT, CENTER, FOV and DETAILS are available in the real landed/on-foot mode.
+2. NEXT updates the selected celestial target and CENTER changes view direction only.
+3. FOV cycles 70° / 35° / 15° / 5° / 1.5° without moving any body or the observer.
+4. Earth from the Moon shows resolved deterministic land/ocean-style albedo variation instead of a flat blue sphere when large enough on screen; this is a visual procedural proxy, not satellite imagery or claimed real-time geography.
+5. MIN surface HUD is substantially smaller and does not obscure most of the sky.
+6. DETAILS correctly distinguishes IN VIEW / OFF SCREEN / BELOW HORIZON.
+7. Walking, Moon gravity, BOARD/TAKEOFF and return-to-orbit behavior remain unchanged.
+
+### Release archive verification
+
+- Candidate ZIP integrity: **PASS** (`unzip -t`).
+- Candidate archive clean extraction: **163 files**.
+- Clean-extracted full suite: **350/350 PASS**.
+- Local HTTP Safari/GitHub Pages cache-chain smoke: **7/7 HTTP 200** for `index.html`, versioned `styles.css`, `main.js`, `app.js`, `threeRenderer.js`, `surfaceWorld.js`, and `celestialFactory.js`.
+- `.github/workflows/*`: **0 files**.

@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.5C.1 — Landed Celestial Controls & Surface Presentation
+
+- Landed/on-foot Moon surface now exposes the same NEXT / CENTER / FOV / DETAILS celestial presentation controls as SURFACE SKY.
+- Landed and massless observer modes share sky focus and telescope FOV state. CENTER remains camera-only.
+- DETAILS distinguishes IN VIEW / OFF SCREEN / BELOW HORIZON without changing celestial geometry.
+- HUD MIN collapses the landed surface panel to location + FOUND/SHIP/VIEWING and celestial controls; weather/signal/scan clutter stays out of MIN.
+- Resolved celestial planet/moon disks lazily reuse the same deterministic global albedo-map generator used by the space renderer. Earth from the Moon therefore retains ocean/land variation instead of a flat blue sphere.
+- Moon remains the only SOL landing target. No gravity, integrator, FRAME, orbital state, eclipse/phase, landing-transition, walking, takeoff, or terrain-generation changes.
+
 # Universe Explorer v0.1.0.5C — SOL Moon Landing Bridge
 
 - Built directly from the verified v0.1.0.5B.2 Surface Sky UX checkpoint.

@@ -166,6 +166,16 @@ function makePlanetarySurfaceMaps(body, profile) {
   return { map, bumpMap };
 }
 
+
+export function createPlanetarySurfacePresentationMaps(body, environment = null) {
+  if (!body || body.kind === BODY_KIND.STAR) return null;
+  const profile = planetaryMaterialProfile(body, environment);
+  const maps = makePlanetarySurfaceMaps(body, profile);
+  if (maps?.map?.userData) maps.map.userData.surfaceOwned = true;
+  if (maps?.bumpMap?.userData) maps.bumpMap.userData.surfaceOwned = true;
+  return { ...maps, profile };
+}
+
 function makePlanetaryCloseDetailMaps(body, profile) {
   if (!body || !profile || profile.gas) return null;
   const width = Math.max(128, Math.min(384, Math.round(profile.closeDetailResolution || 256)));
