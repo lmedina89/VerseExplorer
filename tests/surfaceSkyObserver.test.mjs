@@ -24,14 +24,20 @@ function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 const sol = generateSystem('ignored', 'sol');
 const byId = (id) => sol.bodies.find((body) => body.id === id);
 
-test('0.1.0.5A enables reference surface-sky observers only on solid SOL worlds without enabling SOL landing', () => {
+test('0.1.0.5C keeps SOL surface-sky observers while enabling real landing only for the Moon proof', () => {
   for (const id of ['planet-earth', 'planet-mars', 'moon-luna', 'moon-europa', 'moon-titan', 'moon-triton']) {
     const body = byId(id);
     const sky = surfaceSkyObserverSupport(body, sol.bodies);
     const landing = surfaceEngineSupport(body, sol.bodies);
     assert.equal(sky.enabled, true, body.name);
-    assert.equal(landing.enabled, false, body.name);
-    assert.match(landing.reason, /SOL reference landing is intentionally disabled/i);
+    if (id === 'moon-luna') {
+      assert.equal(landing.enabled, true, body.name);
+      assert.equal(landing.profileId, 'airless-rocky-v1');
+      assert.match(landing.reason, /Moon landing proof/i);
+    } else {
+      assert.equal(landing.enabled, false, body.name);
+      assert.match(landing.reason, /landing remains intentionally disabled/i);
+    }
   }
   assert.equal(surfaceSkyObserverSupport(byId('planet-jupiter'), sol.bodies).enabled, false);
   assert.equal(surfaceSkyObserverSupport(byId('planet-saturn'), sol.bodies).enabled, false);

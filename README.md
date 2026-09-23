@@ -1,5 +1,17 @@
 # Universe Explorer exploration branch
 
+**v0.1.0.5C — SOL Moon Landing Bridge.** Built directly from the verified v0.1.0.5B.2 checkpoint. This opens exactly one SOL landing proof: Earth's Moon. It reuses the inherited Universe Lab airless-rocky descent/touchdown/on-foot/takeoff lifecycle and the same live celestial sky already used by SURFACE SKY. The Moon's SOL mass, radius, gravity, rotation, orbit, phase/eclipse geometry and other-body positions remain authoritative. The local regolith terrain is a deterministic procedural exploration proxy, not a real lunar terrain map. Every other SOL world remains landing-disabled.
+
+## v0.1.0.5C Moon landing proof
+
+- Near the Moon and inside the established descent envelope, the shared surface action becomes **LAND / DESCEND**.
+- The landing region uses the existing `AIRLESS_ROCKY` profile: black vacuum sky, no wind/weather, no anomalies, inherited on-foot movement/scan/parked-ship behavior.
+- The landed Moon view uses the same `AstronomicalObserverModel` as SURFACE SKY, so Earth/Sun/other bodies, phases and eclipses come from the same live universe state.
+- BOARD / TAKEOFF reuses the existing generalized-surface handoff and Hill-screened circular-orbit planner.
+- The canonical SOL Moon body record is not relabeled as procedurally `landable`; the permission is isolated in the surface-support layer.
+- Earth, Mars, Mercury, Venus, Europa, Io, Ganymede, Callisto, Titan, Triton and the giant planets remain landing-locked in this milestone.
+- SURFACE SKY remains the separate massless observer path.
+
 **v0.1.0.5B.2 — Surface Sky UX Clarity Hotfix.** This is a UI-only patch built from v0.1.0.5B. It makes the massless surface observer unambiguous by separating the observer location (`SURFACE SKY — Earth`) from the selected celestial target (`VIEWING — Moon`), adds target astronomy details, and explicitly labels below-horizon selections. No astronomy, FOV, physics, flight, FRAME or landing behavior is changed.
 
 

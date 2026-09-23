@@ -1,3 +1,13 @@
+# v0.1.0.5C scientific boundary — SOL Moon landing proof
+
+The Moon landing bridge does not alter the SOL Moon's mass, radius, barycentric position/velocity, rotation model, gravitational participation, phase/eclipse geometry or environment reference inputs. Surface gravity in the local region remains derived from the canonical Moon state (`GM/R²`, ~1.62 m/s²).
+
+The landing scene is a local deterministic **regolith proxy** inherited from the generalized airless-rocky surface architecture. Craters/ridges/POIs are not claims of real lunar coordinates, measured topography, mineralogy or a historical landing site. Vacuum presentation is retained: no wind, weather or atmospheric fog is invented.
+
+The descended/on-foot sky and the massless SURFACE SKY observer both consume the same live astronomical observer model. There is no separate scripted eclipse or decorative landing sky.
+
+---
+
 # Universe Explorer v0.1.0.5B scientific notes
 
 ## Surface celestial presentation boundary

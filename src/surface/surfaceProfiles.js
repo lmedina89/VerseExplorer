@@ -125,6 +125,25 @@ export function surfaceEngineSupport(body, bodies = []) {
   const environment = derivePlanetaryEnvironment(body, bodies);
   const family = architectureFamilyForEnvironment(environment);
 
+  // Explorer v0.1.0.5C opens exactly one SOL landing proof: Earth's Moon.
+  // It reuses the already-tested generalized airless-rocky surface/landing stack while
+  // keeping the Moon's authoritative mass, radius, gravity, rotation and live sky state.
+  // The generated local terrain remains an explicitly procedural regolith proxy rather
+  // than a claim of real lunar topography. Every other SOL world stays landing-locked.
+  if (body.referenceSystemId === 'sol' && body.id === 'moon-luna') {
+    return {
+      enabled: true,
+      proof: true,
+      exploration: true,
+      solReferenceProof: true,
+      family: SURFACE_ARCHITECTURE_FAMILIES.AIRLESS_ROCKY,
+      profileId: SURFACE_ENGINE_PROFILES.AIRLESS_ROCKY,
+      regionId: 'airless-regolith',
+      environment,
+      reason: 'SOL Moon landing proof using the existing airless-rocky surface stack; local terrain is a deterministic regolith proxy, not a real lunar map.',
+    };
+  }
+
   if (body.referenceSystemId === 'sol' || body.surfacePolicy === 'sol-reference-landing-disabled-v1') {
     return {
       enabled: false,
@@ -134,7 +153,7 @@ export function surfaceEngineSupport(body, bodies = []) {
       profileId: null,
       regionId: null,
       environment,
-      reason: 'SOL reference landing is intentionally disabled until validated real-world surface profiles are added.',
+      reason: 'SOL reference landing remains intentionally disabled for this world until a validated world-specific surface profile is added.',
     };
   }
 

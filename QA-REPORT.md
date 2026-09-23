@@ -1,3 +1,28 @@
+# Universe Explorer v0.1.0.5C QA Report
+
+## SOL Moon Landing Bridge
+
+- Baseline: **Universe Explorer v0.1.0.5B.2 — Surface Sky UX Clarity Hotfix**.
+- Untouched B.2 baseline before edits: **340/340 tests pass**.
+- Functional scope: enable exactly `moon-luna` through the inherited `AIRLESS_ROCKY` surface capability gate. Every other SOL body remains landing-disabled.
+- The canonical Moon body record remains unchanged (`landable` is not rewritten); permission exists only in the surface-support layer.
+- The inherited descent/touchdown/on-foot/BOARD-TAKEOFF lifecycle, surface session, renderer, landing-transition state machine and Hill-screened return-orbit planner are reused rather than replaced.
+- Landed Moon and massless SURFACE SKY both consume the existing live `AstronomicalObserverModel`; no duplicate sky/eclipse system is introduced.
+- Lunar local terrain is explicitly a deterministic regolith/geology proxy, not real lunar topography. Vacuum/no-weather behavior is preserved.
+
+## Automated result
+
+- Worktree after implementation: **345/345 tests pass**.
+- Five net-new Moon-landing bridge checks cover Moon-only capability gating, airless surface generation, shared live sky consumption, safe takeoff return-orbit planning without Moon mutation, and distinct observer-vs-landed entry paths.
+- Complete source/test syntax check: **PASS**.
+- Protected diff: gravity solver, velocity-Verlet integrator, ship dynamics, flight computer, transit/FRAME math, SOL state generator, astronomical/eclipse model, landing transition/session, surface renderer and styles remain byte-identical to B.2. Logic changes are isolated to `surfaceProfiles.js`; other changed runtime JS files carry cache-version import tags only.
+- Candidate ZIP integrity: **PASS**.
+- Candidate clean extraction: **345/345 tests pass** and syntax **PASS**.
+- Local static HTTP smoke: **8/8 HTTP 200** for shell and all changed/cache-busted runtime edges.
+- Physical iPhone Safari remains the acceptance gate for descent/touchdown/on-foot/takeoff feel and visual continuity of Earth in the landed lunar sky.
+
+---
+
 # Universe Explorer v0.1.0.5B.2 QA Report
 
 ## Surface Sky UX Clarity Hotfix

@@ -1,3 +1,15 @@
+# v0.1.0.5C architecture delta — Moon-only SOL landing bridge
+
+`surfaceEngineSupport()` is the sole capability gate changed for SOL landing. `moon-luna` is admitted to the already-existing `AIRLESS_ROCKY` generalized surface profile; all other SOL bodies remain rejected. The canonical Moon body object is not mutated or marked procedurally landable.
+
+The existing `enterSurface()` lifecycle remains authoritative: it captures a body-fixed anchor from the live ship/Moon geometry, generates the bounded local region, enters the shared surface renderer, runs the inherited descent state machine, enables the existing landed/on-foot controls at touchdown, and returns through `surfaceTakeoffReferencePosition()` plus the existing Hill-screened `frameOrbitInsertionPlan()`.
+
+SURFACE SKY remains observer-only and is not merged with the landing state. Both paths consume the same `AstronomicalObserverModel`, so celestial positions/phases/eclipses are shared rather than duplicated. No Newtonian gravity, integrator, ship-dynamics, flight-computer, FRAME, SOL state-vector or astronomical-geometry code is changed by this milestone.
+
+The local Moon terrain is the inherited deterministic airless-regolith presentation profile. It uses canonical lunar gravity/environment inputs but is not a DEM, named landing site, measured geology or real lunar map.
+
+---
+
 # v0.1.5.5 architecture delta — universe profiles and bounded compact companion
 
 `src/data/generationProfiles.js` is the single profile registry. `generateSystem(seed, profileId)` resolves unknown/missing identifiers to `origin`, so existing callers and schema-1 saves retain the accepted generator. Origin leaves its prior RNG call sequence intact. Abyssal changes generation only through explicit configuration and uses separate namespaced RNG streams for profile-only compact-object state.

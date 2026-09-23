@@ -1,3 +1,16 @@
+# Universe Explorer v0.1.0.5C — SOL Moon Landing Bridge
+
+- Built directly from the verified v0.1.0.5B.2 Surface Sky UX checkpoint.
+- Enables exactly `moon-luna` through the existing `AIRLESS_ROCKY` surface support path; every other SOL planet/moon stays landing-disabled.
+- Reuses inherited descent, touchdown, on-foot exploration, parked spacecraft, BOARD/TAKEOFF and generalized Hill-screened return-orbit handoff.
+- Landed Moon astronomy reuses the same live `AstronomicalObserverModel` as SURFACE SKY; no separate landing sky/eclipses implementation was added.
+- Preserves canonical SOL Moon body data and physics; landing permission is surface-layer policy only.
+- Lunar local terrain/geology remain deterministic regolith proxies, explicitly not real lunar topography.
+- Adds Safari/GitHub Pages cache busting across the changed surface-support/system-map/orbit-insertion module chain.
+- Full worktree regression after implementation: 345/345 tests pass.
+
+---
+
 # Universe Explorer v0.1.0.5B.2 — Surface Sky UX Clarity Hotfix
 
 - Built directly from the verified v0.1.0.5B Celestial Surface Presentation baseline.

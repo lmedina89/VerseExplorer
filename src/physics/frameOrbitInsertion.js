@@ -1,5 +1,5 @@
 import { BODY_KIND, PHYSICS } from '../core/constants.js';
-import { conservativeHillRadiusMeters, instantaneousHillRadiusMeters, navigationParent } from '../navigation/systemNavigation.js';
+import { conservativeHillRadiusMeters, instantaneousHillRadiusMeters, navigationParent } from '../navigation/systemNavigation.js?v=ue0105c';
 
 export const PROGRADE_HILL_STABILITY_FRACTION = 0.47;
 

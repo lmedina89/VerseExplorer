@@ -1,3 +1,9 @@
+# v0.1.0.5C Safari/GitHub Pages cache chain
+
+Moon landing support changes `surfaceProfiles.js`, and that capability is consumed through both landing generation and navigation/system-map paths. To prevent mixed-version iPhone Safari module graphs, v0.1.0.5C versions the chain `index → main → app → surfaceGenerator/surfaceProfiles/frameOrbitInsertion/systemMap`, with `surfaceGenerator → surfaceProfiles`, `frameOrbitInsertion → systemNavigation → surfaceProfiles`, and `systemMap → frameOrbitInsertion/systemNavigation` versioned to the same Explorer milestone.
+
+---
+
 # Universe Lab v0.1.5.4.2 — Stellar Irradiance / Daylight iPhone Gate
 
 Before physical acceptance of `IRRAD-1542`:

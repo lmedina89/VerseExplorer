@@ -27,17 +27,17 @@ import { CosmicPhenomenonRegistry } from '../cosmic/phenomenonRegistry.js';
 import { SpaceWeatherManager } from '../cosmic/spaceWeather.js';
 import { ANOMALY_REALITY_LABELS } from '../cosmic/anomalyGenerator.js';
 import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, transitClearanceCheck, firstTransitGuardHit, advanceTransitPosition, matchFrameExitVelocity } from '../physics/transitDrive.js';
-import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js';
+import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105c';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
 import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0105b';
 import { Hud } from '../ui/hud.js?v=155';
-import { SystemMapController } from '../ui/systemMap.js?v=ue0105a';
-import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js';
+import { SystemMapController } from '../ui/systemMap.js?v=ue0105c';
+import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105c';
 import { createSurfaceSession, serializeSurfaceSession, stepSurfaceMovement, nearestSurfacePoi, scanNearestSurfacePoi, surfaceTakeoffReferencePosition } from '../surface/surfaceSession.js';
 import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beginLandingTransition, setLandingPhase, stepLandingTransition, transitionProgress, canEnterSurface, canWalkSurface, canRequestTakeoff, validateOrbitHandoff } from '../surface/landingTransition.js';
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
-import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js';
+import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js?v=ue0105c';
 import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105a';
 
 const SURFACE_SKY_FOV_PRESETS = Object.freeze([70, 35, 15, 5, 1.5]);
@@ -349,7 +349,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.5B.2 online. ORIGIN and ABYSSAL remain unchanged; SOL SURFACE SKY now adds physically proportioned Saturn main rings, target-centering sky controls and telescope FOV presets while keeping real landing disabled. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.5C online. ORIGIN and ABYSSAL remain unchanged; SOL now enables the existing physical landing/surface lifecycle for Earth's Moon only, while SURFACE SKY remains the massless observer path and all other SOL landing stays locked. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -454,7 +454,7 @@ export class UniverseLabApp {
     const landing = this.landingEligibility(body);
     if (landing.ok) return { ok: true, mode: 'land', label: 'LAND / DESCEND', title: `Enter ${this.selectedSurfaceRegionId || 'the selected seeded region'}.`, landing };
     const sky = this.surfaceSkyEligibility(body);
-    if (sky.ok) return { ok: true, mode: 'sky', label: 'SURFACE SKY', title: 'Open a massless body-fixed surface observer. The spacecraft remains in live Newtonian flight and SOL landing stays disabled.', sky };
+    if (sky.ok) return { ok: true, mode: 'sky', label: 'SURFACE SKY', title: 'Open a massless body-fixed surface observer. The spacecraft remains in live Newtonian flight; Moon landing becomes available separately inside the validated near-orbital descent envelope.', sky };
     const skySupport = sky?.support ?? (body ? surfaceSkyObserverSupport(body, this.bodies) : null);
     const label = body && body.referenceSystemId === 'sol' && skySupport?.environment?.physicalSurfaceExists ? 'SURFACE SKY LOCKED' : (body ? 'LAND LOCKED' : 'LAND TARGET');
     return { ok: false, mode: null, label, title: sky.reason ?? landing.reason ?? 'Surface view unavailable.', landing, sky };
