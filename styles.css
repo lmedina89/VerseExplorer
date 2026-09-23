@@ -227,3 +227,18 @@ button.is-held{box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 0 18px rgba(10
 @media (orientation:landscape) and (max-height:500px){
   .explorer-hud-min.surface-active .surface-hud{width:min(360px,42vw);top:max(45px,calc(env(safe-area-inset-top) + 42px))}
 }
+
+/* v0.1.0.6A — explicit reference-system modification state + orbit sandbox readout */
+.sandbox-chip{position:absolute;z-index:11;top:57px;right:max(10px,env(safe-area-inset-right));padding:5px 9px;border:1px solid rgba(255,210,119,.58);border-radius:999px;background:rgba(29,19,4,.82);color:#ffe0a1;font-size:8px;font-weight:900;letter-spacing:.08em;white-space:nowrap;pointer-events:none;box-shadow:0 0 18px rgba(255,210,119,.08)}
+.sandbox-chip[hidden]{display:none}.sandbox-orbit-readout b{color:#ffe2a6}.drawer-grid #sandboxCommit:not(:disabled){border-color:rgba(255,210,119,.62);color:#ffe2a6;background:rgba(37,24,6,.56)}
+.surface-active .sandbox-chip{display:none!important}
+@media (orientation:portrait){.sandbox-chip{top:52px;right:max(8px,env(safe-area-inset-right));font-size:7px;max-width:42vw;overflow:hidden;text-overflow:ellipsis}}
+
+
+/* v0.1.0.6A.1 — landed/on-foot surface-reticle SKY SPAWN */
+.surface-compact-actions .surface-spawn-toggle{border-color:rgba(255,210,119,.58);color:#ffe2a6;background:rgba(37,24,6,.46)}
+.surface-spawn-panel{margin-top:7px;padding:7px;border:1px solid rgba(255,210,119,.32);border-radius:9px;background:rgba(24,16,5,.90);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.surface-spawn-panel[hidden]{display:none}.surface-spawn-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}.surface-spawn-head>div{display:grid;min-width:0}.surface-spawn-head b{font-size:8px;color:#ffe4ad}.surface-spawn-head small{font-size:6px;color:#bba77d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.surface-spawn-head>span{display:grid;text-align:right}.surface-spawn-panel label{display:grid;grid-template-columns:auto 1fr;gap:7px;align-items:center;color:#bba77d;font-size:6.5px}.surface-spawn-panel select{min-height:28px;padding:0 7px;border-color:rgba(255,210,119,.32);background:rgba(5,10,13,.88);color:#ffe4ad;font-size:7px}.surface-spawn-readout{display:grid;grid-template-columns:minmax(50px,.62fr) minmax(0,1.38fr);gap:1px;margin:6px 0;border:1px solid rgba(255,210,119,.16);border-radius:7px;overflow:hidden;background:rgba(255,210,119,.10)}.surface-spawn-readout span,.surface-spawn-readout b{padding:4px 5px;background:rgba(8,11,12,.92);font-size:6.5px}.surface-spawn-readout span{color:#a79572}.surface-spawn-readout b{text-align:right;color:#ffe6b5;overflow-wrap:anywhere}.surface-spawn-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}.surface-spawn-actions button{min-height:30px;padding:0 4px;font-size:6.5px}.surface-spawn-actions .void:not(:disabled){border-color:rgba(255,210,119,.72);color:#ffe4ad;background:rgba(42,27,7,.72)}.surface-spawn-panel p{margin:5px 0 0;color:#c4b48f;font-size:6.3px;line-height:1.35}.surface-active .sandbox-chip{display:block!important;top:auto;bottom:max(10px,env(safe-area-inset-bottom));right:max(132px,calc(env(safe-area-inset-right) + 124px))}.surface-sky-observer .sandbox-chip{display:none!important}
+@media (orientation:portrait){.surface-spawn-panel{padding:6px}.surface-spawn-readout span,.surface-spawn-readout b{font-size:6.2px}.surface-spawn-actions button{min-height:28px;font-size:6.2px}.surface-active .sandbox-chip{right:max(120px,calc(env(safe-area-inset-right) + 112px));max-width:38vw}}
+
+.surface-active .sandbox-chip[hidden]{display:none!important}

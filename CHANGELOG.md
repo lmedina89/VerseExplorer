@@ -1,3 +1,26 @@
+# Universe Explorer v0.1.0.6A.1 — Surface Sky Spawn Bridge
+
+- Restores SKY SPAWN to the intended **actual landed/on-foot surface** workflow rather than requiring flight mode.
+- Adds a compact SPAWN control and panel directly to the landed surface HUD. The current landed planet/moon is automatically the parent.
+- PREVIEW reads the live astronomical surface observer forward vector, intersects that reticle ray with the selected LOW / MEDIUM / HIGH orbital shell, and renders an amber aiming marker plus projected orbit in the surface sky.
+- The preview marker is deliberately enlarged as an aiming aid; the proposed asteroid mass/radius remain physical and preview geometry never enters gravity.
+- Below-horizon reticle directions are rejected so the insertion cannot pass through the parent world.
+- COMMIT re-solves the parent, surface observer, body rotation and reticle direction at the exact commit instant, then inserts the fixed 1.0e12 kg basalt asteroid with a circular prograde tangent velocity. Subsequent motion is the existing live mutual Newtonian N-body solution.
+- Surface-spawned bodies are tagged `sandboxSpawnSource: surface-reticle`, persist through the existing save-body serialization path, and mark the system MODIFIED / SANDBOX.
+- The reference massless SURFACE SKY observer remains spawn-disabled; SKY SPAWN is intentionally tied to actual landed/on-foot mode.
+- Gravity/integrator, canonical SOL/data, planetary rotation, atmospheric optics, landing transitions, surface-session logic, FRAME/transit and ship dynamics are unchanged.
+
+# Universe Explorer v0.1.0.6A — Orbit Sandbox Foundation
+
+- Adds the first controlled live-system sandbox path in the LAB drawer during normal ship flight.
+- Parent choices are deliberately limited to Earth, Moon and Mars in SOL for this first slice.
+- PREVIEW computes a circular **prograde equatorial** state from the parent body's current mass/radius/rotation axis and current live position/velocity, then renders only a translucent ghost body and amber orbit path. Preview does not enter gravity, collisions or the authoritative body registry.
+- COMMIT recomputes the insertion against the parent's **current live state at the commit instant**, then adds a fixed 1.0e12 kg, 3000 kg/m³ basalt asteroid as a normal gravity source. From that instant the existing mutual Newtonian velocity-Verlet solver is authoritative; perturbations, close encounters and collisions are allowed naturally.
+- LOW / MEDIUM / HIGH altitude presets are provided for Earth, Moon and Mars. The first release does not expose arbitrary orbital elements, custom mass/radius, retrograde insertion, surface-reticle spawn, stars, black holes, binaries or ring creation.
+- The first committed sandbox body permanently marks the current reference system `SOL — MODIFIED` for that run/save. The modified state is not cleared just because a spawned body later collides or is destroyed.
+- Caps committed sandbox bodies at 5 for the first mobile-safe foundation.
+- Gravity/integrator, canonical SOL initial states, ship dynamics, flight computer, FRAME/transit, planetary rotation, atmospheric optics, landing transitions and surface systems remain inherited unchanged.
+
 # Universe Explorer v0.1.0.5F — Solar Visibility & Surface Survey Clarity
 
 - Uses the user-supplied Sketchfab **Sun** asset by SebastianSosnowski (CC BY 4.0) as a visual-only photosphere source; only a neutral-luminance derivative of the embedded 1024×512 JPEG is shipped, not the GLB geometry/transmission shell.

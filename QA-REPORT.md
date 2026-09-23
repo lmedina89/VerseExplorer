@@ -1,62 +1,57 @@
-# Universe Explorer v0.1.0.5F — QA Report
+# Universe Explorer v0.1.0.6A.1 — QA Report
 
 ## Scope
 
-This release is a bounded presentation update on top of v0.1.0.5E. It adds a licensed SOL Sun photosphere reference texture, fixes landed/surface Sun readability against a bright atmosphere, and labels the existing procedural survey beacons. It does not change authoritative celestial geometry, atmosphere physics, orbital dynamics, landing transitions or ship physics.
+This release corrects SKY SPAWN to the intended **actual landed/on-foot surface workflow** while retaining the validated v0.1.0.6A orbit-insertion foundation. While landed, the player aims the center reticle into the sky, chooses a LOW / MEDIUM / HIGH shell, PREVIEWs the insertion and projected orbit along that exact live look direction, then COMMITs the asteroid into the existing mutual Newtonian N-body simulation. The earlier flight LAB sandbox remains only as a secondary engineering path.
 
-## User-supplied Sun asset audit
+## Surface-reticle insertion model
 
-- Input: `/mnt/data/sun.glb`, 2,116,612 bytes, glTF 2.0.
-- Embedded author metadata: SebastianSosnowski (`https://sketchfab.com/SebastianSosnowski`).
-- Source: `https://sketchfab.com/3d-models/sun-9ef1c68fbb944147bcfcc891d3912645`.
-- License metadata: CC BY 4.0.
-- GLB contents: 2 meshes, 2 materials, 3 textures / 3 embedded images; `KHR_materials_transmission` is used by the supplied decorative shell.
-- Selected source image: embedded 1024×512 JPEG photosphere.
-- Runtime derivative: `assets/textures/sun-sebastiansosnowski-photosphere.jpg`, 1024×512, neutral-luminance detail so Explorer's live stellar/atmospheric color controls hue.
-- Runtime derivative SHA-256: `36667fd3d39b12965c09333a0d3c9f08103a12dcd74c13d587280fbdde61a308`.
-- The supplied GLB geometry, transmission shell and GLB file are not included in the release.
+- Current landed planet/moon is automatically the orbital parent.
+- SKY SPAWN is available only in the real LANDED/on-foot state; the massless reference SURFACE SKY observer is intentionally excluded.
+- The live astronomical observer's inertial position and center-reticle forward vector are authoritative for aim.
+- Reticle altitude must be at or above the local horizon. Below-horizon directions are rejected and COMMIT is disabled.
+- The reticle ray is intersected with the selected orbital shell, so the proposed insertion point lies exactly on the live center line of sight.
+- LOW / MEDIUM / HIGH use the existing bounded altitude presets for the selected parent.
+- Initial circular speed is `sqrt(G(M_parent + m_asteroid)/r)`.
+- Velocity is tangent to the shell and prograde relative to the parent's existing rotation axis; parent inertial velocity is included.
+- COMMIT re-solves the parent state, observer state, rotation and look ray at the exact commit instant rather than reusing stale preview values.
+- Once committed, the body is a normal gravity source in the existing direct mutual Newtonian solver and velocity-Verlet integrator. No orbit rail is used.
 
-## Solar visibility fix
+## Preview / provenance policy
 
-The live observer solution still supplies Sun direction, altitude, apparent angular radius, horizon state and eclipse-visible fraction. `solveSurfaceAtmosphericOptics()` is unchanged and still supplies physical spectral transmission, atmospheric color and direct-light attenuation.
+The amber ghost marker and projected orbit are presentation-only. They are never inserted into the authoritative body registry, gravity solver or collision system. The ghost is deliberately enlarged on the surface-sky shell for mobile aiming; the committed asteroid remains the fixed physical 1.0e12 kg, 3000 kg/m³ basalt body with radius derived from mass/density. Surface-created bodies are tagged `sandboxSpawnSource: surface-reticle`. The first COMMIT marks the current reference system `SOL — MODIFIED`; that provenance persists for the run/save. Maximum committed sandbox bodies remains 5 in this mobile-safe slice.
 
-The prior surface renderer used `directStellarTransmission` almost literally as framebuffer alpha. That made a physically above-horizon Sun fade into Earth's bright blue sky. v0.1.0.5F retains physical transmission for lighting but applies a bounded HDR display transform to the visible solar disk. At the reported +5.75° Earth altitude in clear one-atmosphere conditions, the existing optics solver gives direct transmission ≈0.434; the new display mapping yields disk gain ≈0.861 (≈0.843 final disk opacity at full visible fraction) while retaining the low-Sun red/orange spectral tint.
-
-## Survey marker clarity
-
-Existing POI ring/stem geometry and scan behavior are unchanged. Each beacon now carries a lightweight billboard with the POI name plus `SURVEY / SCAN`, so the yellow known-geology beacon is explicitly identifiable rather than unexplained scenery.
-
-## Regression / static validation
+## Automated validation
 
 - `npm run check`: PASS.
-- Full test suite: **371 / 371 PASS**.
-- New targeted coverage checks the Sun reference-asset isolation, bundled JPEG integrity, CC BY attribution, nonliteral solar-display alpha mapping and survey-beacon labeling.
-- GitHub Pages/local HTTP smoke: **9 / 9 PASS** (`index.html`, entry modules, `celestialFactory`, `surfaceWorld`, new Sun texture and existing Earth texture all return HTTP 200).
+- Full test suite: **387 / 387 PASS**.
+- New surface SKY SPAWN tests verify exact reticle-ray placement, circular/prograde geometry, below-horizon rejection, closed preview orbit geometry, actual landed-HUD wiring, render-only preview behavior and COMMIT into the live body registry.
+- The integration test performs a full live mutual-N-body Earth LOW insertion created from a surface reticle and integrates approximately one orbit with the existing direct gravity + velocity-Verlet stack; the state remains finite and bound with radial closure within the test tolerance (<150 m).
+- Existing v0.1.0.6A orbit-sandbox tests remain green.
 
-## Protected-core diff audit versus v0.1.0.5E
+## Protected-core diff audit versus v0.1.0.6A
 
-Byte-for-byte unchanged:
+The surface bridge is isolated to the app/presentation layer plus the sandbox insertion helper. Protected simulation areas are required to remain byte-for-byte identical to the exact v0.1.0.6A baseline:
 
-- `src/core/astronomicalObserver.js`
-- `src/core/planetaryRotation.js`
-- `src/data/solSystem.js`
-- `src/physics/gravity/directGravitySolver.js`
-- `src/physics/integrators/velocityVerlet.js`
-- `src/physics/shipDynamics.js`
-- `src/physics/flightComputer.js`
-- `src/physics/transitDrive.js`
-- `src/physics/atmosphericOptics.js`
-- `src/surface/landingTransition.js`
-- `src/surface/surfaceSession.js`
-- `src/surface/surfaceWeather.js`
-- `src/surface/surfaceProfiles.js`
+- `src/core/`
+- `src/physics/`
+- `src/data/`
+- `src/surface/`
 
-`src/physics/frameOrbitInsertion.js`, `src/navigation/systemNavigation.js`, `src/surface/surfaceGenerator.js` and renderer/app entry-chain files receive cache-stamp changes only where needed for Safari/GitHub Pages module isolation; their corresponding simulation behavior is not redesigned in this release.
+Intentional implementation changes are limited to shell/styles, app wiring, `src/experiments/orbitSandbox.js`, renderer/surface presentation, cache edges, tests and release documentation. Gravity/integration equations, canonical SOL reference data, landing-transition/session logic, planetary rotation, atmosphere physics, ship dynamics and FRAME/transit are not redesigned in this milestone.
 
 ## Manual iPhone acceptance focus
 
-1. Land on Earth, select Sun, CENTER, and cycle 70° → 15° → 5° → 1.5°. When the Sun is above the horizon it should remain plainly visible.
-2. Near the horizon the disk should become warmer/redder; below the horizon it should still disappear normally.
-3. Eclipse/occultation should still reduce the visible solar fraction.
-4. From space, the SOL Sun should show photospheric texture without changing its physical radius/position.
-5. Walk toward a yellow surface beacon: its POI name and `SURVEY / SCAN` label should explain what it is.
+1. Land normally on Earth or another already-supported solid SOL world and wait for actual LANDED/on-foot mode.
+2. Confirm the compact **SPAWN** control appears on the landed HUD. It must not appear in the massless SURFACE SKY observer.
+3. Aim the center reticle above the horizon, open SPAWN, choose LOW and tap PREVIEW.
+4. Confirm the amber ghost appears on the center look direction and follows LOOK as the reticle moves; projected orbit updates with it.
+5. Aim below the horizon and confirm the preview becomes invalid / COMMIT is disabled.
+6. Aim back above the horizon and COMMIT. Confirm the asteroid appears in the aimed sky direction, `SOL — MODIFIED` appears, and subsequent motion is live rather than fixed to the preview path.
+7. Use telescope/FOV controls if the physical asteroid becomes too small to see easily, then verify it can also be observed from normal flight/system views.
+
+## Deployment / package checks
+
+- Worktree local HTTP smoke: **11 / 11 PASS** for shell, styles, main/app, sandbox helper, renderer/surface renderer, inherited astronomy module, Earth/Sun reference textures and release metadata.
+- Preliminary GitHub-ready package: ZIP integrity PASS, clean extraction PASS, clean-extraction `npm run check` PASS, clean-extraction full regression **387 / 387 PASS**, and clean-extraction HTTP smoke **11 / 11 PASS**.
+- After freezing this report, the release ZIP is rebuilt and the same integrity, clean-extraction QA and HTTP checks are repeated against the exact bytes delivered to the user.

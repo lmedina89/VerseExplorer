@@ -8,7 +8,7 @@ import { updateScientificOverlayVisual } from './scientificOverlayVisuals.js';
 import { BODY_KIND, SIMULATION } from '../core/constants.js';
 import { computeObservationCameraPose } from './observationCamera.js';
 import { apparentAngularRadius, stellarPerceptualProfile } from './stellarPerception.js';
-import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0105f';
+import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0106a1';
 import { rendererBackendPolicy } from './backendPolicy.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { CockpitView } from './cockpitView.js?v=ue0105f';
@@ -115,6 +115,15 @@ export class UniverseRenderer {
     this.targetMarker.visible = false;
     this.targetMarker.renderOrder = 1000;
     this.scene.add(this.targetMarker);
+    this.sandboxPreviewVisual = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 18, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffd277, transparent: true, opacity: 0.44, wireframe: true, depthWrite: false }),
+    );
+    this.sandboxPreviewVisual.visible = false;
+    this.sandboxPreviewVisual.frustumCulled = false;
+    this.sandboxPreviewVisual.renderOrder = 30;
+    this.sandboxPreviewVisual.userData.physicalPosition = new Float64Array(3);
+    this.scene.add(this.sandboxPreviewVisual);
     this.impactEffects = [];
     this.impactEffectGroup = new THREE.Group();
     this.impactEffectGroup.renderOrder = 900;
@@ -179,6 +188,7 @@ export class UniverseRenderer {
       this.minorPoints = null;
     }
     for (const id of [...this.trajectories.keys()]) this.clearTrajectory(id);
+    this.clearSandboxPreview();
     this.setTarget(null);
     const oldStars = this.scene.getObjectByName('visual-starfield');
     if (oldStars) { this.scene.remove(oldStars); disposeObject(oldStars); }
@@ -360,6 +370,28 @@ export class UniverseRenderer {
     existing.geometry.dispose();
     existing.material.dispose();
     this.trajectories.delete(id);
+  }
+
+  setSandboxPreview(plan, orbitPoints) {
+    if (!plan?.body?.position) { this.clearSandboxPreview(); return; }
+    const visual = this.sandboxPreviewVisual;
+    visual.userData.physicalPosition.set(plan.body.position);
+    const physicalRenderRadius = Math.max(0, Number(plan.body.radius) || 0) / SIMULATION.metersPerRenderUnit;
+    const readableRadius = Math.max(0.035, physicalRenderRadius);
+    visual.scale.setScalar(readableRadius);
+    visual.visible = true;
+    this.setTrajectory('sandbox-orbit-preview', orbitPoints, 0xffd277, 0.72);
+  }
+
+  clearSandboxPreview() {
+    if (this.sandboxPreviewVisual) this.sandboxPreviewVisual.visible = false;
+    this.clearTrajectory('sandbox-orbit-preview');
+  }
+
+  updateSandboxPreview(referenceFrame) {
+    if (!this.sandboxPreviewVisual?.visible) return;
+    referenceFrame.toRender(this.sandboxPreviewVisual.userData.physicalPosition, this._temp);
+    this.sandboxPreviewVisual.position.copy(this._temp);
   }
 
   updateTrajectories(referenceFrame) {
@@ -596,6 +628,14 @@ export class UniverseRenderer {
     return this.surfaceWorld?.getFovDegrees() ?? null;
   }
 
+  setSurfaceSandboxPreview(plan, orbitPoints, observer) {
+    return this.surfaceWorld?.setSandboxSkyPreview(plan, orbitPoints, observer) ?? false;
+  }
+
+  clearSurfaceSandboxPreview() {
+    this.surfaceWorld?.clearSandboxSkyPreview();
+  }
+
   getStats() {
     const info = this.renderer.info;
     const render = info?.render ?? info;
@@ -628,6 +668,7 @@ export class UniverseRenderer {
 
   renderSceneObjects({ bodies, referenceFrame, minorField, particleExperiments = [], cosmicPhenomena = [], spaceWeather = [], scientificOverlays = null, target = null, ship = null, elapsedSimSeconds = 0, astronomy = null }) {
     this.syncBodies(bodies);
+    this.updateSandboxPreview(referenceFrame);
     const now = performance.now();
     const realDt = Math.min(0.05, Math.max(0, (now - this._lastSceneRenderAt) / 1000));
     this._lastSceneRenderAt = now;
@@ -800,6 +841,7 @@ export class UniverseRenderer {
     this._resizeObserver.disconnect();
     this.exitSurface();
     for (const id of [...this.trajectories.keys()]) this.clearTrajectory(id);
+    if (this.sandboxPreviewVisual) { this.scene.remove(this.sandboxPreviewVisual); disposeObject(this.sandboxPreviewVisual); this.sandboxPreviewVisual = null; }
     for (const visual of this.experimentVisuals.values()) { this.scene.remove(visual.points); visual.geometry.dispose(); visual.material.dispose(); }
     this.experimentVisuals.clear();
     for (const visual of this.cosmicVisuals.values()) { this.scene.remove(visual); disposeObject(visual); }

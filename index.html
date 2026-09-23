@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#02050b">
-  <title>Universe Explorer v0.1.0.5F</title>
-  <link rel="stylesheet" href="./styles.css?v=ue0105f">
+  <title>Universe Explorer v0.1.0.6A.1</title>
+  <link rel="stylesheet" href="./styles.css?v=ue0106a1">
   <script type="importmap">
   {
     "imports": {
@@ -21,7 +21,7 @@
     <section id="viewport" class="viewport" aria-label="3D universe viewport. Tap a visible celestial body to target it."></section>
 
     <div class="hud top-hud" aria-live="polite">
-      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.5F</span></div>
+      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.6A.1</span></div>
       <div class="stat technical-stat"><b id="rendererValue">INIT</b><small>renderer</small></div>
       <div class="stat primary-stat"><b id="fpsValue">—</b><small>fps</small></div>
       <div class="stat technical-stat"><b id="physicsMsValue">—</b><small>physics</small></div>
@@ -34,6 +34,7 @@
     <div id="targetChip" class="target-chip" hidden>NO TARGET</div>
     <div id="navChip" class="nav-chip" hidden>NAV MANUAL</div>
     <div id="cameraChip" class="camera-chip" hidden>CAMERA OBSERVE</div>
+    <div id="sandboxChip" class="sandbox-chip" hidden>SOL — MODIFIED</div>
     <div id="ascentDiagnostic" class="ascent-diagnostic" hidden>ASCENT CHECK</div>
     <div class="reticle" aria-hidden="true"><span></span><i></i></div>
     <div id="cockpitOverlay" class="cockpit-overlay" aria-hidden="true">
@@ -103,8 +104,16 @@
           <button id="surfaceSkyNext" class="surface-sky-toggle" type="button" hidden>NEXT</button>
           <button id="surfaceSkyCenter" class="surface-sky-toggle" type="button" hidden>CENTER</button>
           <button id="surfaceFovButton" class="surface-sky-toggle" type="button" hidden>FOV 70°</button>
+          <button id="surfaceSpawnButton" class="surface-spawn-toggle" type="button" hidden aria-expanded="false" aria-controls="surfaceSpawnPanel">SPAWN</button>
           <button id="surfaceHudToggle" type="button" aria-expanded="false" aria-controls="surfaceHudDetails">DETAILS</button>
         </div>
+      </div>
+      <div id="surfaceSpawnPanel" class="surface-spawn-panel" hidden>
+        <div class="surface-spawn-head"><div><b>SKY SPAWN</b><small id="surfaceSpawnParent">CURRENT SURFACE</small></div><span><b id="surfaceSpawnCount">0/5</b><small>BODIES</small></span></div>
+        <label>Orbital shell<select id="surfaceSpawnAltitude"><option value="low" selected>LOW</option><option value="medium">MEDIUM</option><option value="high">HIGH</option></select></label>
+        <div class="surface-spawn-readout"><span>Altitude</span><b id="surfaceSpawnAltitudeValue">—</b><span>Reticle</span><b id="surfaceSpawnLookValue">—</b><span>Speed</span><b id="surfaceSpawnSpeedValue">—</b><span>Period</span><b id="surfaceSpawnPeriodValue">—</b></div>
+        <div class="surface-spawn-actions"><button id="surfaceSpawnPreview" type="button">PREVIEW</button><button id="surfaceSpawnCommit" class="void" type="button" disabled>COMMIT</button><button id="surfaceSpawnCancel" type="button" disabled>CANCEL</button></div>
+        <p id="surfaceSpawnStatus">Aim the center reticle above the horizon, choose an orbital band, then PREVIEW. The amber marker is enlarged for visibility; the committed asteroid keeps its physical radius.</p>
       </div>
       <div id="surfaceHudDetails" class="surface-hud-details" hidden>
         <div class="surface-stat-grid">
@@ -292,6 +301,15 @@
         <label>Trajectory horizon<select id="trajectoryHorizon"><option value="3600">1 hour</option><option value="21600">6 hours</option><option value="86400" selected>1 day</option><option value="604800">7 days</option><option value="2592000">30 days</option></select></label>
         <label>Minor test bodies<select id="minorCount"><option value="1000">1,000</option><option value="4000" selected>4,000</option><option value="10000">10,000</option><option value="20000">20,000</option></select></label>
         <hr>
+        <h3>ORBIT SANDBOX · 0.1.0.6A</h3>
+        <p class="help">Create one physical basalt asteroid in a calculated circular prograde orbit. PREVIEW is presentation-only; COMMIT adds the body to the live mutual Newtonian system and marks the reference system MODIFIED.</p>
+        <label>Parent body<select id="sandboxParent"><option value="">Loading eligible bodies…</option></select></label>
+        <label>Orbit altitude<select id="sandboxAltitude"><option value="low" selected>LOW ORBIT</option><option value="medium">MEDIUM ORBIT</option><option value="high">HIGH ORBIT</option></select></label>
+        <div class="scan-grid sandbox-orbit-readout"><span>Altitude</span><b id="sandboxAltitudeValue">—</b><span>Circular speed</span><b id="sandboxSpeedValue">—</b><span>Period</span><b id="sandboxPeriodValue">—</b><span>Body</span><b id="sandboxBodyValue">1.0e12 kg basalt asteroid</b></div>
+        <div class="button-row"><button id="sandboxPreview" type="button">PREVIEW ORBIT</button><button id="sandboxCommit" class="void" type="button" disabled>COMMIT BODY</button></div>
+        <button id="sandboxCancel" type="button" disabled>CANCEL PREVIEW</button>
+        <p id="sandboxStatus" class="prediction">No sandbox preview. Flight mode only · circular prograde equatorial insertion · maximum 5 committed sandbox bodies.</p>
+        <hr>
         <h3>PARTICLE EXPERIMENTS</h3>
         <p id="particleModeHelp" class="help">Loading particle-mode description…</p>
         <label>Experiment mode<select id="particleMode"><option value="gravity" selected>Gravity Cloud — physical test particles</option><option value="life">Particle Life — Conway-inspired</option><option value="species">Species Forces — attraction/repulsion</option></select></label>
@@ -461,6 +479,6 @@
       </div>
     </aside>
   </main>
-  <script type="module" src="./src/main.js?v=ue0105f"></script>
+  <script type="module" src="./src/main.js?v=ue0106a1"></script>
 </body>
 </html>

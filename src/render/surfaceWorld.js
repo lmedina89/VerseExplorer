@@ -881,6 +881,7 @@ export class SurfaceWorldVisual {
     this.rng = createRng(`${region.seed}:render`);
     this.poiGroups = new Map();
     this.animated = [];
+    this.sandboxSkyPreview = null;
 
     const skyTexture = makeSkyTexture(region.palette.skyTop, region.palette.skyHorizon);
     const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 28, 18), new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide, depthWrite: false }));
@@ -1100,6 +1101,91 @@ export class SurfaceWorldVisual {
     return exposure;
   }
 
+
+  ensureSandboxSkyPreview() {
+    if (this.sandboxSkyPreview) return this.sandboxSkyPreview;
+    const group = new THREE.Group();
+    group.name = 'surface-sky-spawn-preview';
+    group.visible = false;
+
+    const ghost = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 18, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffd277, wireframe: true, transparent: true, opacity: 0.78, depthWrite: false, depthTest: false, toneMapped: false, fog: false }),
+    );
+    ghost.renderOrder = 42;
+    group.add(ghost);
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(1.35, 1.62, 40),
+      new THREE.MeshBasicMaterial({ color: 0xffd277, transparent: true, opacity: 0.88, side: THREE.DoubleSide, depthWrite: false, depthTest: false, toneMapped: false, fog: false }),
+    );
+    ring.renderOrder = 43;
+    group.add(ring);
+
+    const orbitGeometry = new THREE.BufferGeometry();
+    const orbit = new THREE.Line(
+      orbitGeometry,
+      new THREE.LineBasicMaterial({ color: 0xffd277, transparent: true, opacity: 0.58, depthWrite: false, depthTest: true, toneMapped: false, fog: false }),
+    );
+    orbit.name = 'surface-sky-spawn-orbit-preview';
+    orbit.frustumCulled = false;
+    orbit.renderOrder = 35;
+    this.scene.add(orbit);
+    this.scene.add(group);
+    this.sandboxSkyPreview = { group, ghost, ring, orbit, shellDistance: 1250 };
+    return this.sandboxSkyPreview;
+  }
+
+  setSandboxSkyPreview(plan, orbitPoints, observer) {
+    if (!plan || !observer?.valid) { this.clearSandboxSkyPreview(); return false; }
+    const preview = this.ensureSandboxSkyPreview();
+    const eye = observer.localAnchor ?? [0, 1.72, 0];
+    const dx = Number(plan.body?.position?.[0]) - Number(observer.inertialPosition?.[0]);
+    const dy = Number(plan.body?.position?.[1]) - Number(observer.inertialPosition?.[1]);
+    const dz = Number(plan.body?.position?.[2]) - Number(observer.inertialPosition?.[2]);
+    const magnitude = Math.hypot(dx, dy, dz) || 1;
+    const ix = dx / magnitude, iy = dy / magnitude, iz = dz / magnitude;
+    const east = observer.horizonEast, up = observer.localUp, north = observer.horizonNorth;
+    const localX = ix * east[0] + iy * east[1] + iz * east[2];
+    const localY = ix * up[0] + iy * up[1] + iz * up[2];
+    const localZ = ix * north[0] + iy * north[1] + iz * north[2];
+    const shell = preview.shellDistance;
+    preview.group.position.set(Number(eye[0]) + localX * shell, Number(eye[1]) + localY * shell, Number(eye[2]) + localZ * shell);
+    const angularRadius = Math.asin(Math.max(0, Math.min(0.99, Number(plan.body?.radius || 0) / Math.max(1, magnitude))));
+    const physicalMarkerRadius = Math.max(8.5, shell * Math.tan(Math.max(angularRadius, 0.0012)));
+    preview.ghost.scale.setScalar(physicalMarkerRadius);
+    preview.ring.scale.setScalar(physicalMarkerRadius);
+    preview.ring.lookAt(this.camera.position);
+    preview.group.visible = true;
+
+    const source = orbitPoints instanceof Float64Array || orbitPoints instanceof Float32Array ? orbitPoints : new Float64Array(0);
+    const positions = new Float32Array(source.length);
+    for (let i = 0; i + 2 < source.length; i += 3) {
+      const rx = Number(source[i]) - Number(observer.inertialPosition?.[0]);
+      const ry = Number(source[i + 1]) - Number(observer.inertialPosition?.[1]);
+      const rz = Number(source[i + 2]) - Number(observer.inertialPosition?.[2]);
+      const rm = Math.hypot(rx, ry, rz) || 1;
+      const ux = rx / rm, uy = ry / rm, uz = rz / rm;
+      const lx = ux * east[0] + uy * east[1] + uz * east[2];
+      const ly = ux * up[0] + uy * up[1] + uz * up[2];
+      const lz = ux * north[0] + uy * north[1] + uz * north[2];
+      positions[i] = Number(eye[0]) + lx * shell;
+      positions[i + 1] = Number(eye[1]) + ly * shell;
+      positions[i + 2] = Number(eye[2]) + lz * shell;
+    }
+    preview.orbit.geometry.dispose();
+    preview.orbit.geometry = new THREE.BufferGeometry();
+    preview.orbit.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    preview.orbit.visible = positions.length >= 6;
+    return true;
+  }
+
+  clearSandboxSkyPreview() {
+    if (!this.sandboxSkyPreview) return;
+    this.sandboxSkyPreview.group.visible = false;
+    this.sandboxSkyPreview.orbit.visible = false;
+  }
+
   updatePoiState(scannedPoiIds) {
     for (const poi of surfacePois(this.region)) {
       const beacon = this.poiGroups.get(`${poi.id}:beacon`);
@@ -1248,6 +1334,7 @@ export class SurfaceWorldVisual {
     const cp = Math.cos(session.pitch), sp = Math.sin(session.pitch), sy = Math.sin(session.yaw), cy = Math.cos(session.yaw);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(eye[0] + sy * cp * 100, eye[1] + sp * 100, eye[2] + cy * cp * 100);
+    if (this.sandboxSkyPreview?.group?.visible) this.sandboxSkyPreview.ring.lookAt(this.camera.position);
     const weather = this.updateWeather(session, realTimeSeconds);
     const skyExposure = this.updateAstronomicalSky(astronomy, eye, weather);
     this.updateShipTransition(transition, realTimeSeconds);

@@ -247,7 +247,7 @@ test('Explorer app wires the SOL moon save-upgrade path without replacing establ
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const app = await readFile(new URL('../src/app/app.js', import.meta.url), 'utf8');
   assert.match(html, /value="sol">SOL — reference Solar System \(J2000\)/);
-  assert.match(html, /Universe Explorer v0\.1\.0\.5F/);
+  assert.match(html, /Universe Explorer v0\.1\.0\.6A/);
   assert.match(app, /generateSolReferenceMoonUpgrades/);
   assert.match(app, /this\.system\.generationProfileId === 'sol'/);
   assert.match(app, /payload\.elapsedSimSeconds/);

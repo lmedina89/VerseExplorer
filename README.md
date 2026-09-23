@@ -1,5 +1,25 @@
 # Universe Explorer exploration branch
 
+**v0.1.0.6A.1 — Surface Sky Spawn Bridge.** Built directly on the 6A orbit-insertion foundation, but restores the feature to its intended surface-first workflow. While actually landed/on-foot, press **SPAWN**, aim the center reticle anywhere at or above the local horizon, choose LOW / MEDIUM / HIGH, then PREVIEW. The amber ghost and projected orbit follow the live look direction; COMMIT re-solves the exact surface observer and parent state at that instant and inserts the physical asteroid on that line of sight into the existing mutual Newtonian N-body simulation.
+
+## 0.1.0.6A.1 acceptance focus
+
+1. Land on Earth, Moon, Mars, Europa, Titan or Triton and confirm **SPAWN** appears in the actual on-foot surface HUD after touchdown.
+2. Aim above the horizon, choose an orbital shell and PREVIEW. Confirm the amber marker sits at the reticle direction and moves with live LOOK while preview is armed.
+3. Aim below the horizon and confirm COMMIT is disabled/rejected rather than placing a body through the world.
+4. COMMIT and confirm the asteroid appears where you were looking, then moves away under the normal live N-body solution. The preview marker is enlarged only for aiming; the committed body keeps its physical radius.
+5. Confirm the reference SURFACE SKY observer does not expose SKY SPAWN, and confirm gravity/integrator/SOL state/landing core remain unchanged.
+
+**v0.1.0.6A — Orbit Sandbox Foundation.** Built from the validated 5F Solar Visibility checkpoint. This is the first live-system editing slice: during normal ship flight, open **LAB → ORBIT SANDBOX**, choose Earth, Moon or Mars plus LOW / MEDIUM / HIGH, PREVIEW a circular prograde equatorial asteroid orbit, then COMMIT it. Preview is presentation-only; COMMIT recomputes the state at that exact live instant and inserts a fixed physical asteroid into the existing mutual Newtonian N-body simulation. The first commit marks the reference system **SOL — MODIFIED**.
+
+## 0.1.0.6A acceptance focus
+
+1. In SOL ship flight with FRAME off, open **LAB → ORBIT SANDBOX**, select **Earth → LOW**, then PREVIEW. Confirm an amber orbit path and translucent ghost appear while the body count and gravity state remain unchanged.
+2. COMMIT. Confirm `SOL — MODIFIED` appears, the new `SANDBOX Asteroid` becomes the target, and it begins moving under the normal live N-body solver.
+3. Run modest warp for roughly one orbit and confirm the body remains finite/bound unless naturally perturbed or impacted.
+4. Repeat around Moon or Mars and confirm LOW / MEDIUM / HIGH produce different altitude, circular speed and period readouts.
+5. Confirm preview/commit is rejected while landed, in FRAME or outside SHIP VIEW, and that the first release stops at five committed sandbox bodies.
+
 **v0.1.0.5F — Solar Visibility & Surface Survey Clarity.** Built from the validated 5E Earth landing/atmosphere checkpoint. The supplied CC BY 4.0 Sun GLB contributes only a neutral-luminance derivative of its embedded photosphere JPEG; Explorer keeps its existing physical Sun sphere, corona and authoritative SOL properties. Surface rendering now keeps an above-horizon Sun visibly readable through a bounded HDR display transform while physical atmospheric transmission still drives illumination. Existing survey beacons are explicitly labeled with their POI name and `SURVEY / SCAN`.
 
 ## 5F acceptance focus
