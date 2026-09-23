@@ -1,3 +1,13 @@
+# Universe Explorer v0.1.0.5B.1 — Surface Sky Visibility & Target UX Hotfix
+
+- Earth SURFACE SKY now chooses the physical sub-Moon point instead of the arbitrary body-fixed point beneath the spacecraft, so the real Moon begins at the zenith and is immediately observable.
+- Parent-body sites remain unchanged for moons (Moon→Earth, Europa→Jupiter, Titan→Saturn, Triton→Neptune).
+- Parentless SOL worlds without a modeled moon prefer the real primary star; the spacecraft-facing site remains only as a final fallback.
+- The compact surface HUD repurposes FOUND as TARGET during observer-only SURFACE SKY and shows the current sky-focus body.
+- NEXT now reports the selected body and candidate count, including an explicit 1/1 message when only one body is above the horizon.
+- Existing celestial positions, angular sizes, phases, eclipses/occultations, atmospheric optics, ship state, gravity, FRAME, landing stack, and 5B Saturn/FOV presentation are unchanged.
+- Safari/GitHub Pages cache markers were advanced only along the changed index → main → app → surfaceSkyObserver dependency chain.
+
 # Universe Explorer v0.1.0.5B — Celestial Surface Presentation
 
 - Preserves the v0.1.0.5A massless SOL surface observer and the inherited flight/landing architecture.

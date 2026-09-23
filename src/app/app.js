@@ -38,7 +38,7 @@ import { createSurfaceSession, serializeSurfaceSession, stepSurfaceMovement, nea
 import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beginLandingTransition, setLandingPhase, stepLandingTransition, transitionProgress, canEnterSurface, canWalkSurface, canRequestTakeoff, validateOrbitHandoff } from '../surface/landingTransition.js';
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js';
-import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105a';
+import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, preferredSurfaceSkyFocusBody, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105b1';
 
 const SURFACE_SKY_FOV_PRESETS = Object.freeze([70, 35, 15, 5, 1.5]);
 
@@ -349,7 +349,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.5B online. ORIGIN and ABYSSAL remain unchanged; SOL SURFACE SKY now adds physically proportioned Saturn main rings, target-centering sky controls and telescope FOV presets while keeping real landing disabled. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.5B.1 online. ORIGIN and ABYSSAL remain unchanged; SOL SURFACE SKY now adds physically proportioned Saturn main rings, target-centering sky controls and telescope FOV presets while keeping real landing disabled. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -846,7 +846,10 @@ export class UniverseLabApp {
     const next = candidates[(current + 1 + candidates.length) % candidates.length];
     this.surfaceSession.skyFocusBodyId = next.id;
     this.syncSurfaceSkyPresentationControls(astronomy);
-    return this.centerSurfaceSkyTarget({ astronomy, notify: true });
+    const centered = this.centerSurfaceSkyTarget({ astronomy, notify: false });
+    const selectedIndex = candidates.findIndex((record) => record.id === next.id);
+    this.hud.notify(`SURFACE SKY TARGET: ${next.name} (${selectedIndex + 1}/${candidates.length}).${candidates.length === 1 ? ' It is currently the only celestial body above this horizon.' : ''}`);
+    return centered;
   }
 
   cycleSurfaceSkyFov() {
@@ -893,7 +896,8 @@ export class UniverseLabApp {
 
       const star = this.registry.get('star-0') ?? this.bodies.find((entry) => entry.kind === BODY_KIND.STAR) ?? null;
       const parent = body.parentId ? this.registry.get(body.parentId) : null;
-      this.surfaceSession.skyFocusBodyId = parent?.id ?? star?.id ?? null;
+      const preferredFocus = preferredSurfaceSkyFocusBody(body, this.bodies);
+      this.surfaceSession.skyFocusBodyId = preferredFocus?.id ?? star?.id ?? null;
       this.renderer.enterSurface(this.surfaceRegion, body, star);
       this.renderer.setSurfaceFovDegrees?.(SURFACE_SKY_FOV_PRESETS[0]);
       this.root.classList.add('surface-active', 'surface-sky-observer');
@@ -918,7 +922,7 @@ export class UniverseLabApp {
       this.updateSurfaceHud(astronomy);
       this.updateSurfaceTransitionUi();
       if (options.notify !== false) {
-        const site = parent ? ` The initial site is the physically valid sub-${parent.name} point so ${parent.name} begins high in the sky.` : ' The initial site is the body-fixed point beneath the current spacecraft direction.';
+        const site = preferredFocus ? ` The initial site is chosen so ${preferredFocus.name} begins high in the sky.` : ' The initial site uses the current spacecraft-facing body-fixed fallback.';
         this.hud.notify(`SURFACE SKY: ${body.name}. This is a massless observer camera; the spacecraft and full Newtonian simulation continue normally at the current time scale.${site} Local ground is a schematic horizon, not a claimed terrain map or landing.`, 9000);
       }
       return true;
@@ -1274,8 +1278,8 @@ export class UniverseLabApp {
     set('#surfaceRotationPhase', physicalRotation ? `${degrees(rotationAngleAt(parentBody, astronomySeconds)).toFixed(2)}°` : '—');
 
     const astronomySolution = astronomy ?? this.solveAstronomicalObserver();
-    if (observerOnly) this.syncSurfaceSkyPresentationControls(astronomySolution);
-    else {
+    const surfaceSkyFocus = observerOnly ? this.syncSurfaceSkyPresentationControls(astronomySolution) : null;
+    if (!observerOnly) {
       set('#surfaceSkyFocus', '—');
       set('#surfaceViewFov', '70°');
     }
@@ -1331,7 +1335,9 @@ export class UniverseLabApp {
     }
     this.syncPauseControls();
     if (observerOnly) {
-      set('#surfaceDiscoveries', '—');
+      const compactLabel = this.root.querySelector('#surfaceDiscoveriesLabel');
+      if (compactLabel) compactLabel.textContent = 'TARGET';
+      set('#surfaceDiscoveries', surfaceSkyFocus?.name ?? '—');
       set('#surfaceNearest', 'LIVE CELESTIAL SKY');
       const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
       if (weatherStatus) weatherStatus.textContent = region.scientificStatus;
@@ -1339,6 +1345,8 @@ export class UniverseLabApp {
       if (status) status.textContent = 'REFERENCE SKY OBSERVER · Look around with LOOK. Celestial disks use physical angular size; phases and eclipses use the existing finite-disk observer geometry. The flat local horizon is schematic and SOL landing remains disabled.';
       return;
     }
+    const compactLabel = this.root.querySelector('#surfaceDiscoveriesLabel');
+    if (compactLabel) compactLabel.textContent = 'FOUND';
     set('#surfaceDiscoveries', `${this.surfaceSession.scannedPoiIds.size}/${surfacePois(region).length}`);
     const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
     if (weatherStatus) {

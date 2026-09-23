@@ -1,9 +1,9 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.5B",
-  "name": "Celestial Surface Presentation",
+  "version": "0.1.0.5B.1",
+  "name": "Surface Sky Visibility & Target UX Hotfix",
   "milestone": "SOL Surface Sky Presentation & Telescope",
-  "baseline": "Universe Explorer v0.1.0.5A",
+  "baseline": "Universe Explorer v0.1.0.5B",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
   "generationProfiles": [
     "origin",
@@ -18,11 +18,11 @@
   "surfaceSkyTerrainPolicy": "flat schematic horizon only; no claim of real terrain, geology, POIs, weather or landing capability",
   "surfaceSkyAstronomyPolicy": "reuse inherited AstronomicalObserverModel, body rotation, physical angular size, phase and finite-disk eclipse/occultation geometry",
   "moonDefaultSitePolicy": "sub-parent body-fixed point at current simulation epoch",
-  "planetDefaultSitePolicy": "body-fixed point beneath current spacecraft direction",
+  "planetDefaultSitePolicy": "prefer the most prominent real child satellite; otherwise the primary star; spacecraft-facing fallback only when neither exists",
   "surfaceSkySavePolicy": "observer camera is not serialized as a landed surface session; physical ship/system save state remains canonical",
   "flightNavigationPolicy": "Newtonian flight, FRAME/transit, navigation, integrator, SOL reference states and landing stack remain unchanged from v0.1.0.5A",
-  "mobileCachePolicy": "version every changed runtime import edge for Safari/GitHub Pages (index\u2192main\u2192app\u2192astronomicalObserver/threeRenderer\u2192surfaceWorld)",
-  "scope": "Improves the existing SOL massless surface observer with Saturn main rings, target framing and telescope FOV. No SKY SPAWN, SOL landing, terrain, new bodies, or physics rewrite.",
+  "mobileCachePolicy": "version every changed runtime import edge for Safari/GitHub Pages (index\u2192main\u2192app\u2192surfaceSkyObserver)",
+  "scope": "Hotfixes SOL SURFACE SKY first-view visibility and target feedback only. Earth opens at the sub-Moon site with Moon as focus; compact HUD shows the active sky target; NEXT reports target index/count. No physics, eclipse, renderer, landing, body-state, or angular-size changes.",
   "surfaceSkyPresentationPolicy": "physical angular sizes remain authoritative; presentation adds Saturn main rings, target-centering controls and bounded camera FOV only",
   "saturnRingPresentation": "main C/B/A rings rendered at NASA/NSSDCA radial ratios with Cassini Division preserved; ring plane follows canonical Saturn spin axis; no ring particle dynamics/self-shadow/radiative transfer",
   "surfaceSkyFovPresetsDeg": [
@@ -34,5 +34,5 @@
   ],
   "surfaceSkyRingPolicy": "Saturn C/B/A main rings are presentation geometry scaled from published Saturn-radius ratios; ring particles are not individual gravity sources",
   "surfaceSkyFovPolicy": "camera-only FOV presets 70/35/15/5/1.5 degrees; no celestial position, radius, orbit or spacecraft state is modified",
-  "surfaceSkyFocusPolicy": "NEXT/CENTER changes observer yaw/pitch only and never moves the observer site or spacecraft"
+  "surfaceSkyFocusPolicy": "entry may choose a physically valid body-fixed site that places the preferred real target high in the sky; NEXT/CENTER then change observer yaw/pitch only and never move the observer site or spacecraft"
 }

@@ -1,3 +1,9 @@
+# Universe Explorer v0.1.0.5B.1 QA Report
+
+Physical iPhone acceptance of 5B exposed a usability/first-view issue rather than an astronomy failure: Earth inherited a ship-relative observer site where the Sun could be the only above-horizon candidate and sit at the atmospheric horizon. 5B.1 changes only observer-site selection and target feedback.
+
+Automated hotfix checks: full QA 338/338 PASS; Earth preferred focus = Moon; Earth default Moon altitude = 90.000° at SOL reference initialization; Moon physical angular diameter remains 0.505683°; compact observer HUD exposes the current target; NEXT reports selection count. Protected solver/flight/render/landing files remain unchanged from 5B.
+
 # Universe Explorer v0.1.0.5B QA Report
 
 ## Celestial Surface Presentation
