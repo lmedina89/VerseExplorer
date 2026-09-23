@@ -125,6 +125,19 @@ export function surfaceEngineSupport(body, bodies = []) {
   const environment = derivePlanetaryEnvironment(body, bodies);
   const family = architectureFamilyForEnvironment(environment);
 
+  if (body.referenceSystemId === 'sol' || body.surfacePolicy === 'sol-reference-landing-disabled-v1') {
+    return {
+      enabled: false,
+      proof: false,
+      exploration: false,
+      family,
+      profileId: null,
+      regionId: null,
+      environment,
+      reason: 'SOL reference landing is intentionally disabled until validated real-world surface profiles are added.',
+    };
+  }
+
   if (body.landable && body.surfaceProfile === 'anomalous-showcase-v1') {
     return {
       enabled: true,

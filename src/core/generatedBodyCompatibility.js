@@ -60,6 +60,17 @@ export function applyGeneratedBodyCompatibility(restored, generated) {
     && generated.environmentFormation && typeof generated.environmentFormation === 'object') {
     restored.environmentFormation = { ...generated.environmentFormation };
   }
+  if ((!restored.referenceEnvironment || typeof restored.referenceEnvironment !== 'object')
+    && generated.referenceEnvironment && typeof generated.referenceEnvironment === 'object') {
+    restored.referenceEnvironment = { ...generated.referenceEnvironment };
+  }
+  for (const key of ['referenceSystemId', 'referenceDataset', 'referenceEpoch', 'surfacePolicy']) {
+    if (missing(restored[key]) && !missing(generated[key])) restored[key] = generated[key];
+  }
+  if ((!restored.referenceOrbit || typeof restored.referenceOrbit !== 'object')
+    && generated.referenceOrbit && typeof generated.referenceOrbit === 'object') {
+    restored.referenceOrbit = { ...generated.referenceOrbit };
+  }
 
   if (missing(restored.rogueOrbitModel) && !missing(generated.rogueOrbitModel)) {
     // Do not rewrite a legacy rogue velocity; the saved dynamical state remains authoritative.

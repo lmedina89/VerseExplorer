@@ -220,10 +220,15 @@ export function derivePlanetaryEnvironment(body, bodies = []) {
   const formation = body.environmentFormation && typeof body.environmentFormation === 'object'
     ? body.environmentFormation
     : {};
-  const bondAlbedo = clamp(Number(formation.bondAlbedo) || 0.3, 0.02, 0.90);
-  const volatileInventory01 = clamp(Number(formation.volatileInventory01) || 0, 0, 1);
+  const referenceEnvironment = body.referenceEnvironment && typeof body.referenceEnvironment === 'object'
+    ? body.referenceEnvironment
+    : null;
+  const bondAlbedo = clamp(Number(referenceEnvironment?.bondAlbedo ?? formation.bondAlbedo) || 0.3, 0.02, 0.90);
+  const volatileInventory01 = referenceEnvironment
+    ? clamp(Number(referenceEnvironment.volatileInventory01) || 0, 0, 1)
+    : clamp(Number(formation.volatileInventory01) || 0, 0, 1);
   const atmosphereInventoryMassFraction = Math.max(0, Number(formation.atmosphereInventoryMassFraction) || 0);
-  const representativeMolecularMassAmu = clamp(Number(formation.representativeAtmosphereMolecularMassAmu) || 28, 2, 60);
+  const representativeMolecularMassAmu = clamp(Number(referenceEnvironment?.representativeAtmosphereMolecularMassAmu ?? formation.representativeAtmosphereMolecularMassAmu) || 28, 2, 60);
 
   const currentStarDistanceMeters = star ? distance3(body.position, star.position) : null;
   const luminosityWatts = finitePositive(star?.luminositySolar)
@@ -245,6 +250,64 @@ export function derivePlanetaryEnvironment(body, bodies = []) {
   const gravity = surfaceGravityMps2FromMassRadius(mass, radius);
   const escape = escapeVelocityMps(mass, radius);
   const density = bulkDensityKgM3(mass, radius);
+
+  if (referenceEnvironment) {
+    const gasEnvelope = body.kind === BODY_KIND.PLANET && body.planetType === 'gas';
+    const physicalSurfaceExists = !gasEnvelope && referenceEnvironment.physicalSurfaceExists !== false;
+    const pressureValue = Number(referenceEnvironment.surfacePressurePa);
+    const pressurePa = gasEnvelope || !Number.isFinite(pressureValue) ? null : Math.max(0, pressureValue);
+    const inferredClass = pressurePa === null ? { id: 'deep-envelope', label: 'DEEP ENVELOPE' } : atmosphereClassFromPressure(pressurePa);
+    const atmosphereClass = {
+      id: String(referenceEnvironment.atmosphereClassId || inferredClass.id),
+      label: String(referenceEnvironment.atmosphereLabel || inferredClass.label),
+    };
+    const bodyClassId = String(referenceEnvironment.bodyClassId || (gasEnvelope ? 'gas-giant' : 'rocky-terrestrial'));
+    const classLabel = String(referenceEnvironment.classLabel || (gasEnvelope ? 'GAS GIANT' : 'ROCKY TERRESTRIAL'));
+    const surfaceFamilyLabel = String(referenceEnvironment.surfaceFamily || surfaceFamily(bodyClassId));
+    return {
+      modelVersion: body.environmentModelVersion ?? 'sol-reference-environment-v1',
+      formationModel: body.environmentFormationModel ?? 'observational-reference-v1',
+      bodyClassId,
+      classLabel,
+      physicalSurfaceExists,
+      surfaceFamily: surfaceFamilyLabel,
+      surfaceCapability: physicalSurfaceExists
+        ? 'SOLID SURFACE · SOL REFERENCE LANDING DISABLED IN THIS BUILD'
+        : 'NO SOLID SURFACE · ATMOSPHERIC/PROBE FLIGHT FUTURE',
+      landingReason: physicalSurfaceExists
+        ? 'SOL reference body: landing is intentionally disabled until a validated real-world surface profile is added.'
+        : 'Gas/ice giant: no physical solid surface is modeled.',
+      bulkDensityKgM3: density,
+      surfaceGravityMps2: gravity,
+      escapeVelocityMps: escape,
+      bondAlbedo,
+      volatileInventory01,
+      icePotential01: clamp(Number(referenceEnvironment.icePotential01) || 0, 0, 1),
+      currentStarDistanceMeters,
+      referenceStellarFluxWm2: referenceFluxWm2,
+      currentStellarFluxWm2: currentFluxWm2,
+      referenceFluxEarth: referenceFluxWm2 ? referenceFluxWm2 / stellarFluxWm2(PHYSICS.SOLAR_LUMINOSITY, PHYSICS.AU) : null,
+      equilibriumTemperatureK: equilibriumK,
+      currentEquilibriumTemperatureK: currentEquilibriumK,
+      atmosphereInventoryMassFraction: null,
+      retainedAtmosphereMassFraction: null,
+      gasPhaseAvailabilityScore: null,
+      atmospherePressureProxyPa: pressurePa,
+      atmospherePressureProxyAtm: pressurePa === null ? null : pressurePa / STANDARD_ATMOSPHERE_PA,
+      atmospherePressureCapped: false,
+      atmosphereClassId: atmosphereClass.id,
+      atmosphereLabel: `${atmosphereClass.label} · REFERENCE`,
+      atmosphereRetentionScore: null,
+      atmosphereRetentionParameter: null,
+      representativeAtmosphereMolecularMassAmu: referenceEnvironment.representativeAtmosphereMolecularMassAmu ?? null,
+      skyRegime: skyRegime(atmosphereClass, bodyClassId),
+      tidalRotationState: tidalRotationState(body, parent),
+      referenceDistanceModel: `${orbit.model} · J2000 REFERENCE`,
+      scientificBoundary: gasEnvelope
+        ? 'SOL reference bulk environment. Pressure depends on depth in a deep giant-planet envelope; no solid surface, equation-of-state, cloud chemistry or radiative-convective atmosphere is solved.'
+        : 'SOL reference bulk environment. Mass/radius, Bond albedo and reference surface pressure are data inputs; radiative equilibrium is derived from live star distance, while greenhouse climate, weather and detailed chemistry are not solved.',
+    };
+  }
 
   if (body.kind === BODY_KIND.PLANET && body.planetType === 'gas') {
     const classInfo = { id: 'gas-giant', label: 'GAS GIANT' };

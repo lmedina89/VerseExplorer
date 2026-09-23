@@ -135,6 +135,12 @@ function serializeBody(body) {
     environmentModelVersion: body.environmentModelVersion,
     environmentFormationModel: body.environmentFormationModel,
     environmentFormation: body.environmentFormation && typeof body.environmentFormation === 'object' ? { ...body.environmentFormation } : body.environmentFormation,
+    referenceSystemId: body.referenceSystemId,
+    referenceDataset: body.referenceDataset,
+    referenceEpoch: body.referenceEpoch,
+    referenceEnvironment: body.referenceEnvironment && typeof body.referenceEnvironment === 'object' ? { ...body.referenceEnvironment } : body.referenceEnvironment,
+    referenceOrbit: body.referenceOrbit && typeof body.referenceOrbit === 'object' ? { ...body.referenceOrbit } : body.referenceOrbit,
+    surfacePolicy: body.surfacePolicy,
     rogueOrbitModel: body.rogueOrbitModel,
     materialId: body.materialId,
     visualVersion: body.visualVersion,
@@ -339,7 +345,21 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`v0.1.5.5 online. Origin remains the accepted deterministic baseline; Abyssal adds a bounded extreme-system profile with a physical wide-orbit magnetar companion and enhanced explicitly labeled visual phenomena. Active backend: ${backend}. Build ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.4A online. ORIGIN and ABYSSAL remain unchanged; SOL adds a fixed J2000 Sun + eight-planet reference foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+  }
+
+  syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
+    const normalized = String(profileId || 'origin').toLowerCase();
+    const seedInput = this.root.querySelector('#seedInput');
+    const randomButton = this.root.querySelector('#randomSeed');
+    if (!seedInput || !randomButton) return;
+    const fixedSol = normalized === 'sol';
+    if (fixedSol) seedInput.value = 'SOL-J2000';
+    else if (seedInput.value === 'SOL-J2000') seedInput.value = normalized === 'abyssal' ? 'ABYSSAL-001' : 'ORIGIN-001';
+    seedInput.disabled = fixedSol;
+    randomButton.disabled = fixedSol;
+    seedInput.title = fixedSol ? 'SOL uses a fixed J2000 reference epoch and does not accept random seeds.' : '';
+    randomButton.title = fixedSol ? 'Random seeds are disabled for the fixed SOL reference profile.' : '';
   }
 
   newSystem(seed, generationProfileId = 'origin') {
@@ -381,6 +401,7 @@ export class UniverseLabApp {
     this.hud.setSeed(this.system.seed);
     this.root.querySelector('#seedInput').value = this.system.seed;
     if (this.root.querySelector('#generationProfile')) this.root.querySelector('#generationProfile').value = this.system.generationProfileId;
+    this.syncGenerationProfileControls(this.system.generationProfileId);
     this.selectTarget(this.system.homeId);
     this.selectPhenomenon(this.cosmicPhenomena.values[0]?.id ?? null, false);
     this.invalidatePredictions();
@@ -2699,8 +2720,9 @@ export class UniverseLabApp {
     if (warpButton) warpButton.textContent = `WARP ${this.clock.timeScale.toLocaleString()}×`;
     const pauseButton = this.root.querySelector('#pauseToggle'); if (pauseButton) pauseButton.textContent = this.running ? 'PAUSE' : 'RESUME';
     this.root.querySelector('#minorCount').value = String(this.minorField.count);
-    this.root.querySelector('#seedInput').value = payload.seed;
+    this.root.querySelector('#seedInput').value = this.system.seed;
     if (this.root.querySelector('#generationProfile')) this.root.querySelector('#generationProfile').value = this.system.generationProfileId;
+    this.syncGenerationProfileControls(this.system.generationProfileId);
     if (payload.trajectoryHorizon) this.root.querySelector('#trajectoryHorizon').value = String(payload.trajectoryHorizon);
     this.userBodySerial = payload.userBodySerial ?? 1;
     this.selectedSurfaceRegionId = typeof payload.selectedSurfaceRegionId === 'string' ? payload.selectedSurfaceRegionId : 'shatterfall-basin';
@@ -3007,9 +3029,11 @@ export class UniverseLabApp {
       const seedInput = $('#seedInput');
       if (event.target.value === 'abyssal' && seedInput.value === 'ORIGIN-001') seedInput.value = 'ABYSSAL-001';
       else if (event.target.value === 'origin' && seedInput.value === 'ABYSSAL-001') seedInput.value = 'ORIGIN-001';
+      this.syncGenerationProfileControls(event.target.value);
     });
     $('#randomSeed').addEventListener('click', () => {
       const profileId = $('#generationProfile')?.value || 'origin';
+      if (profileId === 'sol') { this.newSystem('SOL-J2000', 'sol'); return; }
       const prefix = profileId === 'abyssal' ? 'ABYSSAL' : 'SYS';
       this.newSystem(`${prefix}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(16).toUpperCase()}`, profileId);
     });

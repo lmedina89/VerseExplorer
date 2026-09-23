@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#02050b">
-  <title>Universe Explorer v0.1.0.3</title>
+  <title>Universe Explorer v0.1.0.4A</title>
   <link rel="stylesheet" href="./styles.css?v=155">
   <script type="importmap">
   {
@@ -21,7 +21,7 @@
     <section id="viewport" class="viewport" aria-label="3D universe viewport. Tap a visible celestial body to target it."></section>
 
     <div class="hud top-hud" aria-live="polite">
-      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.3</span></div>
+      <div class="brand">UNIVERSE EXPLORER <span>v0.1.0.4A</span></div>
       <div class="stat technical-stat"><b id="rendererValue">INIT</b><small>renderer</small></div>
       <div class="stat primary-stat"><b id="fpsValue">—</b><small>fps</small></div>
       <div class="stat technical-stat"><b id="physicsMsValue">—</b><small>physics</small></div>
@@ -278,7 +278,7 @@
     <aside id="labPanel" class="drawer lab-panel" hidden>
       <header><div><b>UNIVERSE LAB</b><small>Seeded system + experiment launcher</small></div><button id="labClose" type="button" aria-label="Close lab">×</button></header>
       <div class="drawer-grid">
-        <label>Universe profile<select id="generationProfile"><option value="origin" selected>ORIGIN — scientific baseline</option><option value="abyssal">ABYSSAL — extreme universe</option></select></label>
+        <label>Universe profile<select id="generationProfile"><option value="origin" selected>ORIGIN — scientific baseline</option><option value="abyssal">ABYSSAL — extreme universe</option><option value="sol">SOL — reference Solar System (J2000)</option></select></label>
         <label>System seed<input id="seedInput" value="ORIGIN-001" maxlength="64"></label>
         <div class="button-row"><button id="regenerate" type="button">GENERATE</button><button id="randomSeed" type="button">RANDOM</button></div>
         <label>Time warp<select id="timeScale"><option value="1">1× real seconds</option><option value="60" selected>60×</option><option value="600">600×</option><option value="3600">3,600×</option><option value="86400">86,400×</option></select></label>

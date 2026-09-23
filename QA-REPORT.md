@@ -1,3 +1,17 @@
+# Universe Explorer v0.1.0.4A QA Report
+
+## Result
+
+**PASS — 317/317 automated tests.**
+
+The v0.1.0.3 tree was used as the only source baseline. All 308 inherited regression tests remain green, including exact ORIGIN deterministic signatures, ABYSSAL behavior, FRAME isolation, flight/navigation, WebKit hold-release, rendering/static contracts, landing/surface systems and save compatibility.
+
+Nine SOL-specific tests add coverage for: profile resolution, fixed-seed determinism, exact Sun + eight-planet population, reference mass/radius/semi-major axes, barycentric rest-frame residuals, reference atmosphere bypass, landing lockout, seven-day Newtonian integration and fixed-profile UI controls.
+
+Static structure and `node --check` pass for the complete source/test tree. The final acceptance gate that cannot be automated here remains physical iPhone/Safari rendering and touch interaction.
+
+---
+
 # v0.1.5.5 QA — Abyssal Universe Profile Foundation
 
 ## Baseline recovery

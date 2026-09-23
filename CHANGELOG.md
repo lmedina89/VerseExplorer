@@ -1,3 +1,15 @@
+# Universe Explorer v0.1.0.4A — SOL Reference-System Foundation
+
+- Added a fixed `sol` generation profile without altering ORIGIN or ABYSSAL generation.
+- Added `src/data/solSystem.js` with a J2000 Sun + eight-major-planet reference state.
+- Kept `star-0` as the Sun and set `planet-earth` as the SOL home target.
+- Added reference physical/environment metadata so SOL does not reuse seeded atmosphere formation proxies.
+- Disabled generalized surface landing for every SOL body pending validated real-world surface profiles.
+- Disabled random seed controls while SOL is selected; the canonical seed is `SOL-J2000`.
+- Added `EXPLORER-VERSION.json` so Explorer release identity is separated from the inherited v0.1.5.5 core metadata.
+- Added nine SOL regression tests; full suite passes 317/317.
+- Existing flight/navigation/FRAME/integrator code paths remain shared and unchanged in behavior.
+
 # Universe Explorer v0.1.0.3 — Exploration HUD Hierarchy Refinement
 
 - MINIMAL remains the default HUD mode.

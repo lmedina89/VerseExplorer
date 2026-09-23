@@ -254,3 +254,12 @@ Portrait cockpit adaptation changes only presentation geometry and HTML control 
 - Origin remains the scientific regression reference. The new profile mechanism does not reinterpret older saves or silently convert ordinary seeds into Abyssal systems.
 
 ---
+
+## Universe Explorer v0.1.0.4A — SOL reference boundary
+
+The SOL profile is a fixed major-planet reference foundation, not a seeded procedural system. Initial orbital elements are the JPL Solar System Dynamics approximate-position Table 1 values evaluated at J2000.0 (JD 2451545.0 TDB). These are lower-accuracy Keplerian reference elements, not a substitute for a high-precision JPL Horizons ephemeris.
+
+The first SOL increment intentionally includes only the Sun and eight major planets. Earth uses the published Earth-Moon-barycenter orbital elements until the Moon is introduced as a separate massive body in a later increment. Bulk mass/radius and reference atmosphere/albedo values come from NASA/NSSDCA planetary reference data. The live simulation then evolves those bodies with the existing Newtonian finite-radius N-body integrator.
+
+Known SOL surface pressures/albedo classes bypass the procedural formation/retention atmosphere proxy. No SOL landing surface is enabled in this milestone; enabling real-world landing requires a separately validated surface/environment profile rather than reusing fictional procedural terrain.
+

@@ -6,6 +6,7 @@ import { generateAnomalies } from '../cosmic/anomalyGenerator.js';
 import { breakupPeriodSeconds, bulkDensityKgM3, gasGiantPropertiesFromSamples } from '../physics/planetaryProperties.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { GENERATION_PROFILE_IDS, resolveGenerationProfile } from './generationProfiles.js';
+import { generateSolSystem } from './solSystem.js';
 
 const STAR_NAMES = ['Aster', 'Vesper', 'Orison', 'Nadir', 'Eidra', 'Khepri', 'Ilyon', 'Morrow', 'Sable', 'Caelum'];
 const PLANET_TYPES = [
@@ -481,6 +482,7 @@ function shiftToBarycentricFrame(bodies) {
 export function generateSystem(seedText = 'ORIGIN-001', profileId = GENERATION_PROFILE_IDS.ORIGIN) {
   const seed = String(seedText || 'ORIGIN-001').trim().slice(0, 64);
   const profile = resolveGenerationProfile(profileId);
+  if (profile.id === GENERATION_PROFILE_IDS.SOL) return generateSolSystem();
   const rng = createRng(seed);
   const seedHash = hashSeed(seed);
   const massRatio = rng.range(0.68, 1.28);

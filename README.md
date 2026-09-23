@@ -1,83 +1,21 @@
 # Universe Explorer exploration branch
 
-**v0.1.0.3 exploration-HUD hierarchy refinement.** This branch still preserves the Universe Lab v0.1.5.5 simulation, navigation, renderer, particles, cockpit, FRAME, landing, and surface systems. The new HUD-density layer is presentation-only and defaults to a cleaner exploration view.
+**v0.1.0.4A SOL Reference-System Foundation.** This branch preserves the Universe Explorer v0.1.0.3 HUD hierarchy and the inherited Universe Lab v0.1.5.5 simulation/navigation stack while adding a third, fixed **SOL** profile.
 
-HUD modes cycle from the small top-right HUD button:
+## v0.1.0.4A SOL foundation
 
-- **MINIMAL** — default. Keeps the central FLIGHT MFD plus thrust/reverse/brake and the steering/reticle cues, but hides the bottom TARGET/APPROACH/FRAME/WARP/MENU action strip.
-- **FLIGHT** — adds the bottom TARGET/APPROACH/FRAME/WARP/MENU action strip and, in landscape, restores NAV/FLIGHT/SCI MFDs while keeping diagnostics and lab launchers out of the main view.
-- **FULL** — restores the original v0.1.5.5 cockpit instruments and primary control presentation.
+- Adds `SOL — reference Solar System (J2000)` alongside unchanged ORIGIN and ABYSSAL profiles.
+- SOL is fixed to `SOL-J2000`; random seeds are intentionally disabled for this profile.
+- Adds the Sun plus Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune as nine live Newtonian gravity sources.
+- Uses JPL approximate J2000 major-planet orbital elements and NASA/NSSDCA reference bulk physical values.
+- Earth is the SOL home/start target. The Moon is intentionally deferred; Earth currently uses Earth-Moon-barycenter orbital elements for the reference orbit.
+- SOL reference environments bypass the procedural atmosphere-formation proxy for known albedo/pressure classes.
+- No procedural comets, rogues, anomalies or generalized landing surfaces are injected into SOL.
+- All SOL landings remain intentionally disabled until validated real-world surface profiles are implemented.
+- Flight, FRAME, navigation, rendering, cockpit, landing transition logic and Newtonian integrator are not special-cased for SOL.
+- `EXPLORER-VERSION.json` tracks Explorer release metadata without rewriting inherited `VERSION.json` / `package.json` core identity.
 
-No flight/navigation action IDs were renamed or repurposed. The new MENU launcher simply opens the existing FLIGHT / SYSTEM drawer.
-
-# Universe Lab v0.1.5.5 — Abyssal Universe Profile Foundation
-
-**Build marker:** `ABYSSAL-155`  
-**Save schema:** `1`  
-**Three.js:** `0.185.0`
-
-This release adds explicit, data-driven universe profiles without replacing the existing generator. **Origin** remains the default and preserves the established `ORIGIN-001` physical initial conditions, phenomenon ordering and independent environment/rotation RNG streams. **Abyssal** is an opt-in extreme profile selected separately from its editable seed.
-
-`ABYSSAL-001` generates a bounded nine-planet system with two physical high-eccentricity comets, one physical unbound rogue planet, enhanced belts/remnants/rings, 15–18 explicitly labeled anomalies, and **Abyssal Sentinel**: a 1.55-solar-mass physical magnetar companion initialized in a 420 AU circular two-body relative state before the complete system is shifted into its barycentric rest frame. Its mass, position and velocity participate in the existing direct Newtonian solver. Its enlarged disk, magnetic lobes, burst arcs and radiation cues remain presentation proxies; GR, MHD, plasma transport and radiation damage are not solved.
-
-The profile identifier is saved as an optional schema-1 payload field. Older saves have no such field and therefore restore through Origin. The selected profile and random-seed prefix are exposed in the existing Universe Lab drawer. Abyssal remains below the 128-body direct-solver ceiling and retains the existing 40,000-particle mobile budget; large persistent plasma/particle storms are deliberately deferred.
-
----
-
-# Universe Lab v0.1.5.4.2 — Stellar Irradiance & Daylight Realism Polish
-
-**Build marker:** `IRRAD-1542`  
-**Save schema:** `1`  
-**Three.js:** `0.185.0`
-
-This focused realism release closes a mismatch between the scientific environment model and the renderer. Universe Lab already derived stellar flux from modeled luminosity and live inverse-square distance, but orbital reflected-body brightness and surface daylight still behaved too much like a fixed-intensity scene light. v0.1.5.4.2 adds one read-only irradiance presentation bridge and feeds it into both paths.
-
-Planets and moons now preserve the existing MeshStandardMaterial star-facing terminator, phase/eclipsing geometry, close-orbit maps and exposure behavior while their reflected-light amplitude follows live stellar luminosity/distance. Landed worlds use the same irradiance bridge to scale direct stellar light and diffuse hemisphere daylight on top of the existing atmospheric transmission/scattering solution.
-
-The physical value remains the canonical `W/m²` / `S⊕` irradiance. Display gain is deliberately **square-root HDR-compressed** and bounded only at extreme values so mobile displays retain useful dynamic range; this tone curve is presentation, not changed physics. The renderer reuses irradiance result records instead of allocating new result objects every frame.
-
-No authoritative body state, gravity, integrator, FRAME behavior, albedo/environment science, phase/eclipsing geometry, landing/surface authority, save schema or iPhone/iPad WebKit backend policy is changed.
-
----
-
-# Universe Lab v0.1.5.4.1 — Planet & Moon Realism Polish
-
-**Build marker:** `PLANETREAL-1541`  
-**Save schema:** `1`  
-**Three.js:** `0.185.0`
-
-This focused rendering update preserves the accepted v0.1.5.4 mid-range celestial look and strengthens the regime that still broke down when planets/moons filled the camera. Rocky and icy bodies lazily gain a compact repeating normal/roughness detail layer only at close apparent size, so crater/fracture/roughness lighting continues to resolve without allocating huge global textures. Large bright disks receive stronger bounded exposure headroom to reduce pale-wall washout.
-
-The black-hole renderer also gains a continuous radial-temperature/Doppler-asymmetric accretion-flow layer underneath the existing turbulent particle field. GR-informed shadow/critical-curve/ISCO ratios remain presentation cues only; background geodesic ray tracing and GRMHD are still not claimed.
-
-No authoritative body state, gravity, FRAME, atmosphere science, landing/surface logic, save schema or WebKit backend policy is changed.
-
----
-
-# Universe Lab v0.1.5.4 — Celestial Rendering & Relativistic Object Realism
-
-**Build marker:** `CELESTREAL-154`  
-**Save schema:** `1`  
-**Three.js:** `0.185.0`
-
-This milestone upgrades how resolved planets, moons, stars and compact objects look while preserving the accepted v0.1.5.3.1 simulation state. Close planets/moons gain lazy environment-driven procedural detail and canonical visual rotation; stars gain darker photospheric spots; black holes and neutron stars use physically derived ratio/compactness diagnostics with explicitly bounded rendering proxies.
-
-
-**Build marker:** `INPUTREL-1531`  
-**Save schema:** 1 (unchanged)  
-**Three.js:** 0.185.0 (unchanged)
-
-This hotfix sits directly on v0.1.5.3. It fixes the stale shell version badge and hardens iPhone/WebKit hold-release handling after a physical test showed the surface forward button could remain visually/behaviorally latched after a touch ended. The existing pointer-release paths remain; the added Touch Event fallback is target-touch-aware so normal two-finger LOOK + WALK input is preserved.
-
-No scientific model, atmosphere optics, surface generation, navigation, FRAME, save authority, or landing/takeoff behavior is intentionally changed.
-
----
-
-# Universe Lab v0.1.5.3 — Physical Atmosphere & Sky Optics
-
-**Build marker:** `ATMOSKY-153`  
-**Save schema:** 1 (unchanged)  
-**Three.js:** 0.185.0 (unchanged)
+**QA:** 317/317 tests pass, including the complete inherited 308-test regression suite plus 9 SOL tests.
 
 ## v0.1.5.3 atmosphere / sky optics
 

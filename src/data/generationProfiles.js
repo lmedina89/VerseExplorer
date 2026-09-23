@@ -1,6 +1,7 @@
 export const GENERATION_PROFILE_IDS = Object.freeze({
   ORIGIN: 'origin',
   ABYSSAL: 'abyssal',
+  SOL: 'sol',
 });
 
 const ORIGIN = Object.freeze({
@@ -15,6 +16,22 @@ const ORIGIN = Object.freeze({
   anomalyOptions: null,
   mobileVisualParticleBudget: 40_000,
   scientificStatus: 'Standard seeded near-Keplerian planetary system with the established physical and presentation layers.',
+});
+
+
+const SOL = Object.freeze({
+  id: GENERATION_PROFILE_IDS.SOL,
+  label: 'SOL — reference Solar System',
+  seedPrefix: 'SOL',
+  fixedReference: true,
+  planetCount: 8,
+  guaranteedComets: 0,
+  guaranteedRoguePlanet: false,
+  compactCompanion: null,
+  phenomenonOptions: null,
+  anomalyOptions: null,
+  mobileVisualParticleBudget: 40_000,
+  scientificStatus: 'Fixed J2000 Solar System reference foundation. Major-planet initial states are reference data rather than seeded procedural generation.',
 });
 
 const ABYSSAL = Object.freeze({
@@ -41,6 +58,7 @@ const ABYSSAL = Object.freeze({
 export const GENERATION_PROFILES = Object.freeze({
   [ORIGIN.id]: ORIGIN,
   [ABYSSAL.id]: ABYSSAL,
+  [SOL.id]: SOL,
 });
 
 export function resolveGenerationProfile(profileId = GENERATION_PROFILE_IDS.ORIGIN) {
