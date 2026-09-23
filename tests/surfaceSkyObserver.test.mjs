@@ -24,7 +24,7 @@ function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 const sol = generateSystem('ignored', 'sol');
 const byId = (id) => sol.bodies.find((body) => body.id === id);
 
-test('0.1.0.5E keeps massless SOL surface-sky observers alongside the expanded real-landing set', () => {
+test('0.1.0.5F keeps massless SOL surface-sky observers alongside the expanded real-landing set', () => {
   const landingIds = new Set(['planet-earth', 'planet-mars', 'moon-luna', 'moon-europa', 'moon-titan', 'moon-triton']);
   for (const id of ['planet-earth', 'planet-mars', 'moon-luna', 'moon-europa', 'moon-titan', 'moon-triton']) {
     const body = byId(id);

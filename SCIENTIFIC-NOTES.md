@@ -1,3 +1,7 @@
+# Universe Explorer v0.1.0.5F — Solar Visibility & Surface Survey Clarity scientific boundary
+
+The SOL Sun's position, radius, angular size, eclipse coverage, horizon state and atmospheric spectral attenuation remain derived from the existing live astronomy/optics stack. v0.1.0.5F changes only presentation: a neutral-luminance derivative of the user-supplied CC BY 4.0 photosphere image replaces the procedural SOL photosphere map, and direct-transmission values are no longer used literally as framebuffer alpha for the solar disk. The latter is an HDR display transform: physical attenuation still controls direct lighting and stellar color, while display alpha is compressed because the real solar photosphere remains vastly brighter than the daytime sky after ordinary clear-air attenuation. The external GLB geometry/transmission shell is not used. Surface POI labels are UI presentation only.
+
 # Universe Explorer v0.1.0.5E — Earth scientific boundary
 
 Earth surface gravity, radius, rotation, orbital state, 101325 Pa reference pressure, live Sun/Moon/planet geometry, finite-disk eclipses and atmospheric-optics inputs remain canonical/reference-driven. The local landed terrain is deliberately procedural and must not be interpreted as a real Earth location or elevation model. Ground color variation, near-ground rocks and fog are presentation proxies. Clouds baked into the current Earth albedo are static imagery; cloud dynamics, precipitation, vegetation/ecology, hydrology, ozone, greenhouse climate and global weather are not solved in this milestone.

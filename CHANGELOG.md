@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.5F — Solar Visibility & Surface Survey Clarity
+
+- Uses the user-supplied Sketchfab **Sun** asset by SebastianSosnowski (CC BY 4.0) as a visual-only photosphere source; only a neutral-luminance derivative of the embedded 1024×512 JPEG is shipped, not the GLB geometry/transmission shell.
+- Applies the reference photosphere to the existing SOL Sun sphere in space and to the landed/surface celestial Sun disk without changing solar mass, radius, luminosity, position or angular geometry.
+- Fixes the daylight-Sun visibility bug by separating physical atmospheric transmission from display alpha. Ground illumination still uses the physical optics solution; the solar disk uses bounded HDR display compression so an above-horizon Sun remains readable against a bright sky.
+- Preserves live atmospheric reddening, eclipse/visible fraction, horizon clipping and telescope FOV behavior.
+- Adds an explicit POI-name + `SURVEY / SCAN` billboard to existing surface survey beacons so the yellow ring/stem is no longer unexplained.
+- No gravity, integrator, SOL state, planetary rotation, atmosphere physics, landing transition, walking, takeoff, FRAME or SKY SPAWN behavior is changed.
+
 # Universe Explorer v0.1.0.5E — Earth Landing & Atmosphere Foundation
 
 - Enables Earth through the existing atmospheric-rocky landing/on-foot/takeoff stack without changing the canonical SOL Earth body record.

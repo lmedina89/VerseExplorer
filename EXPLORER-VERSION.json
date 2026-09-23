@@ -1,18 +1,28 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.5E",
-  "name": "Earth Landing & Atmosphere Foundation",
-  "baseline": "Universe Explorer v0.1.0.5D.1",
+  "version": "0.1.0.5F",
+  "name": "Solar Visibility & Surface Survey Clarity",
+  "baseline": "Universe Explorer v0.1.0.5E",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
   "solReferenceSeed": "SOL-J2000",
   "solReferenceEpoch": "J2000.0 / JD 2451545.0 TDB",
   "solBodyCount": 16,
-  "solLandingWorlds": ["planet-earth", "moon-luna", "planet-mars", "moon-europa", "moon-titan", "moon-triton"],
+  "solLandingWorlds": [
+    "planet-earth",
+    "moon-luna",
+    "planet-mars",
+    "moon-europa",
+    "moon-titan",
+    "moon-triton"
+  ],
   "earthLandingPolicy": "Earth reuses the inherited atmospheric-rocky descent/touchdown/on-foot/takeoff lifecycle through the surface-support layer; the canonical SOL Earth body flags and physical state are not rewritten.",
   "earthSurfacePolicy": "Local Earth terrain is deterministic terrestrial presentation, not mapped geography/topography. Ground color/relief and ordinary fog are lightweight proxies; ecology, hydrology, clouds and global weather are deferred.",
   "earthAtmospherePolicy": "Surface sky uses the existing wavelength-dependent atmospheric-optics model driven by the SOL 101325 Pa reference atmosphere, real surface gravity, live Sun altitude/eclipses and shared celestial observer geometry.",
   "earthAlbedoPolicy": "The CC BY 4.0 Akshat Earth albedo remains lazy-loaded and is explicitly mapped north-up with glTF V orientation handled at the texture level. The supplied GLB geometry is not used.",
   "flightNavigationPolicy": "Newtonian gravity/integrator, ship dynamics, flight computer, FRAME/transit, SOL states, astronomical observer/eclipses, planetary rotation, landing transition and takeoff/orbit insertion remain inherited rather than redesigned.",
-  "mobileCachePolicy": "All changed/reachable versioned module edges are stamped ue0105e for Safari/GitHub Pages cache isolation.",
-  "scope": "Earth landing, Earth atmospheric/terrestrial presentation, and Earth albedo orientation correction only; no SKY SPAWN, real GIS terrain, global climate/weather, separate cloud layer or new physics."
+  "mobileCachePolicy": "All changed/reachable versioned module edges are stamped ue0105f for Safari/GitHub Pages cache isolation.",
+  "scope": "SOL Sun photosphere presentation, landed/surface Sun visibility display mapping, and survey-beacon clarity only; no celestial geometry, atmosphere physics, landing physics, orbital dynamics or SKY SPAWN changes.",
+  "sunVisualPolicy": "The user-supplied CC BY 4.0 Sketchfab Sun asset supplies its embedded 1024x512 photosphere image, converted to a neutral luminance-detail map so runtime stellar/atmospheric color controls hue, on the existing SOL Sun sphere. The supplied GLB geometry/transmission shell is not shipped or loaded at runtime.",
+  "surfaceSunPolicy": "Live surface-Sun direction, altitude, angular radius, eclipse visibility and atmospheric spectral color remain authoritative. Only display opacity uses bounded HDR compression so physical extinction is not incorrectly interpreted as alpha against a bright daytime sky.",
+  "surfaceSurveyMarkerPolicy": "Existing procedural POI beacons retain their geometry and scan behavior but now carry an explicit SURVEY / SCAN label with the POI name."
 }

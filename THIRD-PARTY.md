@@ -1,5 +1,18 @@
 # Third-Party Software
 
+## Universe Explorer v0.1.0.5F Sun reference photosphere
+
+This release bundles one external visual asset derived from the user-supplied Sketchfab GLB:
+
+- **Title:** “Sun”
+- **Creator:** SebastianSosnowski
+- **Source:** `https://sketchfab.com/3d-models/sun-9ef1c68fbb944147bcfcc891d3912645`
+- **License:** Creative Commons Attribution 4.0 (CC BY 4.0)
+- **License URL:** `https://creativecommons.org/licenses/by/4.0/`
+- **Modification/use in Universe Explorer:** the embedded 1024×512 JPEG photosphere texture was extracted, converted to a neutral luminance-detail map so Explorer's stellar/atmospheric color controls hue, and renamed `assets/textures/sun-sebastiansosnowski-photosphere.jpg`. The supplied GLB meshes and `KHR_materials_transmission` shell are not shipped or used at runtime. Universe Explorer applies the image to its existing SOL Sun sphere and landed/surface-Sun presentation only; canonical solar mass, radius, position, luminosity and celestial geometry are unchanged.
+
+Required attribution: This work uses “Sun” by SebastianSosnowski, licensed under CC BY 4.0.
+
 ## Universe Explorer v0.1.0.5D.1 Earth reference albedo
 
 This release bundles one external visual asset derived from the user-supplied Sketchfab download:

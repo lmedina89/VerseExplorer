@@ -7,7 +7,7 @@ import { surfaceColorAt, surfaceHeightAt, surfaceZoneWeights, surfacePois } from
 import { surfaceEyePosition } from '../surface/surfaceSession.js';
 import { surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { stellarIrradiancePresentation } from './stellarIrradiance.js';
-import { createPlanetarySurfacePresentationMaps } from './celestialFactory.js?v=ue0105e';
+import { createPlanetarySurfacePresentationMaps, createReferenceStellarPresentationMap } from './celestialFactory.js?v=ue0105f';
 
 function disposeMaterial(material) {
   if (!material) return;
@@ -120,17 +120,36 @@ function makeStellarDiskTexture(color = '#ffffff') {
   return texture;
 }
 
-function createSurfaceStarDisk(observed) {
+function createSurfaceStarDisk(observed, starBody = null) {
   const group = new THREE.Group();
   group.userData.surfaceCelestialKind = 'star';
-  const disk = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: makeStellarDiskTexture(cssHex(observed.color)),
-    color: observed.color,
-    transparent: true,
-    opacity: 0.98,
-    depthWrite: false,
-    depthTest: true,
-  }));
+  const referenceMap = createReferenceStellarPresentationMap(starBody, { surfaceOwned: true });
+  let disk;
+  if (referenceMap) {
+    disk = new THREE.Mesh(
+      new THREE.SphereGeometry(0.5, 40, 24),
+      new THREE.MeshBasicMaterial({
+        map: referenceMap,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.98,
+        depthWrite: false,
+        depthTest: true,
+        toneMapped: false,
+      }),
+    );
+    disk.userData.referencePhotosphere = true;
+  } else {
+    disk = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeStellarDiskTexture(cssHex(observed.color)),
+      color: observed.color,
+      transparent: true,
+      opacity: 0.98,
+      depthWrite: false,
+      depthTest: true,
+      toneMapped: false,
+    }));
+  }
   disk.userData.role = 'physical-stellar-disk';
   group.add(disk);
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -141,6 +160,7 @@ function createSurfaceStarDisk(observed) {
     depthWrite: false,
     depthTest: true,
     blending: THREE.AdditiveBlending,
+    toneMapped: false,
   }));
   glow.userData.role = 'stellar-glow-proxy';
   group.add(glow);
@@ -432,6 +452,28 @@ function createEmberFissures(region, rng) {
   return new THREE.LineSegments(geometry, material);
 }
 
+function makeBeaconLabelTexture(text, color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 112;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(3,10,16,0.82)';
+  ctx.strokeStyle = cssHex(color);
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect(4, 4, canvas.width - 8, canvas.height - 8, 18); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 34px ui-monospace, SFMono-Regular, Menlo, monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(String(text).toUpperCase().slice(0, 26), canvas.width / 2, 43);
+  ctx.fillStyle = cssHex(color);
+  ctx.font = '700 24px ui-monospace, SFMono-Regular, Menlo, monospace';
+  ctx.fillText('SURVEY / SCAN', canvas.width / 2, 79);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.userData.surfaceOwned = true;
+  return texture;
+}
+
 function createBeacon(poi, region) {
   const group = new THREE.Group();
   const color = poiColor(poi);
@@ -443,9 +485,21 @@ function createBeacon(poi, region) {
   group.add(ring);
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 9, 5), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending }));
   stem.position.y = 4.5; group.add(stem);
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: makeBeaconLabelTexture(poi.name ?? 'Survey Site', color),
+    transparent: true,
+    opacity: 0.92,
+    depthWrite: false,
+    depthTest: true,
+  }));
+  label.position.y = 11.5;
+  label.scale.set(18, 3.94, 1);
+  label.userData.role = 'survey-beacon-label';
+  group.add(label);
   placeOnGround(group, region, poi.x, poi.z, 0.35);
   group.userData.poiId = poi.id;
   group.userData.beaconRing = ring;
+  group.userData.beaconLabel = label;
   return group;
 }
 
@@ -982,7 +1036,7 @@ export class SurfaceWorldVisual {
       let visual = this.astronomicalBodies.get(observed.id);
       if (!visual || (visual.userData?.surfaceCelestialKind === 'star') !== wantsStar) {
         if (visual) { this.scene.remove(visual); disposeTree(visual); }
-        visual = wantsStar ? createSurfaceStarDisk(observed) : createSurfacePhaseSphere(observed, this.bodyCatalog.get(observed.id) ?? null);
+        visual = wantsStar ? createSurfaceStarDisk(observed, this.bodyCatalog.get(observed.id) ?? this.star) : createSurfacePhaseSphere(observed, this.bodyCatalog.get(observed.id) ?? null);
         visual.name = `surface-celestial-${observed.id}`;
         this.astronomicalBodies.set(observed.id, visual);
         this.scene.add(visual);
@@ -1004,15 +1058,23 @@ export class SurfaceWorldVisual {
         const physicalDiameter = 2 * shellDistance * Math.tan(angularRadius);
         const disk = visual.userData.disk;
         const glow = visual.userData.glow;
+        const visibleFraction = Math.max(0, Math.min(1, Number(observed.observerStarVisibleFraction ?? 1)));
+        // Physical transmission is retained for ground illumination. The visible solar disk uses
+        // a bounded HDR display mapping instead of treating atmospheric transmission as alpha:
+        // even an attenuated Sun is vastly brighter than a blue daytime sky to the human eye.
+        const clearAirDiskGain = Math.max(0.58, Math.pow(Math.max(0, exposure.directStellarTransmission), 0.18));
+        const weatherDiskGain = 0.28 + 0.72 * Math.sqrt(Math.max(0, Math.min(1, transmission)));
+        const diskDisplayOpacity = 0.98 * visibleFraction * clearAirDiskGain * weatherDiskGain;
         if (disk) {
-          disk.scale.set(physicalDiameter, physicalDiameter, 1);
-          disk.material.opacity = Math.max(0.015, exposure.directStellarTransmission) * 0.98;
+          if (disk.userData?.referencePhotosphere) disk.scale.setScalar(physicalDiameter);
+          else disk.scale.set(physicalDiameter, physicalDiameter, 1);
+          disk.material.opacity = diskDisplayOpacity;
           disk.material.color.setRGB(...exposure.starColorAtObserverRgb);
         }
         if (glow) {
-          const glowDiameter = physicalDiameter * 2.8;
+          const glowDiameter = physicalDiameter * 3.2;
           glow.scale.set(glowDiameter, glowDiameter, 1);
-          glow.material.opacity = 0.22 * Math.max(0.03, exposure.directStellarTransmission) * Math.max(0.10, Number(observed.observerStarVisibleFraction ?? 1));
+          glow.material.opacity = 0.30 * visibleFraction * Math.max(0.10, Math.pow(Math.max(0, exposure.directStellarTransmission), 0.22)) * weatherDiskGain;
           glow.material.color.setRGB(...exposure.starColorAtObserverRgb);
         }
         if (observed === starObservation) {

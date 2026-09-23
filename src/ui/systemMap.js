@@ -1,8 +1,8 @@
 import { BODY_KIND, PHYSICS } from '../core/constants.js';
 import { apparentAngularRadiusRad, phaseAppearance, stellarVisibilityAtBody } from '../core/celestialAppearance.js';
 import { ANOMALY_REALITY_LABELS } from '../cosmic/anomalyGenerator.js';
-import { frameOrbitInsertionPlan } from '../physics/frameOrbitInsertion.js?v=ue0105e';
-import { navigationBodySnapshot, orderedNavigationBodies } from '../navigation/systemNavigation.js?v=ue0105e';
+import { frameOrbitInsertionPlan } from '../physics/frameOrbitInsertion.js?v=ue0105f';
+import { navigationBodySnapshot, orderedNavigationBodies } from '../navigation/systemNavigation.js?v=ue0105f';
 
 function distanceLabel(meters) {
   if (!Number.isFinite(meters)) return '—';

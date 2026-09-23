@@ -77,6 +77,24 @@ const REFERENCE_PLANET_ALBEDO_ASSETS = Object.freeze({
   'planet-earth': new URL('../../assets/textures/earth-akshat-albedo.jpg', import.meta.url).href,
 });
 
+const SOL_REFERENCE_PHOTOSPHERE_ASSET = new URL('../../assets/textures/sun-sebastiansosnowski-photosphere.jpg', import.meta.url).href;
+
+export function createReferenceStellarPresentationMap(body, { surfaceOwned = false } = {}) {
+  if (body?.referenceSystemId !== 'sol' || body?.name !== 'Sun') return null;
+  const texture = new THREE.TextureLoader().load(SOL_REFERENCE_PHOTOSPHERE_ASSET);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  // The image is extracted from a glTF asset, so preserve glTF's V convention rather than
+  // silently flipping the photosphere when TextureLoader is used directly.
+  texture.flipY = false;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.userData.referenceAsset = 'Sun by SebastianSosnowski (CC BY 4.0)';
+  texture.userData.referenceAssetUrl = 'https://sketchfab.com/3d-models/sun-9ef1c68fbb944147bcfcc891d3912645';
+  texture.userData.surfaceOwned = Boolean(surfaceOwned);
+  return texture;
+}
+
 function makeReferencePlanetAlbedoMap(body, { surfaceOwned = false } = {}) {
   const url = REFERENCE_PLANET_ALBEDO_ASSETS[String(body?.id ?? '')];
   if (!url) return null;
@@ -1000,8 +1018,12 @@ export function createCelestialVisual(body) {
     if (body.kind === BODY_KIND.STAR) {
       // The seeded photosphere map is applied to the physical disk so dark starspots can
       // actually subtract brightness instead of existing only inside an additive overlay.
-      const stellarSurfaceMap = makeStellarSurfaceTexture(body);
+      const referencePhotosphere = createReferenceStellarPresentationMap(body);
+      const stellarSurfaceMap = referencePhotosphere ?? makeStellarSurfaceTexture(body);
       mesh.material.map = stellarSurfaceMap;
+      // The supplied SOL Sun texture is emissive-looking source imagery; keep the physical
+      // stellar sphere and existing corona/proxy layers, replacing only the visible surface map.
+      if (referencePhotosphere) mesh.material.color.setHex(bodyColor);
       mesh.material.userData.disposeMap = true;
       mesh.material.needsUpdate = true;
       // A second additive layer retains sub-cell granulation sparkle without altering radius.

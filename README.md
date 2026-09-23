@@ -1,3 +1,15 @@
+# Universe Explorer exploration branch
+
+**v0.1.0.5F — Solar Visibility & Surface Survey Clarity.** Built from the validated 5E Earth landing/atmosphere checkpoint. The supplied CC BY 4.0 Sun GLB contributes only a neutral-luminance derivative of its embedded photosphere JPEG; Explorer keeps its existing physical Sun sphere, corona and authoritative SOL properties. Surface rendering now keeps an above-horizon Sun visibly readable through a bounded HDR display transform while physical atmospheric transmission still drives illumination. Existing survey beacons are explicitly labeled with their POI name and `SURVEY / SCAN`.
+
+## 5F acceptance focus
+
+1. On landed Earth, select **Sun**, CENTER it, and confirm the disk remains visibly bright at 70°, 15°, 5° and 1.5° FOV when above the horizon.
+2. Near the horizon, confirm the Sun becomes warmer/redder from the existing atmosphere optics rather than disappearing into the blue sky.
+3. Confirm eclipse/occultation still reduces the visible stellar fraction and that below-horizon Sun remains hidden.
+4. View the Sun from space and confirm the reference photosphere adds surface structure without changing physical solar size or position.
+5. Walk toward a yellow POI beacon and confirm its label identifies the site and says `SURVEY / SCAN`.
+
 # Universe Explorer
 
 **v0.1.0.5E — Earth Landing & Atmosphere Foundation.** Built from the verified v0.1.0.5D.1 checkpoint. Earth now joins the existing real landing/on-foot/takeoff path, uses the shared live celestial sky and one-atmosphere optical presentation, receives a terrestrial local proxy surface, and corrects the imported Earth albedo north/south orientation. The Earth asset remains visual-only; canonical Earth mass/radius/orbit/rotation and the core physics stack are unchanged.

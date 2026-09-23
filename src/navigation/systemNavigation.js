@@ -1,6 +1,6 @@
 import { BODY_KIND, PHYSICS } from '../core/constants.js';
 import { derivePlanetaryEnvironment, surfaceGravityMps2FromMassRadius } from '../physics/planetaryEnvironment.js';
-import { surfaceCapabilityForBuild } from '../surface/surfaceProfiles.js?v=ue0105e';
+import { surfaceCapabilityForBuild } from '../surface/surfaceProfiles.js?v=ue0105f';
 
 function finite(value, fallback = null) {
   const n = Number(value);

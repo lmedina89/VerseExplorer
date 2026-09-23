@@ -1,7 +1,7 @@
 import { PHYSICS } from '../core/constants.js';
 import { createRng, hashSeed } from '../util/prng.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
-import { SURFACE_ENGINE_PROFILES, surfaceEngineSupport } from './surfaceProfiles.js?v=ue0105e';
+import { SURFACE_ENGINE_PROFILES, surfaceEngineSupport } from './surfaceProfiles.js?v=ue0105f';
 
 const TAU = Math.PI * 2;
 

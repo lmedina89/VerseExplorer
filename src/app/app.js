@@ -1,13 +1,13 @@
 import { EntityRegistry } from '../core/entityRegistry.js';
 import { SimulationClock } from '../core/simulationClock.js';
 import { FloatingReferenceFrame } from '../core/referenceFrame.js';
-import { ASTRONOMICAL_OBSERVER_MODE, AstronomicalObserverModel } from '../core/astronomicalObserver.js?v=ue0105e';
+import { ASTRONOMICAL_OBSERVER_MODE, AstronomicalObserverModel } from '../core/astronomicalObserver.js?v=ue0105f';
 import { captureBodyFixedSurfaceAnchor, hasPhysicalRotationModel, inertialDirectionToBodyFixed, localSolarTimeHours, rotationAngleAt, surfaceLatitudeLongitude } from '../core/planetaryRotation.js';
 import { SaveSystem } from '../core/saveSystem.js';
 import { applyGeneratedBodyCompatibility } from '../core/generatedBodyCompatibility.js';
 import { PHYSICS, SIMULATION, BODY_KIND } from '../core/constants.js';
-import { generateSystem } from '../data/systemGenerator.js?v=ue0105e';
-import { generateSolReferenceMoonUpgrades } from '../data/solSystem.js?v=ue0105e';
+import { generateSystem } from '../data/systemGenerator.js?v=ue0105f';
+import { generateSolReferenceMoonUpgrades } from '../data/solSystem.js?v=ue0105f';
 import { DirectGravitySolver } from '../physics/gravity/directGravitySolver.js';
 import { VelocityVerletIntegrator } from '../physics/integrators/velocityVerlet.js';
 import { CollisionMonitor, CollisionStateBuffer } from '../physics/collisionMonitor.js';
@@ -27,18 +27,18 @@ import { CosmicPhenomenonRegistry } from '../cosmic/phenomenonRegistry.js';
 import { SpaceWeatherManager } from '../cosmic/spaceWeather.js';
 import { ANOMALY_REALITY_LABELS } from '../cosmic/anomalyGenerator.js';
 import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, transitClearanceCheck, firstTransitGuardHit, advanceTransitPosition, matchFrameExitVelocity } from '../physics/transitDrive.js';
-import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105e';
+import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105f';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0105e';
-import { Hud } from '../ui/hud.js?v=ue0105e';
-import { SystemMapController } from '../ui/systemMap.js?v=ue0105e';
-import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105e';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0105f';
+import { Hud } from '../ui/hud.js?v=ue0105f';
+import { SystemMapController } from '../ui/systemMap.js?v=ue0105f';
+import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105f';
 import { createSurfaceSession, serializeSurfaceSession, stepSurfaceMovement, nearestSurfacePoi, scanNearestSurfacePoi, surfaceTakeoffReferencePosition } from '../surface/surfaceSession.js';
 import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beginLandingTransition, setLandingPhase, stepLandingTransition, transitionProgress, canEnterSurface, canWalkSurface, canRequestTakeoff, validateOrbitHandoff } from '../surface/landingTransition.js';
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
-import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js?v=ue0105e';
-import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105e';
+import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js?v=ue0105f';
+import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105f';
 
 const SURFACE_SKY_FOV_PRESETS = Object.freeze([70, 35, 15, 5, 1.5]);
 
@@ -350,7 +350,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.5E online. ORIGIN and ABYSSAL remain unchanged; SOL now enables the inherited landing/surface lifecycle for Earth, Moon, Mars, Europa, Titan and Triton. Earth adds a reference-atmosphere terrestrial presentation while canonical physics and shared celestial sky remain unchanged. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.5F online. ORIGIN and ABYSSAL remain unchanged; SOL now enables the inherited landing/surface lifecycle for Earth, Moon, Mars, Europa, Titan and Triton. Earth retains its reference-atmosphere terrestrial presentation; the SOL Sun now has a licensed photosphere texture and a daylight-readable surface disk while canonical physics and shared celestial geometry remain unchanged. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
