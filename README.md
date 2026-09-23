@@ -513,3 +513,21 @@ After physical acceptance of v0.1.4.4, the sensible next step is **v0.1.4.5 Surf
 - Cache-busts the complete changed runtime import chain for `main.js` → `app.js` → `systemGenerator.js` / `solSystem.js` / `generationProfiles.js`.
 - Prevents Safari/GitHub Pages from combining the v0.1.0.4B app module with stale v0.1.0.4A.2 SOL modules, which could leave the shell stuck on `Initializing…`.
 - No flight, navigation, renderer, integrator, moon-state, LOOK-zone, or SOL physics behavior changed.
+
+## Universe Explorer v0.1.0.5A — Surface Observer Bridge
+
+This milestone connects the existing astronomical surface-observer/eclipses foundation to the fixed SOL profile. Select a supported solid SOL planet or moon and use **SURFACE SKY**. The view is body-fixed and uses the live simulation for the Sun, planets and moons, including physical angular sizes, phases, horizon position and inherited finite-disk eclipse/occultation geometry.
+
+SURFACE SKY is deliberately not a landing system. The spacecraft continues through the ordinary Newtonian simulation while the camera observes from a massless body-fixed site. Closing the observer returns to that live spacecraft state. The visible local ground is a flat schematic horizon only; SOL landing, terrain, geology, POIs and weather are not claimed by this build.
+
+For reference, the initial sub-parent views naturally produce approximately 1.83° Earth diameter from the Moon, 12.09° Jupiter diameter from Europa, 5.64° Saturn diameter from Titan and 7.99° Neptune diameter from Triton at the embedded J2000 mean-state initialization. These are calculated from the same physical radii/ranges used by the observer renderer, not visual enlargement.
+
+### First iPhone acceptance path
+
+1. Confirm the badge reads **v0.1.0.5A** and startup completes normally.
+2. Load SOL and target the Moon. The surface action should read **SURFACE SKY**, not LAND.
+3. Open SURFACE SKY. Earth should begin high in the sky; drag LOOK and verify the view remains responsive.
+4. Return to ship and repeat on Europa, Titan and Triton; their parent planets should be physically large in the sky.
+5. Confirm the HUD still reports latitude/longitude, star altitude/azimuth, local solar time, physical angular size/phase and eclipse state.
+6. Leave SURFACE SKY and confirm the spacecraft returns at its live, continuously evolved state rather than being repositioned.
+7. Regress normal ORIGIN/ABYSSAL landing, LOOK, THRUST/REV/BRAKE, APPROACH and FRAME.

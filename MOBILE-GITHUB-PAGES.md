@@ -86,3 +86,7 @@ Before physically accepting `SURFEXP-152` on iPhone Safari/WebKit:
 Do **not** infer a FRAME route-intersection bug merely from a body filling the screen during a very fast low-orbit arrival. No clearance diagnostic/routing change is part of this release. Close-orbit body visual detail remains a later renderer milestone.
 
 Physical iPhone Safari remains the release gate; automated QA verifies deterministic/state/code boundaries but does not claim exact mobile visual acceptance.
+
+## Universe Explorer v0.1.0.5A cache-chain note
+
+The v0.1.0.4B.1 startup regression established that changing a deep ES module without versioning the importing edge can let iOS Safari/GitHub Pages assemble a mixed old/new module graph. v0.1.0.5A therefore versions the complete changed chain: `index.html → main.js → app.js → systemMap.js / threeRenderer.js / surfaceSkyObserver.js`, with `threeRenderer.js → surfaceWorld.js` also versioned. Unchanged SOL generator imports retain their B.1 tag.

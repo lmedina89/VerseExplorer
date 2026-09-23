@@ -374,3 +374,7 @@ The mobile planner hotfix changes CSS/layout only. Planner propagation, finite-d
 ## Portrait cockpit hotfix boundary
 
 `CockpitView.setViewport(width, height)` is presentation-only. The renderer forwards viewport dimensions after updating camera projection. Portrait mode hides wide-layout shell/MFD/key geometry and repositions the central FLIGHT MFD; landscape restores stored base transforms. HTML portrait shortcuts call `UniverseLabApp.handleCockpitAction()` and therefore reuse the same NAV/FLIGHT/SCIENCE/Engineering drawers. Orientation state is not serialized and has no physics authority.
+
+## Universe Explorer v0.1.0.5A — observer-only SOL surface view
+
+`surfaceSkyObserver.js` is a thin policy/region adapter over the existing astronomy stack. It does not own an ephemeris, eclipse solver or separate sky simulation. `UniverseLabApp.enterSurfaceSky()` creates an observer-only surface session, `AstronomicalObserverModel.solveSurface()` reconstructs the body-fixed observer, and the existing `SurfaceWorldVisual` consumes the canonical astronomical solution. In observer-only mode procedural scatter, POIs, weather, parked-ship scenery and landing transitions are suppressed. Normal `physicsStep()` continues, keeping the spacecraft and universe authoritative.

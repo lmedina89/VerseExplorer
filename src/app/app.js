@@ -30,14 +30,15 @@ import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, 
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=155';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0105a';
 import { Hud } from '../ui/hud.js?v=155';
-import { SystemMapController } from '../ui/systemMap.js?v=155';
+import { SystemMapController } from '../ui/systemMap.js?v=ue0105a';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js';
 import { createSurfaceSession, serializeSurfaceSession, stepSurfaceMovement, nearestSurfacePoi, scanNearestSurfacePoi, surfaceTakeoffReferencePosition } from '../surface/surfaceSession.js';
 import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beginLandingTransition, setLandingPhase, stepLandingTransition, transitionProgress, canEnterSurface, canWalkSurface, canRequestTakeoff, validateOrbitHandoff } from '../surface/landingTransition.js';
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js';
+import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105a';
 
 function safeNumber(value, fallback) {
   const n = Number(value);
@@ -346,7 +347,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.4B.1 online. ORIGIN and ABYSSAL remain unchanged; SOL now adds seven reference moons to the fixed J2000 Sun + eight-planet foundation without procedural surfaces. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.5A online. ORIGIN and ABYSSAL remain unchanged; SOL adds a massless body-fixed SURFACE SKY observer on solid reference worlds while keeping real landing disabled. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -438,6 +439,33 @@ export class UniverseLabApp {
   }
 
 
+  surfaceSkyEligibility(body = this.target) {
+    if (!body) return { ok: false, reason: 'Select a solid SOL planet or moon first.' };
+    if (this.surfaceSession?.active) return { ok: false, reason: 'Exit the current surface view before opening another observer site.' };
+    const support = surfaceSkyObserverSupport(body, this.bodies);
+    if (!support.enabled) return { ok: false, reason: support.reason ?? 'Surface sky observer is not available for this body.', support };
+    if (this.transitState.active) return { ok: false, reason: 'Disengage FRAME DRIVE before opening a body-fixed surface observer.' };
+    return { ok: true, body, support };
+  }
+
+  surfaceEntryAvailability(body = this.target) {
+    const landing = this.landingEligibility(body);
+    if (landing.ok) return { ok: true, mode: 'land', label: 'LAND / DESCEND', title: `Enter ${this.selectedSurfaceRegionId || 'the selected seeded region'}.`, landing };
+    const sky = this.surfaceSkyEligibility(body);
+    if (sky.ok) return { ok: true, mode: 'sky', label: 'SURFACE SKY', title: 'Open a massless body-fixed surface observer. The spacecraft remains in live Newtonian flight and SOL landing stays disabled.', sky };
+    const skySupport = sky?.support ?? (body ? surfaceSkyObserverSupport(body, this.bodies) : null);
+    const label = body && body.referenceSystemId === 'sol' && skySupport?.environment?.physicalSurfaceExists ? 'SURFACE SKY LOCKED' : (body ? 'LAND LOCKED' : 'LAND TARGET');
+    return { ok: false, mode: null, label, title: sky.reason ?? landing.reason ?? 'Surface view unavailable.', landing, sky };
+  }
+
+  enterTargetSurfaceMode(bodyId = this.targetId) {
+    const body = bodyId ? this.registry.get(bodyId) : null;
+    if (!body) { this.hud.notify('Surface view failed: target body is unavailable.'); return false; }
+    const availability = this.surfaceEntryAvailability(body);
+    if (!availability.ok) { this.hud.notify(`SURFACE VIEW LOCKED: ${availability.title}`); return false; }
+    return availability.mode === 'sky' ? this.enterSurfaceSky(body.id) : this.enterSurface(body.id);
+  }
+
   landingEligibility(body = this.target) {
     if (!body) return { ok: false, reason: 'Select a solid planetary or moon target first.' };
     if (!canEnterSurface(this.surfaceTransition) || this.surfaceSession?.active) return { ok: false, reason: `Surface transition is ${this.surfaceTransition?.phase ?? 'active'}.` };
@@ -484,14 +512,13 @@ export class UniverseLabApp {
 
   updateLandingUi() {
     this.updateSurfaceRegionUi(this.target);
-    const eligibility = this.landingEligibility(this.target);
+    const availability = this.surfaceEntryAvailability(this.target);
     for (const selector of ['#landTarget', '#surfaceLandButton']) {
       const button = this.root.querySelector(selector);
       if (!button) continue;
-      button.disabled = !eligibility.ok;
-      const targetSupport = this.target ? surfaceEngineSupport(this.target, this.bodies) : null;
-      button.textContent = eligibility.ok ? 'LAND / DESCEND' : (targetSupport?.environment?.physicalSurfaceExists ? 'LAND LOCKED' : 'LAND TARGET');
-      button.title = eligibility.ok ? `Enter ${this.selectedSurfaceRegionId || 'the selected seeded region'}.` : eligibility.reason;
+      button.disabled = !availability.ok;
+      button.textContent = availability.label;
+      button.title = availability.title;
     }
   }
 
@@ -617,6 +644,15 @@ export class UniverseLabApp {
     const shipCompact = this.root.querySelector('#surfaceShipCompact');
     const shipDistance = this.surfaceShipDistanceMeters();
     const boardingRadius = 36;
+    const observerOnly = this.surfaceSession?.observerOnly === true || this.surfaceRegion?.observerOnly === true;
+    if (observerOnly) {
+      if (phaseLabel) phaseLabel.textContent = 'SKY OBSERVER';
+      if (shipCompact) shipCompact.textContent = 'SHIP LIVE';
+      const save = this.root.querySelector('#surfaceSaveButton'); if (save) save.disabled = true;
+      const skyPause = this.root.querySelector('#surfaceAstronomyPause'); if (skyPause) skyPause.disabled = false;
+      if (takeoff) { takeoff.disabled = false; takeoff.textContent = 'RETURN TO SHIP'; }
+      return;
+    }
     if (phaseLabel) phaseLabel.textContent = phase.toUpperCase();
     if (shipCompact) {
       if (!Number.isFinite(shipDistance)) shipCompact.textContent = 'SHIP —';
@@ -707,6 +743,7 @@ export class UniverseLabApp {
 
       const star = this.registry.get('star-0') ?? this.bodies.find((entry) => entry.kind === BODY_KIND.STAR) ?? null;
       this.renderer.enterSurface(this.surfaceRegion, body, star);
+      this.root.classList.remove('surface-sky-observer');
       this.root.classList.add('surface-active');
       this.syncViewClasses();
       for (const id of ['morePanel','labPanel','scannerPanel','sciencePanel','cosmosPanel','overlayPanel','mapPanel','transitPanel']) {
@@ -714,6 +751,9 @@ export class UniverseLabApp {
       }
       const hud = this.root.querySelector('#surfaceHud'); if (hud) hud.hidden = false;
       const move = this.root.querySelector('#surfaceMovePad'); if (move) move.hidden = false;
+      for (const selector of ['#surfaceScanButton','#surfaceSprintButton','#surfaceSaveButton','#surfacePlannerButton','#surfaceAstronomyPause','#surfaceTakeoffButton','#surfaceHudToggle']) {
+        const control = this.root.querySelector(selector); if (control) control.hidden = false;
+      }
       const velocity = this.root.querySelector('#velocityMarker'); if (velocity) velocity.hidden = true;
       this.setSurfaceHudExpanded(this.surfaceSession.hudExpanded === true, false);
       if (options.fromLoad) {
@@ -738,6 +778,73 @@ export class UniverseLabApp {
     }
   }
 
+
+  enterSurfaceSky(bodyId = this.targetId, options = {}) {
+    const body = bodyId ? this.registry.get(bodyId) : null;
+    if (!body) { this.hud.notify('Surface sky failed: target body is unavailable.'); return false; }
+    const eligibility = this.surfaceSkyEligibility(body);
+    if (!eligibility.ok) { this.hud.notify(`SURFACE SKY LOCKED: ${eligibility.reason}`); return false; }
+
+    this._surfaceOrbitHandoffPending = null;
+    this._surfacePreviousRunning = this.running;
+    this._surfacePreviousTimeScale = this.clock.timeScale;
+    try {
+      this.returnToShipView(false);
+      this.releaseAllHeldControls();
+      setLandingPhase(this.surfaceTransition, SURFACE_PHASE.ORBIT);
+
+      this.surfaceRegion = createSurfaceSkyObserverRegion(this.system, body, this.bodies);
+      this.surfaceSession = createSurfaceSession(this.surfaceRegion, null);
+      this.surfaceSession.observerOnly = true;
+      this.surfaceSession.bodyFixedAnchor = defaultSurfaceSkyAnchor(body, this.bodies, this.ship.position, this.clock.elapsedSimSeconds);
+      this.surfaceSession.anchorCapturedAtSimSeconds = this.clock.elapsedSimSeconds;
+      this.surfaceSession.rotationModelVersion = 1;
+      this.surfaceSession.x = 0;
+      this.surfaceSession.z = 0;
+      this.surfaceSession.lastMoveSpeedMps = 0;
+      this.surfaceSession.yaw = 0;
+      this.surfaceSession.pitch = body.parentId ? 1.08 : 0.18;
+      this.surfaceInput = { forward: 0, strafe: 0, sprint: false };
+
+      const star = this.registry.get('star-0') ?? this.bodies.find((entry) => entry.kind === BODY_KIND.STAR) ?? null;
+      this.renderer.enterSurface(this.surfaceRegion, body, star);
+      this.root.classList.add('surface-active', 'surface-sky-observer');
+      this.syncViewClasses();
+      for (const id of ['morePanel','labPanel','scannerPanel','sciencePanel','cosmosPanel','overlayPanel','mapPanel','transitPanel']) {
+        const panel = this.root.querySelector(`#${id}`); if (panel) panel.hidden = true;
+      }
+      const hud = this.root.querySelector('#surfaceHud'); if (hud) hud.hidden = false;
+      const move = this.root.querySelector('#surfaceMovePad'); if (move) move.hidden = true;
+      const velocity = this.root.querySelector('#velocityMarker'); if (velocity) velocity.hidden = true;
+      for (const selector of ['#surfaceScanButton','#surfaceSprintButton','#surfaceSaveButton']) {
+        const control = this.root.querySelector(selector); if (control) control.hidden = true;
+      }
+      for (const selector of ['#surfacePlannerButton','#surfaceAstronomyPause','#surfaceTakeoffButton','#surfaceHudToggle']) {
+        const control = this.root.querySelector(selector); if (control) control.hidden = false;
+      }
+      this.setSurfaceHudExpanded(false, false);
+      this.selectTarget(body.id);
+      const astronomy = this.solveAstronomicalObserver();
+      this.updateSurfaceHud(astronomy);
+      this.updateSurfaceTransitionUi();
+      if (options.notify !== false) {
+        const parent = body.parentId ? this.registry.get(body.parentId) : null;
+        const site = parent ? ` The initial site is the physically valid sub-${parent.name} point so ${parent.name} begins high in the sky.` : ' The initial site is the body-fixed point beneath the current spacecraft direction.';
+        this.hud.notify(`SURFACE SKY: ${body.name}. This is a massless observer camera; the spacecraft and full Newtonian simulation continue normally at the current time scale.${site} Local ground is a schematic horizon, not a claimed terrain map or landing.`, 9000);
+      }
+      return true;
+    } catch (error) {
+      console.error('Surface sky entry failure', error);
+      try { this.renderer.exitSurface(); } catch (_) {}
+      this.surfaceSession = null;
+      this.surfaceRegion = null;
+      this.root.classList.remove('surface-active', 'surface-sky-observer');
+      this.syncViewClasses();
+      this.hud.notify(`SURFACE SKY failed safely: ${error?.message ?? error}`);
+      return false;
+    }
+  }
+
   recoverSurfaceRuntime({ body = null, reason = 'Surface transition recovery.', restoreOrbit = true, previousRunning = this._surfacePreviousRunning, previousTimeScale = this._surfacePreviousTimeScale } = {}) {
     if (this._surfaceRecoveryGuard) return false;
     this._surfaceRecoveryGuard = true;
@@ -747,7 +854,7 @@ export class UniverseLabApp {
       this.surfaceSession = null;
       this.surfaceRegion = null;
       this.releaseAllHeldControls();
-      this.root.classList.remove('surface-active');
+      this.root.classList.remove('surface-active', 'surface-sky-observer');
       const hud = this.root.querySelector('#surfaceHud'); if (hud) hud.hidden = true;
       const move = this.root.querySelector('#surfaceMovePad'); if (move) move.hidden = true;
       if (restoreOrbit && body) {
@@ -799,6 +906,19 @@ export class UniverseLabApp {
     this.root.classList.remove('surface-active');
     const hud = this.root.querySelector('#surfaceHud'); if (hud) hud.hidden = true;
     const move = this.root.querySelector('#surfaceMovePad'); if (move) move.hidden = true;
+    this.root.classList.remove('surface-sky-observer');
+
+    if (departingSession?.observerOnly === true) {
+      setLandingPhase(this.surfaceTransition, SURFACE_PHASE.ORBIT);
+      this.returnToShipView(false);
+      if (body) this.selectTarget(body.id);
+      this.syncViewClasses();
+      this.updateLandingUi();
+      this.syncPauseControls();
+      if (notify) this.hud.notify(`SHIP VIEW RESTORED: surface sky observer closed on ${body?.name ?? 'the selected world'}. Spacecraft position, velocity, navigation state and simulation time were never replaced by the observer camera.`, 6200);
+      return true;
+    }
+
     if (returnToOrbit && body) {
       this.cancelNavigation();
       this.placeShipInSurfaceReturnOrbit(body, departingSession, departingRegion);
@@ -831,7 +951,10 @@ export class UniverseLabApp {
   }
 
   requestSurfaceTakeoff() {
-    if (!this.surfaceSession?.active || !this.surfaceRegion) { this.hud.notify('No active landed spacecraft session.'); return false; }
+    if (!this.surfaceSession?.active || !this.surfaceRegion) { this.hud.notify('No active surface session.'); return false; }
+    if (this.surfaceSession.observerOnly === true) {
+      return this.exitSurface({ returnToOrbit: false, notify: true, preserveRunning: true });
+    }
     if (!canRequestTakeoff(this.surfaceTransition)) { this.hud.notify(`TAKEOFF LOCKED: transition is ${this.surfaceTransition.phase.toUpperCase()}.`); return false; }
     const distance = this.surfaceShipDistanceMeters();
     const boardingRadius = 36;
@@ -932,6 +1055,11 @@ export class UniverseLabApp {
 
   updateSurface(realDt) {
     if (!this.surfaceSession?.active || !this.surfaceRegion) return;
+    if (this.surfaceSession.observerOnly === true) {
+      this.surfaceSession.lastMoveSpeedMps = 0;
+      this.updateSurfaceTransitionUi();
+      return;
+    }
     const step = stepLandingTransition(this.surfaceTransition, realDt);
     if (this.surfaceTransition.phase === SURFACE_PHASE.DESCENDING) {
       this.surfaceSession.lastMoveSpeedMps = 0;
@@ -966,16 +1094,17 @@ export class UniverseLabApp {
   }
 
   toggleSurfaceAstronomyPause() {
-    if (!this.surfaceSession?.active || !this.surfaceRegion || this.surfaceTransition?.phase !== SURFACE_PHASE.LANDED) {
-      this.hud.notify('SKY PAUSE is available after touchdown while the landed surface session is active.');
+    const observerOnly = this.surfaceSession?.observerOnly === true;
+    if (!this.surfaceSession?.active || !this.surfaceRegion || (!observerOnly && this.surfaceTransition?.phase !== SURFACE_PHASE.LANDED)) {
+      this.hud.notify('SKY PAUSE is available during an active landed surface or reference sky observer session.');
       return this.running;
     }
     this.running = !this.running;
     this.syncPauseControls();
     this.updateSurfaceHud();
-    this.hud.notify(this.running
-      ? 'Surface astronomy resumed at 1×. The parked spacecraft remains constrained to the landing site.'
-      : 'Surface astronomy paused. Local walking and weather remain active; celestial N-body time is held.');
+    this.hud.notify(observerOnly
+      ? (this.running ? 'Reference sky resumed. The spacecraft and N-body system continue from the same physical state.' : 'Reference sky paused. The complete simulation clock, including the spacecraft, is held.')
+      : (this.running ? 'Surface astronomy resumed at 1×. The parked spacecraft remains constrained to the landing site.' : 'Surface astronomy paused. Local walking and weather remain active; celestial N-body time is held.'));
     return this.running;
   }
 
@@ -1004,6 +1133,7 @@ export class UniverseLabApp {
 
   scanSurface() {
     if (!this.surfaceSession?.active || !this.surfaceRegion) { this.hud.notify('No active surface session.'); return false; }
+    if (this.surfaceSession.observerOnly === true) { this.hud.notify('SURFACE SKY uses the celestial observer and event planner; no fictional local POIs are generated for SOL reference sites.'); return false; }
     const result = scanNearestSurfacePoi(this.surfaceSession, this.surfaceRegion);
     if (!result.ok) { this.hud.notify(`SURFACE SCAN: ${result.reason}`); this.updateSurfaceHud(); return false; }
     const reality = SURFACE_REALITY_LABELS[result.poi.realityClass] ?? result.poi.realityClass.toUpperCase();
@@ -1015,28 +1145,30 @@ export class UniverseLabApp {
   updateSurfaceHud(astronomy = null) {
     if (!this.surfaceSession?.active || !this.surfaceRegion) return;
     const region = this.surfaceRegion;
-    const nearest = nearestSurfacePoi(this.surfaceSession, region);
+    const observerOnly = this.surfaceSession.observerOnly === true || region.observerOnly === true;
+    const nearest = observerOnly ? null : nearestSurfacePoi(this.surfaceSession, region);
     const set = (selector, text) => { const el = this.root.querySelector(selector); if (el) el.textContent = text; };
-    set('#surfaceWorldName', `${region.bodyName} · ${region.name}`);
-    set('#surfaceBiome', region.palette.name.toUpperCase());
+    set('#surfaceWorldName', observerOnly ? `${region.bodyName} · SURFACE SKY` : `${region.bodyName} · ${region.name}`);
+    set('#surfaceBiome', observerOnly ? 'REFERENCE SKY · SCHEMATIC HORIZON' : region.palette.name.toUpperCase());
     set('#surfaceGravity', `${region.gravityMps2.toFixed(2)} m/s²`);
     const weatherNow = surfaceWeatherReading(this.surfaceSession.weather);
-    const temperatureIsEquilibrium = region.atmosphereMode === 'airless' || region.temperatureModel === 'radiative-equilibrium';
+    const temperatureIsEquilibrium = observerOnly || region.atmosphereMode === 'airless' || region.temperatureModel === 'radiative-equilibrium';
     set('#surfaceTemperature', `${(region.temperatureK - 273.15 + weatherNow.temperatureOffsetC).toFixed(0)} °C${temperatureIsEquilibrium ? ' EQ' : ''}`);
     const surfacePressurePa = Number(region.atmospherePressurePa);
+    const atmosphereSuffix = observerOnly ? ' REF' : ' PROXY';
     set('#surfaceAtmosphere', region.atmosphereMode === 'airless'
-      ? `${Math.max(0, Number(region.atmospherePressurePa) || 0).toExponential(2)} Pa PROXY`
+      ? `${Math.max(0, Number(region.atmospherePressurePa) || 0).toExponential(2)} Pa${atmosphereSuffix}`
       : Number.isFinite(surfacePressurePa)
-        ? `${surfacePressurePa >= 1000 ? `${(surfacePressurePa / 1000).toFixed(2)} kPa` : `${surfacePressurePa.toFixed(0)} Pa`} PROXY`
-        : `${region.atmosphereAtmProxy.toFixed(2)} atm PROXY`);
-    set('#surfaceCoords', `${this.surfaceSession.x.toFixed(0)}, ${this.surfaceSession.z.toFixed(0)} m`);
+        ? `${surfacePressurePa >= 1000 ? `${(surfacePressurePa / 1000).toFixed(2)} kPa` : `${surfacePressurePa.toFixed(0)} Pa`}${atmosphereSuffix}`
+        : `${region.atmosphereAtmProxy.toFixed(2)} atm${atmosphereSuffix}`);
+    set('#surfaceCoords', observerOnly ? 'BODY-FIXED SITE' : `${this.surfaceSession.x.toFixed(0)}, ${this.surfaceSession.z.toFixed(0)} m`);
     const weather = weatherNow;
-    set('#surfaceWeather', `${weather.label.toUpperCase()}${weather.realityClass === 'impossible' ? ' ⚠' : ''}`);
-    set('#surfaceWind', `${weather.windSpeedMps.toFixed(0)} m/s`);
+    set('#surfaceWeather', observerOnly ? 'REFERENCE' : `${weather.label.toUpperCase()}${weather.realityClass === 'impossible' ? ' ⚠' : ''}`);
+    set('#surfaceWind', observerOnly ? '—' : `${weather.windSpeedMps.toFixed(0)} m/s`);
     const shipSite = region.landedShip ?? region.landing;
-    const shipDistance = Math.hypot(this.surfaceSession.x - shipSite.x, this.surfaceSession.z - shipSite.z);
-    set('#surfaceShipDistance', `${shipDistance.toFixed(0)} m`);
-    set('#surfaceClock', `${Math.floor(this.surfaceSession.weather?.elapsedSeconds ?? 0)} s`);
+    const shipDistance = observerOnly ? Infinity : Math.hypot(this.surfaceSession.x - shipSite.x, this.surfaceSession.z - shipSite.z);
+    set('#surfaceShipDistance', observerOnly ? 'LIVE ORBIT' : `${shipDistance.toFixed(0)} m`);
+    set('#surfaceClock', observerOnly ? '—' : `${Math.floor(this.surfaceSession.weather?.elapsedSeconds ?? 0)} s`);
     const astronomySeconds = Math.max(0, Number(this.clock.elapsedSimSeconds) || 0);
     set('#surfaceSkyClock', astronomySeconds >= PHYSICS.DAY
       ? `${(astronomySeconds / PHYSICS.DAY).toFixed(3)} d`
@@ -1104,6 +1236,15 @@ export class UniverseLabApp {
       set('#surfaceTargetAngular', '—');
     }
     this.syncPauseControls();
+    if (observerOnly) {
+      set('#surfaceDiscoveries', '—');
+      set('#surfaceNearest', 'LIVE CELESTIAL SKY');
+      const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
+      if (weatherStatus) weatherStatus.textContent = region.scientificStatus;
+      const status = this.root.querySelector('#surfaceScanStatus');
+      if (status) status.textContent = 'REFERENCE SKY OBSERVER · Look around with LOOK. Celestial disks use physical angular size; phases and eclipses use the existing finite-disk observer geometry. The flat local horizon is schematic and SOL landing remains disabled.';
+      return;
+    }
     set('#surfaceDiscoveries', `${this.surfaceSession.scannedPoiIds.size}/${surfacePois(region).length}`);
     const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
     if (weatherStatus) {
@@ -2074,7 +2215,7 @@ export class UniverseLabApp {
 
   requestTimeScale(requestedValue, notify = true) {
     const requested = Math.max(1, safeNumber(requestedValue, 1));
-    if (this.surfaceSession?.active) {
+    if (this.surfaceSession?.active && this.surfaceSession.observerOnly !== true) {
       this.clock.setTimeScale(1);
       const select = this.root.querySelector('#timeScale'); if (select) select.value = '1';
       const warp = this.root.querySelector('#warpQuick'); if (warp) warp.textContent = 'SURFACE 1×';
@@ -2508,7 +2649,10 @@ export class UniverseLabApp {
   frameSurface(now, realDt) {
     const physicsStart = performance.now();
     this.experimentMs = 0;
-    if (this.running) this.clock.advance(realDt, (dt) => this.surfaceAstronomyStep(dt), () => this.currentMassivePairStepLimit());
+    if (this.running) {
+      if (this.surfaceSession?.observerOnly === true) this.clock.advance(realDt, (dt) => this.physicsStep(dt), () => this.currentPhysicsSubstepLimit());
+      else this.clock.advance(realDt, (dt) => this.surfaceAstronomyStep(dt), () => this.currentMassivePairStepLimit());
+    }
     this.physicsMs = performance.now() - physicsStart;
     this.updateSurface(realDt);
 
@@ -2535,7 +2679,7 @@ export class UniverseLabApp {
     this.hud.update({
       fps: this.fps,
       elapsedSeconds: this.clock.elapsedSimSeconds,
-      shipSpeed: this.surfaceSession.lastMoveSpeedMps ?? 0,
+      shipSpeed: this.surfaceSession.observerOnly === true ? Math.hypot(...this.ship.velocity) : (this.surfaceSession.lastMoveSpeedMps ?? 0),
       bodyCount: this.bodies.length,
       minorCount: this.minorField?.count ?? 0,
       physicsMs: this.physicsMs,
@@ -2626,7 +2770,7 @@ export class UniverseLabApp {
       seed: this.system.seed,
       generationProfileId: this.system.generationProfileId ?? 'origin',
       elapsedSimSeconds: this.clock.elapsedSimSeconds,
-      timeScale: this.surfaceSession?.active ? this._surfacePreviousTimeScale : this.clock.timeScale,
+      timeScale: this.surfaceSession?.active && this.surfaceSession.observerOnly !== true ? this._surfacePreviousTimeScale : this.clock.timeScale,
       simulationRunning: this.running,
       ship: this.ship.serialize(),
       bodies: this.bodies.map(serializeBody),
@@ -2642,7 +2786,7 @@ export class UniverseLabApp {
       discoveredPhenomena: [...this.discoveredPhenomena],
       discoveryScanDepth: [...this.discoveryScanDepth.entries()],
       spaceWeather: this.spaceWeather.serialize(),
-      surfaceSession: serializeSurfaceSession(this.surfaceSession),
+      surfaceSession: this.surfaceSession?.observerOnly === true ? null : serializeSurfaceSession(this.surfaceSession),
     };
   }
 
@@ -3006,8 +3150,8 @@ export class UniverseLabApp {
     $('#scannerToggle').addEventListener('click', () => this.hud.toggleScanner());
     $('#scannerClose').addEventListener('click', () => this.hud.toggleScanner(false));
     $('#surfaceRegionSelect').addEventListener('change', (event) => { this.selectedSurfaceRegionId = event.target.value || 'shatterfall-basin'; this.updateLandingUi(); });
-    $('#landTarget').addEventListener('click', () => { this.hud.toggleScanner(false); this.enterSurface(this.targetId); });
-    $('#surfaceLandButton').addEventListener('click', () => { this.hud.toggleMore(false); this.enterSurface(this.targetId); });
+    $('#landTarget').addEventListener('click', () => { this.hud.toggleScanner(false); this.enterTargetSurfaceMode(this.targetId); });
+    $('#surfaceLandButton').addEventListener('click', () => { this.hud.toggleMore(false); this.enterTargetSurfaceMode(this.targetId); });
     $('#surfaceHudToggle').addEventListener('click', () => this.toggleSurfaceHud());
     $('#surfacePlannerButton').addEventListener('click', () => this.openSurfaceObservationPlanner());
     $('#phenomenonSelect').addEventListener('change', (event) => this.selectPhenomenon(event.target.value, false));

@@ -27,7 +27,8 @@ test('surface diagnostics reuse the canonical observer solution and sky pause on
   assert.match(source, /horizontalAzimuthDegrees\(observedStar\.localDirection\)/);
   assert.match(source, /toggleSurfaceAstronomyPause\(\)/);
   assert.match(source, /#surfaceAstronomyPause/);
-  assert.match(source, /if \(this\.running\) this\.clock\.advance\(realDt, \(dt\) => this\.surfaceAstronomyStep\(dt\)/);
+  assert.match(source, /else this\.clock\.advance\(realDt, \(dt\) => this\.surfaceAstronomyStep\(dt\)/);
+  assert.match(source, /observerOnly === true\) this\.clock\.advance\(realDt, \(dt\) => this\.physicsStep\(dt\)/);
   assert.match(source, /stepSurfaceWeather\(this\.surfaceSession\.weather, this\.surfaceRegion, realDt\)/);
 });
 

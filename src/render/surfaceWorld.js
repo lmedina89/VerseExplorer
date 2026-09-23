@@ -712,6 +712,7 @@ function createWeatherRig(region, rng) {
 export class SurfaceWorldVisual {
   constructor(region, body, star, starCatalog = null) {
     this.region = region;
+    this.observerOnly = region?.observerOnly === true;
     this.body = body;
     this.star = star;
     this.starCatalog = starCatalog;
@@ -724,7 +725,7 @@ export class SurfaceWorldVisual {
     this.scene.background = this._baseBackgroundColor.clone();
     this.isAirless = region.atmosphereMode === 'airless';
     this._atmospherePressurePa = Math.max(0, Number(region.atmospherePressurePa) || (Math.max(0, Number(region.atmosphereAtmProxy) || 0) * 101325));
-    this._atmosphereMolecularMassAmu = Math.max(1, Number(body?.environmentFormation?.representativeAtmosphereMolecularMassAmu) || 28.97);
+    this._atmosphereMolecularMassAmu = Math.max(1, Number(body?.referenceEnvironment?.representativeAtmosphereMolecularMassAmu) || Number(body?.environmentFormation?.representativeAtmosphereMolecularMassAmu) || 28.97);
     this._lastSkyOpticsKey = '';
     this._baseFogDensity = this.isAirless ? 0 : (Number.isFinite(Number(region.fogDensityProxy)) ? Math.max(0, Number(region.fogDensityProxy)) : (0.00115 / Math.max(0.3, region.atmosphereAtmProxy)));
     this.scene.fog = this.isAirless ? null : new THREE.FogExp2(this._baseFogColor.clone(), this._baseFogDensity);
@@ -747,16 +748,16 @@ export class SurfaceWorldVisual {
     this.scene.add(this.sun.target);
 
     this.terrain = createTerrain(region); this.scene.add(this.terrain);
-    this.scatter = createScatter(region, this.rng); this.scene.add(this.scatter);
-    this.emberFissures = this.isAirless ? new THREE.Group() : createEmberFissures(region, this.rng); this.scene.add(this.emberFissures);
-    this.dust = this.isAirless ? new THREE.Group() : createDust(region, this.rng); this.scene.add(this.dust);
-    this.landingBeacon = createLandingBeacon(region); this.scene.add(this.landingBeacon);
-    this.landedShip = createLandedShip(region); this.scene.add(this.landedShip);
-    this.shipTransitionFx = createShipTransitionFx(region); this.scene.add(this.shipTransitionFx);
-    this.weatherRig = region.weatherEnabled === false ? null : createWeatherRig(region, createRng(`${region.seed}:weather-visuals`));
+    this.scatter = this.observerOnly ? new THREE.Group() : createScatter(region, this.rng); this.scene.add(this.scatter);
+    this.emberFissures = this.observerOnly || this.isAirless ? new THREE.Group() : createEmberFissures(region, this.rng); this.scene.add(this.emberFissures);
+    this.dust = this.observerOnly || this.isAirless ? new THREE.Group() : createDust(region, this.rng); this.scene.add(this.dust);
+    this.landingBeacon = this.observerOnly ? new THREE.Group() : createLandingBeacon(region); this.scene.add(this.landingBeacon);
+    this.landedShip = this.observerOnly ? null : createLandedShip(region); if (this.landedShip) this.scene.add(this.landedShip);
+    this.shipTransitionFx = this.observerOnly ? null : createShipTransitionFx(region); if (this.shipTransitionFx) this.scene.add(this.shipTransitionFx);
+    this.weatherRig = this.observerOnly || region.weatherEnabled === false ? null : createWeatherRig(region, createRng(`${region.seed}:weather-visuals`));
     if (this.weatherRig) this.scene.add(this.weatherRig.group);
 
-    for (const poi of surfacePois(region)) {
+    if (!this.observerOnly) for (const poi of surfacePois(region)) {
       const beacon = createBeacon(poi, region); this.scene.add(beacon); this.poiGroups.set(`${poi.id}:beacon`, beacon);
       if (poi.realityClass === 'known') continue;
       const visual = createAnomalyVisual(poi, region, createRng(`${region.seed}:${poi.id}:visual`));
@@ -1031,7 +1032,7 @@ export class SurfaceWorldVisual {
     const t = Number(timeSeconds) || 0;
     if (this.emberFissures?.material) this.emberFissures.material.opacity = 0.64 + Math.sin(t * 2.2) * 0.16;
     if (this.dust) this.dust.rotation.y = t * 0.006;
-    this.landingBeacon.rotation.y = t * 0.18;
+    if (this.landingBeacon) this.landingBeacon.rotation.y = t * 0.18;
     if (this.landedShip?.userData?.strobe) this.landedShip.userData.strobe.intensity = Math.sin(t * 4.2) > 0.965 ? 42 : 0;
     for (const group of this.animated) {
       const type = group.userData.type;

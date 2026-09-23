@@ -395,7 +395,7 @@ export class SystemMapController {
     const status = this.root.querySelector('#mapSelectionStatus');
     const landButton = this.root.querySelector('#mapLandAction');
     const selection = marker ?? this.currentMarker();
-    if (landButton) { landButton.disabled = true; landButton.title = 'Select the current detailed landable world and move into its near-orbital descent envelope.'; }
+    if (landButton) { landButton.disabled = true; landButton.textContent = 'LAND / DESCEND'; landButton.title = 'Select a detailed surface world or a supported SOL reference sky observer.'; }
 
     for (const id of ['#mapSelectionDistance','#mapSelectionStarRange','#mapSelectionParent','#mapSelectionClass','#mapSelectionRadius','#mapSelectionMass','#mapSelectionGravity','#mapSelectionOrbit','#mapSelectionEccentricity','#mapSelectionRotation','#mapSelectionHill','#mapSelectionSurface','#mapSelectionAtmosphere','#mapSelectionEscape','#mapSelectionFlux','#mapSelectionEquilibrium','#mapSelectionAlbedo','#mapSelectionPressure','#mapSelectionRetention','#mapSelectionVolatiles','#mapSelectionSurfaceFamily','#mapSelectionTidal','#mapSelectionAngular','#mapSelectionPhase','#mapSelectionShadow','#mapSelectionFrameArrival']) this.setDetail(id, '—');
 
@@ -463,11 +463,17 @@ export class SystemMapController {
       this.setDetail('#mapSelectionFrameArrival', arrival.ok
         ? `CIRCULAR +${distanceLabel(arrival.altitudeMeters)}${arrival.hillLimited ? ' · HILL-LIMITED' : ''}`
         : 'INERTIAL FRAME MATCH');
-      const landing = this.app.landingEligibility(body);
-      if (landButton) { landButton.disabled = !landing.ok; landButton.title = landing.ok ? 'Enter the selected seeded surface region.' : landing.reason; }
-      if (status) status.textContent = body.scientificWarning || (landing.ok
-        ? `${snapshot.classLabel}. Surface engine enabled for this body; LAND / DESCEND is available now. ${environment?.scientificBoundary ?? ''}`
-        : `${snapshot.classLabel}. ${landing.reason ?? environment?.landingReason ?? 'NAV and FRAME use this live body directly.'} ${environment?.scientificBoundary ?? ''}`);
+      const entry = this.app.surfaceEntryAvailability(body);
+      if (landButton) {
+        landButton.disabled = !entry.ok;
+        landButton.textContent = entry.label;
+        landButton.title = entry.ok ? entry.title : entry.reason;
+      }
+      if (status) status.textContent = body.scientificWarning || (entry.ok
+        ? entry.mode === 'sky'
+          ? `${snapshot.classLabel}. Reference SURFACE SKY observer available; local ground remains schematic and SOL landing stays disabled. ${environment?.scientificBoundary ?? ''}`
+          : `${snapshot.classLabel}. Surface engine enabled for this body; LAND / DESCEND is available now. ${environment?.scientificBoundary ?? ''}`
+        : `${snapshot.classLabel}. ${entry.reason ?? environment?.landingReason ?? 'NAV and FRAME use this live body directly.'} ${environment?.scientificBoundary ?? ''}`);
       return;
     }
 
@@ -558,7 +564,7 @@ export class SystemMapController {
     const marker = this.currentMarker();
     if (!marker || marker.type !== 'body') return false;
     this.app.selectTarget(marker.id);
-    const ok = this.app.enterSurface(marker.id);
+    const ok = this.app.enterTargetSurfaceMode(marker.id);
     if (ok) this.app.hud.toggleMap(false);
     return ok;
   }

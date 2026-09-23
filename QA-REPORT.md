@@ -331,3 +331,53 @@ The final handoff archive is rebuilt from this frozen tree and rechecked indepen
 - Cache-busts the complete changed runtime import chain for `main.js` → `app.js` → `systemGenerator.js` / `solSystem.js` / `generationProfiles.js`.
 - Prevents Safari/GitHub Pages from combining the v0.1.0.4B app module with stale v0.1.0.4A.2 SOL modules, which could leave the shell stuck on `Initializing…`.
 - No flight, navigation, renderer, integrator, moon-state, LOOK-zone, or SOL physics behavior changed.
+
+---
+
+## Universe Explorer v0.1.0.5A — Surface Observer Bridge QA
+
+### Baseline / scope
+
+- Exact baseline: **Universe Explorer v0.1.0.4B.1 — Mobile Startup Cache Hotfix**.
+- This milestone adds an observer-only SOL surface-view bridge. It does not add SOL landing, terrain, new bodies, SKY SPAWN, a second eclipse engine, or a physics rewrite.
+- Source diff vs B.1: **6 changed/added source modules**: `src/app/app.js`, `src/main.js`, `src/render/surfaceWorld.js`, `src/render/threeRenderer.js`, `src/ui/systemMap.js`, and new `src/surface/surfaceSkyObserver.js`.
+- Protected modules are byte-identical to B.1, including direct gravity, velocity-Verlet, ship dynamics, flight computer, FRAME/transit/insertion/route guard, Observation Planner, SOL generator/state data, canonical AstronomicalObserverModel, celestial appearance/eclipses, planetary rotation and planetary environment.
+
+### Observer-safety assertions
+
+- SURFACE SKY routes through a separate observer-only session and never assigns spacecraft position or velocity.
+- Observer-only frame stepping uses normal `physicsStep()` so the ship and all celestial bodies remain in the authoritative live simulation.
+- Observer-only sessions are excluded from landed-surface serialization; saves remain canonical ship/system state.
+- Returning from SURFACE SKY skips landing takeoff/orbit-placement logic.
+- SOL landing support remains disabled for every reference planet/moon; gas giants remain unavailable as surface observers because they have no physical solid surface in the environment model.
+- Observer-only rendering suppresses procedural scatter, POIs, weather, parked-ship scenery and anomalies. The local ground is explicitly a flat schematic horizon.
+
+### Physical-view checks
+
+At the embedded SOL J2000 reference initialization, the default sub-parent moon sites produce physical parent-body apparent diameters of approximately:
+
+- Moon → Earth: **1.833°**
+- Europa → Jupiter: **12.093°**
+- Titan → Saturn: **5.635°**
+- Triton → Neptune: **7.989°**
+
+The tests derive these from live radius/range geometry through the canonical observer model; no visual enlargement is applied.
+
+### Automated verification
+
+- Frozen worktree `npm run qa`: **332/332 PASS**.
+- Static required-file and cache-chain checks: **PASS**.
+- All JS/MJS syntax checks: **PASS**.
+- Focused new observer tests verify SOL-only support policy, landing remains disabled, schematic-region isolation, body-fixed sub-parent anchors, spacecraft-relative planet anchor, physically large parent views, live-physics stepping, save isolation and shared map/HUD entry routing.
+- Safari/GitHub Pages cache-chain regression now requires: `index → main.js → app.js → systemMap.js / threeRenderer.js / surfaceSkyObserver.js` plus `threeRenderer.js → surfaceWorld.js`.
+
+### Release archive candidate validation
+
+- ZIP integrity: **PASS** (`unzip -t`).
+- Clean extraction `npm run qa`: **332/332 PASS**.
+- Local HTTP shell/module smoke: **11/11 returned HTTP 200** for the shell and the changed/runtime astronomy modules.
+- `.github/workflows/*`: **0 files**.
+
+### Physical-device gate
+
+Automated QA cannot certify iPhone Safari visual composition, touch feel, atmospheric appearance or whether the first-frame parent body is comfortably framed on the user's exact device. Physical iPhone acceptance remains required before moving to v0.1.0.5B. In particular, verify Moon→Earth, Europa→Jupiter, Titan→Saturn and Triton→Neptune SURFACE SKY entry/LOOK/return behavior, and confirm normal B.1 ship flight remains intact afterward.

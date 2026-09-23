@@ -566,3 +566,16 @@ Built from v0.1.4.1 Extreme Objects, Space Weather & Scientific Overlays.
 - Cache-busts the complete changed runtime import chain for `main.js` → `app.js` → `systemGenerator.js` / `solSystem.js` / `generationProfiles.js`.
 - Prevents Safari/GitHub Pages from combining the v0.1.0.4B app module with stale v0.1.0.4A.2 SOL modules, which could leave the shell stuck on `Initializing…`.
 - No flight, navigation, renderer, integrator, moon-state, LOOK-zone, or SOL physics behavior changed.
+
+## Universe Explorer v0.1.0.5A — Surface Observer Bridge
+
+- Adds **SURFACE SKY** on supported solid bodies in the fixed SOL profile without enabling real SOL landing.
+- Reuses the inherited `AstronomicalObserverModel`, body rotation, physical apparent angular size, phases, finite-disk eclipses/occultations, atmosphere optics and surface celestial renderer; no duplicate eclipse engine was added.
+- SURFACE SKY is a **massless observer camera**. The spacecraft is not teleported, landed, parked, velocity-matched or removed from the normal Newtonian simulation.
+- While SURFACE SKY is open, normal `physicsStep()` continues at the existing simulation time scale; closing it returns to the live ship state.
+- Moon observers default to the body-fixed sub-parent point at the current epoch so Earth/Jupiter/Saturn/Neptune begin high in the sky from Moon/Europa/Titan/Triton respectively. Planet observers default to the body-fixed point beneath the current spacecraft direction.
+- The local ground is an explicitly **schematic flat horizon**, with no invented SOL terrain, geology, POIs or weather. Existing SOL landing remains disabled.
+- SURFACE SKY sessions are not serialized as landed sessions. Saves remain canonical physical ship/system state.
+- Existing ORIGIN/ABYSSAL detailed surface landing remains unchanged.
+- SKY SPAWN/orbit editing, telescope/FOV presentation, planet rings in the surface celestial renderer and validated real SOL terrain are intentionally deferred.
+- Cache-busts every newly changed runtime module edge to preserve the v0.1.0.4B.1 Safari/GitHub Pages startup fix.

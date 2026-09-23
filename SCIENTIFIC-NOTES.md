@@ -283,3 +283,17 @@ Reference sources used for this milestone:
 - NASA Titan facts / Huygens reference atmosphere: https://science.nasa.gov/saturn/moons/titan/facts/
 - NASA Triton overview: https://science.nasa.gov/neptune/moons/triton/
 
+
+---
+
+## Universe Explorer v0.1.0.5A — SOL surface-observer scientific boundary
+
+v0.1.0.5A does not introduce a second eclipse or sky-geometry model. It exposes the inherited `AstronomicalObserverModel` from a body-fixed SOL surface viewpoint. Observer inertial position is reconstructed from the selected body's live center state, physical radius, rotation axis/period and a body-fixed surface anchor. Celestial directions, horizon altitude, physical apparent angular radius, phase illumination and finite-disk stellar occultation therefore use the same live body registry that powers orbital flight.
+
+The observer is massless and has no force coupling. The spacecraft remains in the ordinary Newtonian integration loop while the observer view is active. This deliberately separates **where the user is looking from** from **where the spacecraft physically is**.
+
+Moon observer sites default to the sub-parent point at the current simulation epoch. This is a presentation choice, not a change to orbit geometry: the anchor is computed by transforming the live inertial direction to the parent into the moon's body-fixed frame. Planet observer sites default to the body-fixed surface direction beneath the current spacecraft line from planet center.
+
+SOL local ground remains a flat, explicitly schematic horizon. It is not a terrain, geology, elevation or landing model. Atmospheric sky optics may consume the existing reference pressure/composition proxies where available, but v0.1.0.5A does not claim full radiative transfer, meteorology or validated local surface appearance.
+
+No SOL body is made landable by this milestone. No celestial radius, orbit, mass, velocity or light/eclipsing geometry is enlarged for spectacle. Dramatic parent-planet views arise from actual radius/range geometry; telescope/FOV presentation and ring rendering are deferred to later presentation work.
