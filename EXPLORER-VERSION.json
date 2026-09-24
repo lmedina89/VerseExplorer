@@ -1,10 +1,10 @@
 {
   "product": "Universe Explorer",
-  "version": "0.1.0.6A.3",
-  "name": "Compact Object Surface Bridge",
-  "baseline": "Universe Explorer v0.1.0.6A.2",
+  "version": "0.1.0.6A.3-FW1",
+  "name": "Flat Earth Firmament Visual Anomaly",
+  "baseline": "Universe Explorer v0.1.0.6A.3",
   "inheritedCore": "Universe Lab v0.1.5.5 / ABYSSAL-155",
-  "scope": "Surface-first compact-object sandbox bridge: SKY SPAWN can now reuse the existing LAB neutron-star, pulsar and black-hole physical definitions alongside the asteroid; compact objects can be inserted at NEAR/LOW/MEDIUM/HIGH reticle-derived shells without protective system-stability clamps; landed rendering now reuses the existing compact-object visuals so space-spawned or surface-spawned black holes/neutron stars remain visible from the surface. Physics/integrator equations are inherited unchanged.",
+  "scope": "Adds one isolated massless visual-only FLAT EARTH [ANOMALY] far beyond the main Solar System: flat world disc, zodiac rim, central world tree with exposed roots, transparent four-sided pyramid firmament, and animated local Sun/Moon on a vertical figure-eight path. No N-body body, gravity source, landing surface, atmosphere, collision shape, or replacement Earth is created.",
   "sandboxParentsValidated": "Any currently landed planet/moon supported by the existing surface stack; SOL acceptance focuses Earth, Moon, Mars, Europa, Titan and Triton where landing is already enabled.",
   "sandboxBodyLimit": 5,
   "sandboxAsteroidMassKg": 1000000000000,
@@ -17,5 +17,9 @@
   "surfaceSkySpawnPolicy": "Actual landed/on-foot surface only; reference SURFACE SKY observer remains excluded. Reticle must be at or above the local horizon. Current landed body is the insertion parent. Body choices are ASTEROID, NEUTRON STAR, PULSAR and BLACK HOLE. Compact types reuse the existing LAB definitions. NEAR/LOW/MEDIUM/HIGH are initial orbital-shell presets; warnings do not prevent destructive compact-object commits.",
   "visualPresencePolicy": "Sun position/angular geometry remain authoritative; only display glare/white-core presentation is strengthened and reduced progressively at telescope FOV. Planet/moon orbit polish is rendering-only: higher-quality mip/anisotropic filtering and earlier lazy detail residency, with physical radius, lighting geometry and body state unchanged.",
   "compactObjectSurfacePolicy": "Surface astronomy detects black-hole/neutron-star body kinds and reuses createCelestialVisual/updateCelestialVisual from the existing space renderer rather than generic reflective spheres. The compressed surface sky adapts only presentation scale; authoritative physical mass/radius and DETAILS angular-size science remain unchanged.",
-  "surfaceParentDestructionPolicy": "If live impact/absorption deletes the body hosting the active landed session, Explorer exits the invalid surface renderer/session and returns to the live space state without restoring the destroyed parent. This is recovery from a physically allowed sandbox outcome, not a protective clamp."
+  "surfaceParentDestructionPolicy": "If live impact/absorption deletes the body hosting the active landed session, Explorer exits the invalid surface renderer/session and returns to the live space state without restoring the destroyed parent. This is recovery from a physically allowed sandbox outcome, not a protective clamp.",
+  "flatWorldAnomalyPolicy": "Explorer presentation-layer phenomenon injected into the COSMOS registry only. Canonical generated/SOL system body arrays and physics metadata remain unchanged. The anomaly is always identified, navigable through existing COSMOS tools, and frameable with the existing massless observation camera.",
+  "flatWorldLightingPolicy": "The anomaly uses a dedicated render layer for standard materials and local Sun/Moon/ambient lights. The normal Solar-System Sun/ambient lights remain on their existing layer, so the visual world is illuminated by its own internal luminaries rather than the real Solar-System Sun.",
+  "flatWorldPlacementPolicy": "Fixed remote free-space position approximately 117 AU from the system barycenter and well off the ecliptic. The normal ship camera far plane does not need to render it from the inner Solar System; COSMOS FRAME/ORBIT recenters the existing massless observation camera on it.",
+  "flatWorldPhysicsBoundary": "visualOnly=true, gravitySource=false; no physical mass, collision, atmosphere, terrain traversal, landing, or hidden force/time effects."
 }

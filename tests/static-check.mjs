@@ -6,7 +6,7 @@ const required = [
   'src/physics/gravity/directGravitySolver.js','src/physics/integrators/velocityVerlet.js','src/physics/orbitalMetrics.js',
   'src/physics/trajectoryPredictor.js','src/physics/planetaryProperties.js','src/physics/planetaryEnvironment.js','src/physics/atmosphericOptics.js','src/physics/shipDynamics.js','src/physics/flightComputer.js','src/physics/transitDrive.js','src/physics/frameOrbitInsertion.js','src/physics/massivePairStepControl.js','src/physics/impactResolver.js',
   'src/experiments/orbitSandbox.js','src/experiments/particles/spatialHashGrid.js','src/experiments/particles/particleExperiment.js','src/experiments/particles/particleExperimentManager.js',
-  'src/cosmic/phenomenonRegistry.js','src/cosmic/phenomenonGenerator.js','src/cosmic/anomalyGenerator.js','src/cosmic/spaceWeather.js','src/cosmic/scientificOverlays.js','src/render/cosmicPhenomena.js','src/render/spaceWeatherVisuals.js','src/render/scientificOverlayVisuals.js',
+  'src/cosmic/phenomenonRegistry.js','src/cosmic/phenomenonGenerator.js','src/cosmic/anomalyGenerator.js','src/cosmic/flatWorldAnomaly.js','src/cosmic/spaceWeather.js','src/cosmic/scientificOverlays.js','src/render/cosmicPhenomena.js','src/render/flatWorldAnomaly.js','src/render/spaceWeatherVisuals.js','src/render/scientificOverlayVisuals.js',
   'src/surface/surfaceSkyObserver.js','src/core/astronomicalObserver.js','src/core/celestialAppearance.js','src/core/planetaryRotation.js','src/core/generatedBodyCompatibility.js','src/core/inertialStarCatalog.js','src/navigation/systemNavigation.js','src/navigation/frameGuardRoute.js','src/navigation/observationPlanner.js','src/render/starfield.js','src/render/threeRenderer.js','src/render/backendPolicy.js','src/render/observationCamera.js','src/render/stellarPerception.js','src/render/celestialRealism.js','src/render/stellarIrradiance.js','src/render/surfaceWorld.js','src/render/cockpitView.js','src/surface/surfaceGenerator.js','src/surface/surfaceProfiles.js','src/surface/surfaceSession.js','src/surface/surfaceWeather.js','src/surface/landingTransition.js','src/ui/systemMap.js','README.md','ARCHITECTURE.md','SCIENTIFIC-NOTES.md','EXPLORER-VERSION.json'
 ];
 for (const file of required) await access(new URL(`../${file}`, import.meta.url), constants.R_OK);
@@ -14,9 +14,9 @@ const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 if (!html.includes('three@0.185.0')) throw new Error('Three.js version is not pinned.');
 if (!html.includes('./src/main.js')) throw new Error('Main module missing from shell.');
-if (!html.includes('Universe Explorer v0.1.0.6A.3')) throw new Error('Explorer shell version is not v0.1.0.6A.3.');
-if (!html.includes('<div class="brand">UNIVERSE EXPLORER <span>v0.1.0.6A.3</span></div>')) throw new Error('Visible top-left build badge is not Universe Explorer v0.1.0.6A.3.');
-if (!html.includes('./src/main.js?v=ue0106a3')) throw new Error('v0.1.0.6A.3 main module cache marker missing.');
+if (!html.includes('Universe Explorer v0.1.0.6A.3-FW1')) throw new Error('Explorer shell version is not v0.1.0.6A.3-FW1.');
+if (!html.includes('<div class="brand">UNIVERSE EXPLORER <span>v0.1.0.6A.3-FW1</span></div>')) throw new Error('Visible top-left build badge is not Universe Explorer v0.1.0.6A.3-FW1.');
+if (!html.includes('./src/main.js?v=ue0106a3fw1')) throw new Error('v0.1.0.6A.3-FW1 main module cache marker missing.');
 if (!html.includes('ABYSSAL-155')) throw new Error('ABYSSAL-155 build marker missing.');
 if (pkg.version !== '0.1.5.5') throw new Error('package.json version mismatch.');
 if (!html.includes('id="warpQuick"')) throw new Error('Quick time-warp control missing.');

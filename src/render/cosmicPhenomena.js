@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { PHYSICS, SIMULATION } from '../core/constants.js';
 import { createRng } from '../util/prng.js';
+import { createFlatWorldAnomalyVisual, updateFlatWorldAnomalyVisual } from './flatWorldAnomaly.js?v=ue0106a3fw1';
 
 function makeAnnulusPoints(definition, seed) {
   const rng = createRng(`${seed}:${definition.id}:visual`);
@@ -172,6 +173,15 @@ function makeAnomalyVisual(definition, seed) {
 }
 
 export function createCosmicPhenomenonVisual(definition, seed) {
+  if (definition.kind === 'anomaly-flat-world') {
+    const flatWorld = createFlatWorldAnomalyVisual(definition);
+    flatWorld.userData.phenomenonId = definition.id;
+    flatWorld.userData.kind = definition.kind;
+    flatWorld.userData.anchorBodyId = null;
+    flatWorld.userData.baseInclination = 0;
+    return flatWorld;
+  }
+
   const group = new THREE.Group();
   group.userData.phenomenonId = definition.id;
   group.userData.kind = definition.kind;
@@ -197,6 +207,11 @@ export function updateCosmicPhenomenonVisual(group, definition, anchorBody, refe
   const position = new THREE.Vector3();
   referenceFrame.toRender(sourcePosition, position);
   group.position.copy(position);
+
+  if (definition.kind === 'anomaly-flat-world') {
+    updateFlatWorldAnomalyVisual(group, definition, elapsedSimSeconds);
+    return;
+  }
 
   if (definition.kind === 'asteroid-belt') {
     const meanRadius = (definition.innerRadiusMeters + definition.outerRadiusMeters) * 0.5;

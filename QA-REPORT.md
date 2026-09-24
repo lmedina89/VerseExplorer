@@ -1,41 +1,56 @@
-# Universe Explorer v0.1.0.6A.3 — QA Report
+# Universe Explorer v0.1.0.6A.3-FW1 — QA Report
 
 ## Validation summary
 
 - Full static/syntax/test command: **PASS**.
-- Node test suite: **398/398 passed**.
-- Static required-file structure: **PASS (61 required files)**.
+- Node test suite: **404/404 passed**.
+- Static required-file structure: **PASS (63 required files)**.
 - All JavaScript / module syntax checks: **PASS**.
-- New focused compact-object bridge coverage includes existing LAB-definition reuse, destructive compact placement, landed compact rendering, UI exposure, and active-surface-parent destruction recovery.
+- New focused FW1 coverage checks remote/off-ecliptic placement, visual-only/no-gravity status, COSMOS composition without canonical mutation, canonical SOL preservation, massless observation-state compatibility, isolated local lighting, figure-eight Sun/Moon animation, and new/load registration.
 
-## Protected-core comparison against v0.1.0.6A.2
+## Protected baseline comparison against v0.1.0.6A.3
 
-The following protected simulation areas are byte-for-byte unchanged from the validated 6A.2 baseline:
+The following simulation-critical areas are byte-for-byte unchanged from the tested A3 baseline:
 
 - `src/core/`
 - `src/physics/`
 - `src/data/`
 - `src/surface/`
-- `src/experiments/labSpawner.js` — existing neutron-star / pulsar / black-hole definitions are reused, not duplicated or rewritten.
-- `src/render/celestialFactory.js` — existing compact-object visual implementation is reused, not duplicated or rewritten.
+- `src/experiments/`
 
-Changed runtime code is limited to the surface-spawn bridge / app integration / surface presentation path plus version-cache wiring and documentation/tests.
+The A3 compact-object surface bridge, LAB compact-object definitions, landing logic, SOL reference data and Newtonian integration are not rewritten by FW1.
 
-## Scientific / sandbox behavior checked
+FW1 runtime changes are isolated to Explorer presentation/COSMOS integration:
 
-- Surface SKY SPAWN can request ASTEROID, NEUTRON STAR, PULSAR, or BLACK HOLE.
-- Compact-object physical definitions come from the existing LAB experiment registry.
-- COMMIT preserves compact mass/radius/gravity metadata; there is no system-stability mass or distance clamp.
-- Intentionally destructive compact-object overlap is allowed and explicitly reported.
-- After COMMIT, the existing mutual Newtonian velocity-Verlet solver is authoritative.
-- Landed rendering reuses the existing compact-object visual factory so compact objects no longer fall back to microscopic generic reflective spheres.
-- Surface display proxies affect presentation only; physical mass/radius/state and science telemetry remain authoritative.
-- If live impact/absorption removes the currently landed parent world, the invalid surface session is safely torn down and control returns to the live space state without recreating the destroyed body.
+- `src/cosmic/flatWorldAnomaly.js` — new presentation-only definition.
+- `src/render/flatWorldAnomaly.js` — new custom disc/tree/roots/zodiac/firmament/figure-eight renderer.
+- `src/render/cosmicPhenomena.js` — routes the new visual kind to the custom renderer.
+- `src/render/threeRenderer.js` — enables isolated render layer 2 for the anomaly and its local lights.
+- `src/app/app.js` — composes the anomaly into the Explorer COSMOS registry on new/load and pre-identifies it.
+- `src/main.js` / `index.html` — FW1 cache/version wiring.
 
-## Final package verification
+## FW1 behavior checked
 
-- ZIP integrity: **PASS**.
-- Clean extraction: **PASS**.
-- GitHub-style local HTTP smoke: **12/12 routes/assets returned HTTP 200 with non-empty content**.
-- Smoke coverage includes the root shell, 6A.3 cache-busted CSS/main/app/renderer/surface-renderer/orbit-sandbox modules, unchanged compact-object factory/LAB spawner, Earth/Sun reference textures, and `EXPLORER-VERSION.json`.
-- The final deliverable is packaged from the repository root so it can be uploaded directly to the GitHub Pages repository.
+- `FLAT EARTH [ANOMALY]` is placed at a fixed remote free-space location roughly **117 AU** from the barycenter and substantially off the normal ecliptic plane.
+- The anomaly is explicitly **visual-only**, **massless**, **non-gravitating**, non-colliding and does not become a body in the canonical SOL registry.
+- Canonical `generateSolSystem()` still reports zero built-in SOL phenomena/anomalies and contains no Flat World body.
+- The existing `CosmicPhenomenonRegistry` observation-state path supplies the anomaly center/radius to the existing massless FRAME / ORBIT camera flow.
+- The custom visual contains a thick disc, procedural azimuthal-style top, perimeter ice band, twelve zodiac rim plates, central world tree, exposed underside roots, nearly clear four-sided pyramid firmament, and a vertical figure-eight celestial rail.
+- Local Sun and Moon occupy opposite positions on the same animated figure-eight path with a 180-second cycle at 1× simulation time.
+- Standard-lit anomaly materials and internal lights are isolated on render **layer 2**. Normal Solar-System lights remain on layer 0, so they do not define the anomaly's lighting.
+- The local Sun is the dominant warm point light; the local Moon supplies weaker cool fill, with restrained local ambient/hemisphere fill for readability.
+
+## HTTP/package smoke
+
+- GitHub-style local HTTP route smoke: **13/13 assets returned HTTP 200 with non-empty content**.
+- Covered the root shell, FW1 main/app modules, new Flat World definition/renderer, cosmic renderer, renderer bridge, A3 orbit/LAB modules, SOL data and `EXPLORER-VERSION.json`.
+- A graphical WebGL/WebGPU screenshot smoke could not be executed in this container because browser navigation is blocked by the execution environment. Final composition/brightness therefore still requires the intended iPhone Safari visual test.
+
+## Acceptance test on device
+
+1. Open **COSMOS**.
+2. Select **FLAT EARTH [ANOMALY]** (it is intentionally pre-identified).
+3. Use the existing massless **FRAME** view, then **ORBIT**.
+4. Confirm the complete silhouette reads immediately: disc + zodiac rim + world tree/roots + transparent pyramid + vertical figure-eight.
+5. Let simulation time run and confirm the local Sun/Moon move opposite one another on the path and illuminate the anomaly independently of the real Solar-System Sun.
+6. Confirm normal A3 surface SKY SPAWN / compact-object behavior is unchanged.

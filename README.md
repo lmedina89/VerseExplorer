@@ -1,5 +1,17 @@
 # Universe Explorer
 
+**v0.1.0.6A.3-FW1 — Flat Earth Firmament Visual Anomaly.** Built directly from the tested 6A.3 compact-object checkpoint as an isolated presentation-layer side build. COSMOS now includes **FLAT EARTH [ANOMALY]**, a massless remote visual world roughly 117 AU from the system barycenter: a thick flat-world disc with an azimuthal-chart-style top, twelve zodiac rim plates, a central world tree and exposed roots, a nearly clear four-sided pyramid firmament, and a local Sun/Moon pair traveling an animated vertical figure-eight path. The anomaly has no gravity, collision, atmosphere, landing or N-body state and does not replace Earth. Its standard materials and internal lights use an isolated render layer so the normal Solar-System Sun does not light the anomaly.
+
+## FW1 acceptance focus
+- Open **COSMOS** and select **FLAT EARTH [ANOMALY]**; it is intentionally pre-identified so no scan grind is required for the joke/demo object.
+- Use the existing massless **FRAME** or **ORBIT** cosmic observation camera. The spacecraft must remain untouched.
+- From a three-quarter view, the disc, zodiac rim, giant tree, roots, transparent pyramid and figure-eight celestial rail should all read in one composition.
+- At 1× time the local Sun and Moon complete the visual figure-eight cycle in three minutes, opposite each other on the same path.
+- The local Sun provides the dominant warm illumination and the Moon a weak cool fill; ordinary Solar-System lighting must not define the anomaly's shading.
+- SOL reference bodies, v0.1.0.6A.3 compact-object sandbox behavior and all physics tests must remain unchanged.
+
+## Previous validated checkpoint
+
 **v0.1.0.6A.3 — Compact Object Surface Bridge.** Built directly from the validated 6A.2 checkpoint. Surface SKY SPAWN now reuses the existing LAB definitions for **NEUTRON STAR, PULSAR and BLACK HOLE** alongside ASTEROID, including their established masses/radii/compact-object metadata and live Newtonian gravity. Compact-object commits are intentionally not protected from destabilizing SOL: warnings remain, but NEAR placement is allowed to produce catastrophic N-body consequences. Landed astronomy now recognizes compact objects and reuses the same black-hole/neutron-star visual factory used in space, fixing the case where a space-spawned black hole became effectively invisible after landing.
 
 ## 0.1.0.6A.3 acceptance focus

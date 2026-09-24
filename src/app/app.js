@@ -27,11 +27,12 @@ import { ParticleExperimentManager, PARTICLE_MODES } from '../experiments/partic
 import { CosmicPhenomenonRegistry } from '../cosmic/phenomenonRegistry.js';
 import { SpaceWeatherManager } from '../cosmic/spaceWeather.js';
 import { ANOMALY_REALITY_LABELS } from '../cosmic/anomalyGenerator.js';
+import { withFlatWorldAnomaly } from '../cosmic/flatWorldAnomaly.js?v=ue0106a3fw1';
 import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, transitClearanceCheck, firstTransitGuardHit, advanceTransitPosition, matchFrameExitVelocity } from '../physics/transitDrive.js';
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105f';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3fw1';
 import { Hud } from '../ui/hud.js?v=ue0105f';
 import { SystemMapController } from '../ui/systemMap.js?v=ue0105f';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105f';
@@ -360,7 +361,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.6A.3 online. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.6A.3-FW1 online. FLAT EARTH [ANOMALY] is an intentionally fictional, massless deep-space visual object available in COSMOS for massless FRAME / ORBIT observation; its local Sun and Moon provide isolated internal lighting. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -398,7 +399,8 @@ export class UniverseLabApp {
     this.discoveryScanDepth.clear();
     this.systemMap.selection = null;
     this.system = generateSystem(seed, generationProfileId);
-    this.cosmicPhenomena.reset(this.system.phenomena ?? []);
+    this.cosmicPhenomena.reset(withFlatWorldAnomaly(this.system.phenomena ?? []));
+    for (const entry of this.cosmicPhenomena.values) if (entry.alwaysIdentified) this.discoveredPhenomena.add(entry.id);
     this.spaceWeather.reset(this.system.seed, 0);
     this.registry.clear();
     for (const body of this.system.bodies) this.registry.create(body);
@@ -3362,7 +3364,7 @@ export class UniverseLabApp {
       return;
     }
     this.system = generateSystem(payload.seed, payload.generationProfileId ?? 'origin');
-    this.cosmicPhenomena.reset(this.system.phenomena ?? []);
+    this.cosmicPhenomena.reset(withFlatWorldAnomaly(this.system.phenomena ?? []));
     this.particleExperiments.clear();
     this.returnToShipView(false);
     this.selectedExperimentId = null;
@@ -3412,6 +3414,7 @@ export class UniverseLabApp {
     this.clock.elapsedSimSeconds = safeNumber(payload.elapsedSimSeconds, 0);
     const weatherRestored = this.spaceWeather.restore(payload.spaceWeather, this.system.seed, this.clock.elapsedSimSeconds);
     if (Array.isArray(payload.discoveredPhenomena)) for (const id of payload.discoveredPhenomena) if (this.cosmicPhenomena.has(id)) this.discoveredPhenomena.add(id);
+    for (const entry of this.cosmicPhenomena.values) if (entry.alwaysIdentified) this.discoveredPhenomena.add(entry.id);
     if (Array.isArray(payload.discoveryScanDepth)) for (const entry of payload.discoveryScanDepth) {
       if (!Array.isArray(entry) || entry.length < 2 || !this.cosmicPhenomena.has(entry[0])) continue;
       this.discoveryScanDepth.set(entry[0], Math.max(0, Math.min(3, Math.floor(Number(entry[1]) || 0))));

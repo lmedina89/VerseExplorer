@@ -1,3 +1,15 @@
+# Universe Explorer v0.1.0.6A.3-FW1 — Flat Earth Firmament Visual Anomaly
+
+- Added `FLAT EARTH [ANOMALY]` as an Explorer-only COSMOS presentation object injected outside the canonical body/N-body system.
+- Added a thick flat-world disc with a procedural azimuthal-style ocean/continent chart, perimeter ice ring and twelve illuminated zodiac rim plates.
+- Added a procedural world tree with an elevated canopy and exposed roots below the disc.
+- Added a nearly transparent four-sided pyramid firmament with restrained luminous edges.
+- Added a vertical figure-eight celestial rail with animated local Sun and Moon, opposite each other on a 180-second visual cycle.
+- Added isolated local lighting on render layer 2 so the anomaly's world/tree shading responds to its own Sun/Moon rather than the Solar-System Sun.
+- Placed the anomaly at a fixed off-ecliptic deep-space location (~117 AU) and reused the existing massless COSMOS FRAME/ORBIT camera for inspection.
+- No gravity source, body registry entry, collision, atmosphere, landing state or physical Earth replacement is created.
+- Base v0.1.0.6A.3 compact-object sandbox and physics behavior remain unchanged.
+
 # Universe Explorer v0.1.0.6A.3 — Compact Object Surface Bridge
 
 - Surface SKY SPAWN now exposes ASTEROID, NEUTRON STAR, PULSAR and BLACK HOLE.

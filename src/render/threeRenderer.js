@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { createStarfieldView } from './starfield.js';
 import { createInertialStarCatalog } from '../core/inertialStarCatalog.js';
 import { createCelestialVisual, updateCelestialVisual, applyStellarPerceptualProfile, syncPlanetaryAtmosphereVisual, syncPlanetaryRealismVisual, applyPlanetaryPerceptualProfile } from './celestialFactory.js?v=ue0106a2';
-import { createCosmicPhenomenonVisual, updateCosmicPhenomenonVisual } from './cosmicPhenomena.js';
+import { createCosmicPhenomenonVisual, updateCosmicPhenomenonVisual } from './cosmicPhenomena.js?v=ue0106a3fw1';
 import { syncSpaceWeatherVisuals } from './spaceWeatherVisuals.js';
 import { updateScientificOverlayVisual } from './scientificOverlayVisuals.js';
 import { BODY_KIND, SIMULATION } from '../core/constants.js';
@@ -76,6 +76,9 @@ export class UniverseRenderer {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x010207);
     this.camera = new THREE.PerspectiveCamera(66, 1, 0.02, 480_000);
+    // Layer 2 is reserved for the isolated Flat World visual anomaly. Its standard materials
+    // receive only its local Sun/Moon lights; normal Solar-System lights remain on layer 0.
+    this.camera.layers.enable(2);
     this.scene.add(this.camera);
     this.cockpitView = new CockpitView(this.camera);
     this.backendPolicy = rendererBackendPolicy();
