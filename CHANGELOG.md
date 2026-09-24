@@ -1,3 +1,12 @@
+# Universe Explorer v0.1.0.6A.3-FW2 — Flat Earth Firmament Disc-Top Observation
+
+- Added a Flat-World-only **LAND / VIEW** action in COSMOS for `FLAT EARTH [ANOMALY]`.
+- Added a dedicated observer-only disc-top renderer that reuses the exact FW1 anomaly geometry rather than recreating a second model.
+- The interior view keeps the local Sun/Moon figure-eight animation and isolated local lighting, with a slightly strengthened inside-facing firmament presentation for readability.
+- LOOK and FOV remain available; walking, scanning, SKY SPAWN, atmosphere, gravity, collision, terrain physics and physical spacecraft landing are deliberately excluded.
+- **LEAVE DISC** restores the untouched spacecraft view; the anomaly remains outside the canonical body/N-body registry.
+- Added focused FW2 regression coverage for the observation region, renderer bridge, COSMOS wiring and no-registry/no-physics boundary.
+
 # Universe Explorer v0.1.0.6A.3-FW1 — Flat Earth Firmament Visual Anomaly
 
 - Added `FLAT EARTH [ANOMALY]` as an Explorer-only COSMOS presentation object injected outside the canonical body/N-body system.

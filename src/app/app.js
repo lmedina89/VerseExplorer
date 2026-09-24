@@ -27,12 +27,12 @@ import { ParticleExperimentManager, PARTICLE_MODES } from '../experiments/partic
 import { CosmicPhenomenonRegistry } from '../cosmic/phenomenonRegistry.js';
 import { SpaceWeatherManager } from '../cosmic/spaceWeather.js';
 import { ANOMALY_REALITY_LABELS } from '../cosmic/anomalyGenerator.js';
-import { withFlatWorldAnomaly } from '../cosmic/flatWorldAnomaly.js?v=ue0106a3fw1';
+import { FLAT_WORLD_ANOMALY_ID, withFlatWorldAnomaly } from '../cosmic/flatWorldAnomaly.js?v=ue0106a3fw2';
 import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, transitClearanceCheck, firstTransitGuardHit, advanceTransitPosition, matchFrameExitVelocity } from '../physics/transitDrive.js';
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105f';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3fw1';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3fw2';
 import { Hud } from '../ui/hud.js?v=ue0105f';
 import { SystemMapController } from '../ui/systemMap.js?v=ue0105f';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105f';
@@ -41,6 +41,7 @@ import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beg
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js?v=ue0105f';
 import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105f';
+import { createFlatWorldObservationRegion, supportsFlatWorldObservation } from '../surface/flatWorldObservation.js?v=ue0106a3fw2';
 
 const SURFACE_SKY_FOV_PRESETS = Object.freeze([70, 35, 15, 5, 1.5]);
 
@@ -310,7 +311,11 @@ export class UniverseLabApp {
   }
 
   solveAstronomicalObserver(modeOverride = null) {
-    if (this.surfaceSession?.active && this.surfaceRegion) {
+    if (this.surfaceSession?.active && this.surfaceRegion?.flatWorldObservation === true) {
+      // The Flat World disc-top view is a presentation-only camera, not a body-fixed physical
+      // observer. Keep the authoritative astronomy model attached to the untouched spacecraft.
+      this.astronomy.solveShip({ ship: this.ship, simulationTimeSeconds: this.clock.elapsedSimSeconds, mode: modeOverride ?? ASTRONOMICAL_OBSERVER_MODE.SHIP });
+    } else if (this.surfaceSession?.active && this.surfaceRegion) {
       const parent = this.registry.get(this.surfaceSession.bodyId);
       const phase = this.surfaceTransition?.phase;
       const mode = modeOverride ?? (phase === SURFACE_PHASE.DESCENDING || phase === SURFACE_PHASE.ASCENDING
@@ -361,7 +366,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.6A.3-FW1 online. FLAT EARTH [ANOMALY] is an intentionally fictional, massless deep-space visual object available in COSMOS for massless FRAME / ORBIT observation; its local Sun and Moon provide isolated internal lighting. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.6A.3-FW2 online. FLAT EARTH [ANOMALY] remains an intentionally fictional, massless deep-space visual object; COSMOS now adds LAND / VIEW, a presentation-only disc-top viewpoint inside the firmament so its local Sun and Moon figure-eight can be watched from the surface without adding gravity or moving the physical spacecraft. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
@@ -667,11 +672,12 @@ export class UniverseLabApp {
     const boardingRadius = 36;
     const observerOnly = this.surfaceSession?.observerOnly === true || this.surfaceRegion?.observerOnly === true;
     if (observerOnly) {
-      if (phaseLabel) phaseLabel.textContent = 'SKY OBSERVER';
-      if (shipCompact) shipCompact.textContent = 'SHIP LIVE';
+      const flatWorldObservation = this.surfaceSession?.flatWorldObservation === true || this.surfaceRegion?.flatWorldObservation === true;
+      if (phaseLabel) phaseLabel.textContent = flatWorldObservation ? 'DISC OBSERVER' : 'SKY OBSERVER';
+      if (shipCompact) shipCompact.textContent = flatWorldObservation ? 'SHIP SAFE' : 'SHIP LIVE';
       const save = this.root.querySelector('#surfaceSaveButton'); if (save) save.disabled = true;
-      const skyPause = this.root.querySelector('#surfaceAstronomyPause'); if (skyPause) skyPause.disabled = false;
-      if (takeoff) { takeoff.disabled = false; takeoff.textContent = 'RETURN TO SHIP'; }
+      const skyPause = this.root.querySelector('#surfaceAstronomyPause'); if (skyPause) skyPause.disabled = flatWorldObservation;
+      if (takeoff) { takeoff.disabled = false; takeoff.textContent = flatWorldObservation ? 'LEAVE DISC' : 'RETURN TO SHIP'; }
       return;
     }
     if (phaseLabel) phaseLabel.textContent = phase.toUpperCase();
@@ -851,6 +857,17 @@ export class UniverseLabApp {
   }
 
   syncSurfaceSkyPresentationControls(astronomy = null) {
+    if (this.surfaceSession?.flatWorldObservation === true || this.surfaceRegion?.flatWorldObservation === true) {
+      const next = this.root.querySelector('#surfaceSkyNext'); if (next) next.hidden = true;
+      const center = this.root.querySelector('#surfaceSkyCenter'); if (center) center.hidden = true;
+      const fov = this.root.querySelector('#surfaceFovButton');
+      if (fov) {
+        fov.hidden = false;
+        const degrees = this.renderer.getSurfaceFovDegrees?.() ?? 70;
+        fov.textContent = `FOV ${Number(degrees).toFixed(degrees < 2 ? 1 : 0)}°`;
+      }
+      return null;
+    }
     const activeSurface = this.surfaceSession?.active === true;
     const observerOnly = this.surfaceSession?.observerOnly === true;
     const landed = activeSurface && !observerOnly && this.surfaceTransition?.phase === SURFACE_PHASE.LANDED;
@@ -971,8 +988,93 @@ export class UniverseLabApp {
     this.renderer.setSurfaceFovDegrees?.(degrees);
     this.syncSurfaceSkyPresentationControls();
     this.updateSurfaceHud();
-    this.hud.notify(`${observerOnly ? 'SURFACE SKY' : 'LANDED TELESCOPE'} FOV: ${degrees}°. Telescope framing changes presentation only; physical angular sizes and the N-body state are unchanged.`);
+    const flatWorldObservation = this.surfaceSession?.flatWorldObservation === true || this.surfaceRegion?.flatWorldObservation === true;
+    this.hud.notify(flatWorldObservation
+      ? `FIRMAMENT VIEW FOV: ${degrees}°. Camera framing changes only; the anomaly geometry, local Sun/Moon path and spacecraft state are unchanged.`
+      : `${observerOnly ? 'SURFACE SKY' : 'LANDED TELESCOPE'} FOV: ${degrees}°. Telescope framing changes presentation only; physical angular sizes and the N-body state are unchanged.`);
     return degrees;
+  }
+
+
+  enterFlatWorldObservationSurface(phenomenonId = this.selectedPhenomenonId, options = {}) {
+    const definition = phenomenonId ? this.cosmicPhenomena.get(phenomenonId) : null;
+    if (!supportsFlatWorldObservation(definition)) {
+      this.hud.notify('LAND / VIEW is available only for FLAT EARTH [ANOMALY].');
+      return false;
+    }
+    if (this.surfaceSession?.active) {
+      this.hud.notify('Close the current surface view before opening the Flat World observation deck.');
+      return false;
+    }
+
+    this._surfaceOrbitHandoffPending = null;
+    this._surfacePreviousRunning = this.running;
+    this._surfacePreviousTimeScale = this.clock.timeScale;
+    try {
+      this.returnToShipView(false);
+      this.releaseAllHeldControls();
+      setLandingPhase(this.surfaceTransition, SURFACE_PHASE.ORBIT);
+
+      this.surfaceRegion = createFlatWorldObservationRegion(definition);
+      this.surfaceSession = createSurfaceSession(this.surfaceRegion, null);
+      this.surfaceSession.observerOnly = true;
+      this.surfaceSession.flatWorldObservation = true;
+      this.surfaceSession.x = 0;
+      this.surfaceSession.z = 0;
+      this.surfaceSession.lastMoveSpeedMps = 0;
+      const pose = this.surfaceRegion.observationPose ?? {};
+      const radiusFraction = Math.max(0.25, Math.min(0.82, Number(pose.radiusFraction) || 0.62));
+      const azimuth = Number(pose.azimuthRad) || 0.62;
+      const cameraX = Math.cos(azimuth) * radiusFraction;
+      const cameraZ = Math.sin(azimuth) * radiusFraction;
+      this.surfaceSession.yaw = Math.atan2(-cameraX, -cameraZ);
+      this.surfaceSession.pitch = Number(pose.initialPitchRad) || 0.20;
+      this.surfaceSession.skyFovIndex = 0;
+      this.surfaceInput = { forward: 0, strafe: 0, sprint: false };
+
+      const pseudoBody = {
+        id: definition.id,
+        name: definition.label,
+        kind: definition.kind,
+        position: definition.position,
+        velocity: definition.velocity,
+        radius: definition.discRadiusMeters,
+        gravitySource: false,
+      };
+      this.renderer.enterSurface(this.surfaceRegion, pseudoBody, null, this.bodies);
+      this.renderer.setSurfaceFovDegrees?.(70);
+      this.root.classList.add('surface-active', 'surface-flat-world-observer');
+      this.syncViewClasses();
+      for (const id of ['morePanel','labPanel','scannerPanel','sciencePanel','cosmosPanel','overlayPanel','mapPanel','transitPanel']) {
+        const panel = this.root.querySelector(`#${id}`); if (panel) panel.hidden = true;
+      }
+      const hud = this.root.querySelector('#surfaceHud'); if (hud) hud.hidden = false;
+      const move = this.root.querySelector('#surfaceMovePad'); if (move) move.hidden = true;
+      const spawnPanel = this.root.querySelector('#surfaceSpawnPanel'); if (spawnPanel) spawnPanel.hidden = true;
+      this.clearSurfaceSkySandboxPreview();
+      const velocity = this.root.querySelector('#velocityMarker'); if (velocity) velocity.hidden = true;
+      for (const selector of ['#surfaceScanButton','#surfaceSprintButton','#surfaceSaveButton','#surfaceSpawnButton','#surfacePlannerButton','#surfaceAstronomyPause','#surfaceSkyNext','#surfaceSkyCenter']) {
+        const control = this.root.querySelector(selector); if (control) control.hidden = true;
+      }
+      for (const selector of ['#surfaceTakeoffButton','#surfaceHudToggle','#surfaceFovButton']) {
+        const control = this.root.querySelector(selector); if (control) control.hidden = false;
+      }
+      this.setSurfaceHudExpanded(false, false);
+      this.syncSurfaceSkyPresentationControls();
+      this.updateSurfaceHud();
+      this.updateSurfaceTransitionUi();
+      if (options.notify !== false) this.hud.notify('FLAT EARTH [ANOMALY] · DISC-TOP VIEW: presentation-only observation point established inside the firmament. LOOK around to watch the local Sun and Moon trace the figure-eight path. Gravity, atmosphere, terrain physics and spacecraft position remain untouched.', 9000);
+      return true;
+    } catch (error) {
+      console.error('Flat World observation entry failure', error);
+      try { this.renderer.exitSurface(); } catch (_) {}
+      this.surfaceSession = null;
+      this.surfaceRegion = null;
+      this.root.classList.remove('surface-active', 'surface-flat-world-observer');
+      this.syncViewClasses();
+      this.hud.notify(`FLAT WORLD VIEW failed safely: ${error?.message ?? error}`);
+      return false;
+    }
   }
 
 
@@ -1116,7 +1218,7 @@ export class UniverseLabApp {
     this.root.classList.remove('surface-active');
     const hud = this.root.querySelector('#surfaceHud'); if (hud) hud.hidden = true;
     const move = this.root.querySelector('#surfaceMovePad'); if (move) move.hidden = true;
-    this.root.classList.remove('surface-sky-observer');
+    this.root.classList.remove('surface-sky-observer', 'surface-flat-world-observer');
 
     if (departingSession?.observerOnly === true) {
       setLandingPhase(this.surfaceTransition, SURFACE_PHASE.ORBIT);
@@ -1125,7 +1227,9 @@ export class UniverseLabApp {
       this.syncViewClasses();
       this.updateLandingUi();
       this.syncPauseControls();
-      if (notify) this.hud.notify(`SHIP VIEW RESTORED: surface sky observer closed on ${body?.name ?? 'the selected world'}. Spacecraft position, velocity, navigation state and simulation time were never replaced by the observer camera.`, 6200);
+      if (notify) this.hud.notify(departingSession?.flatWorldObservation === true
+        ? 'SHIP VIEW RESTORED: Flat World disc-top presentation closed. The physical spacecraft was never moved, landed or altered.'
+        : `SHIP VIEW RESTORED: surface sky observer closed on ${body?.name ?? 'the selected world'}. Spacecraft position, velocity, navigation state and simulation time were never replaced by the observer camera.`, 6200);
       return true;
     }
 
@@ -1356,9 +1460,56 @@ export class UniverseLabApp {
   updateSurfaceHud(astronomy = null) {
     if (!this.surfaceSession?.active || !this.surfaceRegion) return;
     const region = this.surfaceRegion;
+    const set = (selector, text) => { const el = this.root.querySelector(selector); if (el) el.textContent = text; };
+    if (this.surfaceSession.flatWorldObservation === true || region.flatWorldObservation === true) {
+      const definition = region.flatWorldDefinition ?? this.cosmicPhenomena.get(FLAT_WORLD_ANOMALY_ID);
+      const cycleSeconds = Math.max(30, Number(definition?.localCycleSeconds) || 180);
+      const cyclePosition = ((Math.max(0, Number(this.clock.elapsedSimSeconds) || 0) % cycleSeconds) + cycleSeconds) % cycleSeconds;
+      set('#surfaceWorldName', 'FLAT EARTH [ANOMALY] · DISC-TOP VIEW');
+      set('#surfaceBiome', 'FIRMAMENT INTERIOR · PRESENTATION ONLY');
+      set('#surfaceWeather', 'CLEAR DOME');
+      set('#surfaceNearest', 'WORLD TREE · CENTER AXIS');
+      set('#surfaceFocusCompactLabel', 'CYCLE');
+      set('#surfaceDiscoveries', 'SUN / MOON');
+      set('#surfaceShipCompact', 'SHIP SAFE');
+      set('#surfaceViewingCompact', 'FIGURE-8 SKY');
+      set('#surfaceGravity', '0.00 m/s²');
+      set('#surfaceTemperature', 'VISUAL ONLY');
+      set('#surfaceAtmosphere', 'NO PHYSICAL ATMOSPHERE');
+      set('#surfaceCoords', 'DISC TOP · ~62% R');
+      set('#surfaceWind', '—');
+      set('#surfaceShipDistance', 'MASSLESS VIEW');
+      set('#surfaceClock', `${cyclePosition.toFixed(0)} / ${cycleSeconds.toFixed(0)} s`);
+      set('#surfacePhase', 'DISC OBSERVER');
+      set('#surfaceSkyClock', `${Math.floor(Math.max(0, Number(this.clock.elapsedSimSeconds) || 0)).toLocaleString()} s`);
+      set('#surfaceRotation', 'STATIC FRAME');
+      set('#surfaceLatLon', 'N/A · FLAT DISC');
+      set('#surfaceRotationPhase', '—');
+      set('#surfaceStarAltAz', 'LOCAL SUN · SCRIPTED PATH');
+      set('#surfaceSolarTime', 'FIGURE-8 CYCLE');
+      set('#surfaceStarDisk', 'LOCAL LUMINARY');
+      set('#surfaceEclipse', 'PRESENTATION ONLY');
+      set('#surfaceTargetPhase', 'SUN / MOON OFFSET 180°');
+      set('#surfaceTargetAngular', 'VISUAL SCALE');
+      set('#surfaceSkyFocus', 'LOCAL SUN + MOON');
+      const fovDegrees = this.renderer.getSurfaceFovDegrees?.() ?? 70;
+      set('#surfaceViewFov', `${Number(fovDegrees).toFixed(fovDegrees < 2 ? 1 : 0)}°`);
+      set('#surfaceFocusAltAz', 'LOOK CONTROL');
+      set('#surfaceFocusHorizon', 'INSIDE FIRMAMENT');
+      set('#surfaceFocusPhase', 'SCRIPTED OPPOSING LUMINARIES');
+      set('#surfaceFocusAngular', 'ART-DIRECTED');
+      const weatherStatus = this.root.querySelector('#surfaceWeatherStatus');
+      if (weatherStatus) weatherStatus.textContent = 'NO PHYSICAL WEATHER · The local Sun/Moon lights, pyramid firmament, disc and World Tree are presentation geometry only. The normal Solar-System Sun is not used to light this anomaly.';
+      const scanStatus = this.root.querySelector('#surfaceScanStatus');
+      if (scanStatus) scanStatus.textContent = 'LOOK around to follow the local Sun and Moon along the animated figure-eight. LEAVE DISC returns to the untouched spacecraft; no gravity, collision, terrain traversal or physical landing state is added.';
+      const note = this.root.querySelector('.surface-model-note');
+      if (note) note.textContent = 'PRESENTATION-ONLY DISC OBSERVER · shared Flat World geometry and isolated local Sun/Moon lighting · no gravity / atmosphere / collision / spacecraft teleport';
+      this.syncSurfaceSkyPresentationControls();
+      this.syncPauseControls();
+      return;
+    }
     const observerOnly = this.surfaceSession.observerOnly === true || region.observerOnly === true;
     const nearest = observerOnly ? null : nearestSurfacePoi(this.surfaceSession, region);
-    const set = (selector, text) => { const el = this.root.querySelector(selector); if (el) el.textContent = text; };
     set('#surfaceWorldName', observerOnly ? `SURFACE SKY — ${region.bodyName}` : `${region.bodyName} · ${region.name}`);
     set('#surfaceBiome', observerOnly ? 'VIEWING — …' : region.palette.name.toUpperCase());
     set('#surfaceFocusCompactLabel', observerOnly ? 'TARGET' : 'FOUND');
@@ -2253,6 +2404,12 @@ export class UniverseLabApp {
     }
 
     const state = this.phenomenonState(this.selectedPhenomenonId);
+    const flatWorldLand = this.root.querySelector('#landFlatWorld');
+    if (flatWorldLand) {
+      const available = state?.id === FLAT_WORLD_ANOMALY_ID && supportsFlatWorldObservation(this.selectedPhenomenon);
+      flatWorldLand.hidden = !available;
+      flatWorldLand.disabled = !available;
+    }
     const discovered = state ? this.discoveredPhenomena.has(state.id) : false;
     const depth = state ? (this.discoveryScanDepth.get(state.id) ?? (discovered ? 1 : 0)) : 0;
     const setText = (id, text) => { const el = this.root.querySelector(id); if (el) el.textContent = text; };
@@ -3226,7 +3383,7 @@ export class UniverseLabApp {
     const astronomy = this.solveAstronomicalObserver();
     this.updateSurfaceHud(astronomy);
     if (this.surfaceSandboxPreviewActive) this.refreshSurfaceSkySandboxPreview(astronomy);
-    this.renderer.renderSurface({ session: this.surfaceSession, transition: this.surfaceTransition, realTimeSeconds: now / 1000, astronomy });
+    this.renderer.renderSurface({ session: this.surfaceSession, transition: this.surfaceTransition, realTimeSeconds: now / 1000, astronomy, elapsedSimSeconds: this.clock.elapsedSimSeconds });
     this.renderMs = performance.now() - renderStart;
     this.fpsFrames += 1;
     if (now - this.fpsClock >= 500) {
@@ -3739,6 +3896,7 @@ export class UniverseLabApp {
     $('#scanPhenomenon').addEventListener('click', () => this.scanPhenomenon());
     $('#observePhenomenon').addEventListener('click', () => this.enterCosmicObservation('frame'));
     $('#orbitPhenomenon').addEventListener('click', () => this.enterCosmicObservation('orbit'));
+    $('#landFlatWorld').addEventListener('click', () => this.enterFlatWorldObservationSurface());
     $('#nextPhenomenon').addEventListener('click', () => this.cyclePhenomenon());
     $('#rendezvousPhenomenon').addEventListener('click', () => this.rendezvousPhenomenon());
     $('#shipViewCosmos').addEventListener('click', () => { this.hud.toggleCosmos(false); this.returnToShipView(); });

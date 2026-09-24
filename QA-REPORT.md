@@ -1,3 +1,18 @@
+# Universe Explorer v0.1.0.6A.3-FW2 — QA Report
+
+## Scope
+FW2 is a presentation-only extension of FW1. It adds a Flat-World-only COSMOS **LAND / VIEW** observer and dedicated interior renderer while preserving the anomaly's `visualOnly=true`, `gravitySource=false` boundary and leaving canonical SOL/A3 physics untouched.
+
+## Focused FW2 checks
+- `createFlatWorldObservationRegion()` is observer-only, zero-gravity, zero-pressure and weather-disabled.
+- `FlatWorldSurfaceVisual` reuses `createFlatWorldAnomalyVisual()` / `updateFlatWorldAnomalyVisual()` so the space and disc-top views share one visual definition.
+- The surface camera sees the isolated Flat World render layer and slightly strengthens the transparent firmament only for interior readability.
+- COSMOS exposes **LAND / VIEW** only for `FLAT EARTH [ANOMALY]`.
+- The observer session does not register a new body, change N-body sources, move the ship, or invoke ordinary landing/orbit insertion.
+- **LEAVE DISC** follows the existing observer-only cleanup path back to the physical ship view.
+
+---
+
 # Universe Explorer v0.1.0.6A.3-FW1 — QA Report
 
 ## Validation summary

@@ -9,6 +9,7 @@ import { BODY_KIND, SIMULATION } from '../core/constants.js';
 import { computeObservationCameraPose } from './observationCamera.js';
 import { apparentAngularRadius, stellarPerceptualProfile } from './stellarPerception.js';
 import { SurfaceWorldVisual } from './surfaceWorld.js?v=ue0106a3';
+import { FlatWorldSurfaceVisual } from './flatWorldSurface.js?v=ue0106a3fw2';
 import { rendererBackendPolicy } from './backendPolicy.js';
 import { derivePlanetaryEnvironment } from '../physics/planetaryEnvironment.js';
 import { CockpitView } from './cockpitView.js?v=ue0105f';
@@ -597,7 +598,9 @@ export class UniverseRenderer {
 
   enterSurface(region, body, star, bodies = []) {
     this.exitSurface();
-    this.surfaceWorld = new SurfaceWorldVisual(region, body, star, this.starCatalog, bodies);
+    this.surfaceWorld = region?.flatWorldObservation === true
+      ? new FlatWorldSurfaceVisual(region)
+      : new SurfaceWorldVisual(region, body, star, this.starCatalog, bodies);
     const rect = this.container.getBoundingClientRect();
     this.surfaceWorld.resize(Math.max(2, Math.floor(rect.width)), Math.max(2, Math.floor(rect.height)));
   }
@@ -615,11 +618,11 @@ export class UniverseRenderer {
     }
   }
 
-  renderSurface({ session, transition = null, realTimeSeconds = 0, astronomy = null }) {
+  renderSurface({ session, transition = null, realTimeSeconds = 0, astronomy = null, elapsedSimSeconds = null }) {
     if (!this.surfaceWorld || !session?.active) return false;
     this._motionLines.visible = false;
     this.targetMarker.visible = false;
-    this.surfaceWorld.render(this.renderer, session, realTimeSeconds, transition, astronomy);
+    this.surfaceWorld.render(this.renderer, session, realTimeSeconds, transition, astronomy, elapsedSimSeconds);
     return true;
   }
 
