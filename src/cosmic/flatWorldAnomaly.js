@@ -26,7 +26,7 @@ const BASE_DEFINITION = Object.freeze({
   realityClass: 'impossible',
   detectionClass: 'structured mythic-cosmology visual',
   stability: 'fixed frame with internally animated local luminaries',
-  scanSummary: 'A massless visual anomaly built as a flat world disc inside a transparent four-sided firmament, with a central world tree and local Sun/Moon traveling a fixed figure-eight path.',
+  scanSummary: 'A massless visual anomaly built as a flat world disc inside a transparent four-sided upper/lower bipyramid firmament, with a central world tree and local Sun/Moon traveling a fixed figure-eight path.',
   scientificStatus: 'INTENTIONALLY FICTIONAL. This object is a visual anomaly only: it contributes no gravity, does not replace Earth, and has no physical atmosphere or terrain physics. FW2 adds a presentation-only disc-top observation viewpoint so the local Sun/Moon figure-eight can be viewed from inside the firmament; the spacecraft is not physically landed or teleported by that view, and local lighting remains isolated from the Solar System lighting model.',
   surfaceObservationEnabled: true,
   surfaceObservationMode: 'presentation-only-disc-top',

@@ -1,11 +1,11 @@
 # Universe Explorer
 
-**v0.1.0.6A.3-FW2 — Flat Earth Firmament Disc-Top Observation.** Built directly from the tested FW1 visual-anomaly side build. COSMOS still includes **FLAT EARTH [ANOMALY]** roughly 117 AU from the system barycenter with the same thick flat-world disc, zodiac rim, World Tree/roots, nearly clear pyramid firmament, and animated local Sun/Moon figure-eight path. FW2 adds a Flat-World-only **LAND / VIEW** control that opens a massless disc-top presentation camera inside the firmament so the local cycle can be viewed from the surface. It does not move the physical spacecraft or add gravity, atmosphere, collision, terrain traversal, N-body state, or a physical landing model.
+**v0.1.0.6A.3-FW2.1 — Full Firmament & Visual Polish.** Built directly from the tested FW2 disc-top observer. The Flat Earth anomaly now matches the supplied sketch more closely: the clear firmament is a complete **upper/lower four-sided bipyramid** sharing the disc plane, with a lower apex beneath the roots as well as the upper apex above the World Tree. The visual pass also adds mobile-readable firmament edge glow, subtle celestial-path guide beads, warmer rim trim, a richer deterministic tree canopy, an underside root halo, and a nearly face-on default observation position for the figure-eight. The anomaly remains massless, non-colliding and outside the N-body system; **LAND / VIEW** remains a presentation-only camera.
 
-## FW2 acceptance focus
+## FW2.1 acceptance focus
 - Open **COSMOS**, select **FLAT EARTH [ANOMALY]**, then choose **LAND / VIEW**.
-- LOOK must rotate freely from a fixed disc-top observation position with the World Tree, firmament and local figure-eight visible from inside.
-- The local Sun and Moon must keep moving on the same animated path and keep providing the anomaly's isolated internal lighting; the normal Solar-System Sun must not become the anomaly light source.
+- LOOK must rotate freely from a fixed disc-top observation position with the World Tree, the full upper/lower firmament, and local figure-eight visible from inside.
+- The local Sun and Moon must keep moving on the same animated path and keep providing the anomaly's isolated internal lighting; the normal Solar-System Sun must not become the anomaly light source. The guide beads are presentation-only and must not affect motion.
 - FOV cycling remains available for screenshots; movement, surface scanning, SKY SPAWN, weather and physical landing/takeoff physics remain disabled.
 - **LEAVE DISC** returns to the untouched physical spacecraft. SOL/A3 compact-object physics and ordinary landing systems must remain unchanged.
 

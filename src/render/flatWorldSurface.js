@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { SIMULATION } from '../core/constants.js';
 import { createRng } from '../util/prng.js';
-import { FLAT_WORLD_VISUAL_LAYER, createFlatWorldAnomalyVisual, updateFlatWorldAnomalyVisual } from './flatWorldAnomaly.js?v=ue0106a3fw2';
+import { FLAT_WORLD_VISUAL_LAYER, createFlatWorldAnomalyVisual, updateFlatWorldAnomalyVisual } from './flatWorldAnomaly.js?v=ue0106a3fw21';
 
 function disposeMaterial(material) {
   if (!material) return;
@@ -115,7 +115,8 @@ export class FlatWorldSurfaceVisual {
     // makes the four triangular faces readable without turning the dome into an opaque cage.
     const visualState = this.world?.userData?.flatWorld;
     if (visualState?.firmamentMaterial) visualState.firmamentMaterial.opacity = Math.max(0.052, Number(visualState.firmamentMaterial.opacity) || 0);
-    if (visualState?.firmamentEdgeMaterial) visualState.firmamentEdgeMaterial.opacity = Math.max(0.58, Number(visualState.firmamentEdgeMaterial.opacity) || 0);
+    if (visualState?.firmamentEdgeMaterial) visualState.firmamentEdgeMaterial.opacity = Math.max(0.60, Number(visualState.firmamentEdgeMaterial.opacity) || 0);
+    if (visualState?.firmamentGlowMaterial) visualState.firmamentGlowMaterial.opacity = Math.max(0.22, Number(visualState.firmamentGlowMaterial.opacity) || 0);
 
     const yaw = Number.isFinite(Number(session?.yaw)) ? Number(session.yaw) : this.defaultYaw;
     const pitch = Number.isFinite(Number(session?.pitch)) ? Math.max(-1.48, Math.min(1.48, Number(session.pitch))) : this.defaultPitch;

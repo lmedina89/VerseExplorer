@@ -140,6 +140,7 @@ function addWorldTree(root, discTop, treeTop, rootDepth) {
   const barkDark = new THREE.MeshStandardMaterial({ color:0x392317, roughness:1, metalness:0 });
   const foliageA = new THREE.MeshStandardMaterial({ color:0x315b35, roughness:.88, emissive:0x0b1d0e, emissiveIntensity:.18 });
   const foliageB = new THREE.MeshStandardMaterial({ color:0x4b7440, roughness:.9, emissive:0x102611, emissiveIntensity:.14 });
+  const foliageC = new THREE.MeshStandardMaterial({ color:0x6c8b4a, roughness:.92, emissive:0x132b12, emissiveIntensity:.11 });
 
   const trunkTop = Math.max(discTop + 24, treeTop * .72);
   const trunkPoints = [[0,discTop-.3,0],[1.0,discTop+17,-.4],[-.9,discTop+33,.8],[0,trunkTop,0]];
@@ -161,10 +162,21 @@ function addWorldTree(root, discTop, treeTop, rootDepth) {
   canopyPoints.push([0,treeTop-3,0],[7,treeTop-7,3],[-7,treeTop-8,-4],[3,treeTop-10,-9],[-4,treeTop-9,9]);
   const canopyGeometry = new THREE.IcosahedronGeometry(6.1, 1);
   canopyPoints.forEach((p,i) => {
-    const crown = new THREE.Mesh(canopyGeometry, i%2 ? foliageA : foliageB);
+    const crownMaterial = i % 3 === 0 ? foliageC : (i%2 ? foliageA : foliageB);
+    const crown = new THREE.Mesh(canopyGeometry, crownMaterial);
     crown.position.set(p[0],p[1],p[2]);
-    crown.scale.set(1.15+(i%3)*.08,.82+(i%2)*.08,1.05+((i+1)%3)*.08);
+    crown.rotation.set((i%5)*.11,(i%7)*.19,(i%4)*.08);
+    crown.scale.set(1.12+(i%3)*.10,.78+(i%2)*.10,1.03+((i+1)%3)*.10);
     root.add(crown);
+
+    if (i < 11) {
+      const outward = new THREE.Vector3(p[0],0,p[2]).normalize();
+      const satellite = new THREE.Mesh(new THREE.IcosahedronGeometry(3.2+(i%3)*.35,1), i%2 ? foliageB : foliageC);
+      satellite.position.set(p[0]+outward.x*(3.2+(i%2)), p[1]-1.2+(i%3)*.6, p[2]+outward.z*(3.2+(i%2)));
+      satellite.scale.set(1.12,.72,1.05);
+      satellite.rotation.set(.1*i,.17*i,.06*i);
+      root.add(satellite);
+    }
   });
 
   // Exposed roots spread beneath the disc and descend into the lower figure-eight lobe.
@@ -179,38 +191,111 @@ function addWorldTree(root, discTop, treeTop, rootDepth) {
   }
 }
 
-function createFirmament(halfBase, apexY, baseY) {
+function createFirmament(halfBase, apexY, centerY = 0) {
   const group = new THREE.Group();
-  const vertices = new Float32Array([
-    -halfBase,baseY,-halfBase,  halfBase,baseY,-halfBase,  halfBase,baseY,halfBase,
-    -halfBase,baseY,-halfBase,  halfBase,baseY,halfBase, -halfBase,baseY,halfBase,
-    -halfBase,baseY,-halfBase,  halfBase,baseY,-halfBase, 0,apexY,0,
-     halfBase,baseY,-halfBase,  halfBase,baseY, halfBase, 0,apexY,0,
-     halfBase,baseY, halfBase, -halfBase,baseY, halfBase, 0,apexY,0,
-    -halfBase,baseY, halfBase, -halfBase,baseY,-halfBase, 0,apexY,0,
-  ]);
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(vertices,3));
-  const material = new THREE.MeshBasicMaterial({ color:0xa9e8ff, transparent:true, opacity:.038, depthWrite:false, side:THREE.DoubleSide, blending:THREE.NormalBlending });
-  const faces = new THREE.Mesh(geometry,material); faces.name='flat-world-firmament-faces'; group.add(faces);
-
-  const edgePoints = [
-    [-halfBase,baseY,-halfBase],[halfBase,baseY,-halfBase],
-    [halfBase,baseY,-halfBase],[halfBase,baseY,halfBase],
-    [halfBase,baseY,halfBase],[-halfBase,baseY,halfBase],
-    [-halfBase,baseY,halfBase],[-halfBase,baseY,-halfBase],
-    [-halfBase,baseY,-halfBase],[0,apexY,0],
-    [halfBase,baseY,-halfBase],[0,apexY,0],
-    [halfBase,baseY,halfBase],[0,apexY,0],
-    [-halfBase,baseY,halfBase],[0,apexY,0],
+  const apex = Math.abs(apexY);
+  const upperApex = [0, centerY + apex, 0];
+  const lowerApex = [0, centerY - apex, 0];
+  const corners = [
+    [-halfBase, centerY, -halfBase],
+    [ halfBase, centerY, -halfBase],
+    [ halfBase, centerY,  halfBase],
+    [-halfBase, centerY,  halfBase],
   ];
-  const edgeGeometry = new THREE.BufferGeometry().setFromPoints(edgePoints.map((p)=>new THREE.Vector3(...p)));
-  const edgeMaterial = new THREE.LineBasicMaterial({color:0x91dcff,transparent:true,opacity:.48,depthWrite:false,blending:THREE.AdditiveBlending});
-  const edges = new THREE.LineSegments(edgeGeometry,edgeMaterial); edges.name='flat-world-firmament-edges'; group.add(edges);
-  const apex = new THREE.Mesh(new THREE.OctahedronGeometry(1.1,0),new THREE.MeshBasicMaterial({color:0xe4f9ff,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false}));
-  apex.position.y=apexY; group.add(apex);
+
+  // The reference concept is a complete four-sided firmament above AND below the disc:
+  // two square pyramids sharing the disc's equatorial plane. Keep it almost clear so the
+  // world remains readable while the silhouette still resolves from oblique angles.
+  const facePositions = [];
+  for (let i = 0; i < corners.length; i += 1) {
+    const a = corners[i];
+    const b = corners[(i + 1) % corners.length];
+    facePositions.push(...a, ...b, ...upperApex);
+    facePositions.push(...b, ...a, ...lowerApex);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(facePositions), 3));
+  geometry.computeVertexNormals();
+  const material = new THREE.MeshBasicMaterial({
+    color: 0xa9e8ff,
+    transparent: true,
+    opacity: .029,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    blending: THREE.NormalBlending,
+  });
+  const faces = new THREE.Mesh(geometry, material);
+  faces.name = 'flat-world-firmament-faces';
+  group.add(faces);
+
+  const edgePairs = [];
+  for (let i = 0; i < corners.length; i += 1) {
+    const a = corners[i];
+    const b = corners[(i + 1) % corners.length];
+    edgePairs.push([a, b], [a, upperApex], [a, lowerApex]);
+  }
+  const linePoints = edgePairs.flatMap(([a, b]) => [new THREE.Vector3(...a), new THREE.Vector3(...b)]);
+  const edgeGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+  const edgeMaterial = new THREE.LineBasicMaterial({
+    color: 0xbceeff,
+    transparent: true,
+    opacity: .50,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+  edges.name = 'flat-world-firmament-edges';
+  group.add(edges);
+
+  // Mobile WebGL line widths are effectively one pixel. A very thin translucent cylinder
+  // behind each edge keeps the full bipyramid readable on iPhone without looking like a cage.
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color: 0x72cfff,
+    transparent: true,
+    opacity: .17,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  edgePairs.forEach(([a, b], index) => {
+    const glow = branchBetween(a, b, .15, .15, glowMaterial, 6);
+    glow.name = `flat-world-firmament-edge-glow-${index}`;
+    group.add(glow);
+  });
+
+  const apexMaterial = new THREE.MeshBasicMaterial({
+    color: 0xe7fbff,
+    transparent: true,
+    opacity: .82,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const upperMarker = new THREE.Mesh(new THREE.OctahedronGeometry(1.05, 0), apexMaterial);
+  upperMarker.position.set(...upperApex);
+  upperMarker.name = 'flat-world-firmament-upper-apex';
+  group.add(upperMarker);
+  const lowerMarker = new THREE.Mesh(new THREE.OctahedronGeometry(.9, 0), apexMaterial);
+  lowerMarker.position.set(...lowerApex);
+  lowerMarker.name = 'flat-world-firmament-lower-apex';
+  group.add(lowerMarker);
+
+  const cornerMaterial = new THREE.MeshBasicMaterial({
+    color: 0xb8eeff,
+    transparent: true,
+    opacity: .42,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const cornerGeometry = new THREE.SphereGeometry(.34, 8, 6);
+  corners.forEach((corner, index) => {
+    const node = new THREE.Mesh(cornerGeometry, cornerMaterial);
+    node.position.set(...corner);
+    node.name = `flat-world-firmament-equator-node-${index}`;
+    group.add(node);
+  });
+
   group.userData.firmamentMaterial = material;
   group.userData.firmamentEdgeMaterial = edgeMaterial;
+  group.userData.firmamentGlowMaterial = glowMaterial;
   return group;
 }
 
@@ -232,10 +317,40 @@ export function flatWorldPathPoint(phase, width, height) {
 
 function createFigureEightPath(width,height) {
   const curve = makeFigureEightCurve(width,height);
-  const glow = new THREE.Mesh(new THREE.TubeGeometry(curve,180,.42,6,true), new THREE.MeshBasicMaterial({color:0x7fd9ff,transparent:true,opacity:.12,depthWrite:false,blending:THREE.AdditiveBlending}));
-  const core = new THREE.Mesh(new THREE.TubeGeometry(curve,180,.12,5,true), new THREE.MeshBasicMaterial({color:0xe9fbff,transparent:true,opacity:.72,depthWrite:false,blending:THREE.AdditiveBlending}));
-  glow.name='flat-world-figure-eight-glow'; core.name='flat-world-figure-eight-core';
-  return { group:new THREE.Group(), curve, glow, core };
+  const group = new THREE.Group();
+  const glow = new THREE.Mesh(
+    new THREE.TubeGeometry(curve,180,.42,6,true),
+    new THREE.MeshBasicMaterial({color:0x7fd9ff,transparent:true,opacity:.12,depthWrite:false,blending:THREE.AdditiveBlending}),
+  );
+  const core = new THREE.Mesh(
+    new THREE.TubeGeometry(curve,180,.12,5,true),
+    new THREE.MeshBasicMaterial({color:0xe9fbff,transparent:true,opacity:.72,depthWrite:false,blending:THREE.AdditiveBlending}),
+  );
+  glow.name='flat-world-figure-eight-glow';
+  core.name='flat-world-figure-eight-core';
+  group.add(glow, core);
+
+  // Small celestial guide beads make the figure-eight readable from the observation deck
+  // without thickening the path itself.
+  const markerGeometry = new THREE.SphereGeometry(.34,8,6);
+  const markerMaterial = new THREE.MeshBasicMaterial({
+    color:0xbcecff,
+    transparent:true,
+    opacity:.46,
+    depthWrite:false,
+    blending:THREE.AdditiveBlending,
+  });
+  for (let i=0;i<16;i+=1) {
+    const phase = i / 16 * Math.PI * 2;
+    const p = flatWorldPathPoint(phase,width,height);
+    const marker = new THREE.Mesh(markerGeometry,markerMaterial);
+    marker.position.set(p[0],p[1],p[2]);
+    marker.scale.setScalar(i % 4 === 0 ? 1.35 : .82);
+    marker.name=`flat-world-path-marker-${i}`;
+    group.add(marker);
+  }
+  group.name='flat-world-celestial-path';
+  return { group, curve, glow, core, markerMaterial };
 }
 
 function createLocalSun(radius) {
@@ -279,7 +394,7 @@ export function createFlatWorldAnomalyVisual(definition) {
 
   const topTexture = makeDiscTexture();
   const sideMaterial = new THREE.MeshStandardMaterial({color:0x24201c,roughness:.96,metalness:.05});
-  const topMaterial = new THREE.MeshStandardMaterial({map:topTexture,color:0xffffff,roughness:.78,metalness:.02}); topMaterial.userData.disposeMap=true;
+  const topMaterial = new THREE.MeshStandardMaterial({map:topTexture,color:0xffffff,roughness:.76,metalness:.02,emissive:0x07151d,emissiveIntensity:.09}); topMaterial.userData.disposeMap=true;
   const bottomMaterial = new THREE.MeshStandardMaterial({color:0x15100d,roughness:1,metalness:0});
   const disc = new THREE.Mesh(new THREE.CylinderGeometry(discRadius,discRadius,discThickness,128,1,false),[sideMaterial,topMaterial,bottomMaterial]);
   disc.name='flat-world-disc'; root.add(disc);
@@ -289,6 +404,12 @@ export function createFlatWorldAnomalyVisual(definition) {
 
   const rimBand = new THREE.Mesh(new THREE.CylinderGeometry(discRadius*1.013,discRadius*1.013,discThickness*.76,128,1,true),new THREE.MeshStandardMaterial({color:0x1b2028,roughness:.7,metalness:.32,transparent:true,opacity:.86,side:THREE.DoubleSide}));
   rimBand.name='flat-world-zodiac-band'; root.add(rimBand);
+
+  const trimMaterial = new THREE.MeshStandardMaterial({color:0xcaa75d,emissive:0x302006,emissiveIntensity:.24,roughness:.38,metalness:.58});
+  const upperTrim = new THREE.Mesh(new THREE.TorusGeometry(discRadius*1.012,Math.max(.18,discRadius*.006),8,128),trimMaterial);
+  upperTrim.rotation.x=Math.PI/2; upperTrim.position.y=discTop+.22; upperTrim.name='flat-world-upper-trim'; root.add(upperTrim);
+  const lowerTrim = new THREE.Mesh(new THREE.TorusGeometry(discRadius*1.012,Math.max(.14,discRadius*.0048),8,128),trimMaterial);
+  lowerTrim.rotation.x=Math.PI/2; lowerTrim.position.y=-discTop-.22; lowerTrim.name='flat-world-lower-trim'; root.add(lowerTrim);
 
   const zodiacRadius = discRadius * 1.025;
   ZODIAC.forEach(([symbol,name],i)=>{
@@ -304,14 +425,18 @@ export function createFlatWorldAnomalyVisual(definition) {
 
   addWorldTree(root,discTop,treeTop,rootDepth);
 
+  const rootHaloTexture = makeGlowTexture('rgba(223,184,108,.34)','rgba(100,62,25,.06)');
+  const rootHaloMaterial = new THREE.SpriteMaterial({map:rootHaloTexture,transparent:true,opacity:.34,depthWrite:false,blending:THREE.AdditiveBlending}); rootHaloMaterial.userData.disposeMap=true;
+  const rootHalo = new THREE.Sprite(rootHaloMaterial); rootHalo.position.set(0,-discTop-1.2,0); rootHalo.scale.set(discRadius*.68,discRadius*.68,1); rootHalo.name='flat-world-root-halo'; root.add(rootHalo);
+
   const path = createFigureEightPath(pathWidth,pathHeight);
-  path.group.add(path.glow,path.core); path.group.name='flat-world-celestial-path'; root.add(path.group);
+  root.add(path.group);
 
   const localSun = createLocalSun(renderUnits(definition.localSunRadiusMeters));
   const localMoon = createLocalMoon(renderUnits(definition.localMoonRadiusMeters));
   root.add(localSun,localMoon);
 
-  const firmament = createFirmament(pyramidHalfBase,pyramidApex,-rootDepth*.72);
+  const firmament = createFirmament(pyramidHalfBase,pyramidApex,0);
   root.add(firmament);
 
   const localAmbient = new THREE.AmbientLight(0x263b50,.42); localAmbient.name='flat-world-local-ambient'; root.add(localAmbient);
@@ -325,6 +450,7 @@ export function createFlatWorldAnomalyVisual(definition) {
     cycleSeconds:Math.max(30,Number(definition.localCycleSeconds)||180),
     firmamentMaterial:firmament.userData.firmamentMaterial,
     firmamentEdgeMaterial:firmament.userData.firmamentEdgeMaterial,
+    firmamentGlowMaterial:firmament.userData.firmamentGlowMaterial,
   };
   root.userData.visualOnly = true;
   root.userData.localLightingIsolated = true;
@@ -342,5 +468,6 @@ export function updateFlatWorldAnomalyVisual(root, definition, elapsedSimSeconds
   state.localSun.position.set(sun[0],sun[1],sun[2]);
   state.localMoon.position.set(moon[0],moon[1],moon[2]);
   if (state.firmamentMaterial) state.firmamentMaterial.opacity=.032+.012*(.5+.5*Math.sin(phase*.5));
-  if (state.firmamentEdgeMaterial) state.firmamentEdgeMaterial.opacity=.40+.12*(.5+.5*Math.cos(phase*.35));
+  if (state.firmamentEdgeMaterial) state.firmamentEdgeMaterial.opacity=.42+.12*(.5+.5*Math.cos(phase*.35));
+  if (state.firmamentGlowMaterial) state.firmamentGlowMaterial.opacity=.14+.055*(.5+.5*Math.sin(phase*.31+1.2));
 }

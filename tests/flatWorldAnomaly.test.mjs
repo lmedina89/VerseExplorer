@@ -64,6 +64,10 @@ test('FW1 renderer keeps local lighting isolated and animates the local Sun/Moon
   assert.match(renderSource, /flatWorldPathPoint\(phase/);
   assert.match(renderSource, /flatWorldPathPoint\(phase\+Math\.PI/);
   assert.match(renderSource, /flat-world-firmament-edges/);
+  assert.match(renderSource, /flat-world-firmament-lower-apex/);
+  assert.match(renderSource, /flat-world-firmament-edge-glow-/);
+  assert.match(renderSource, /flat-world-path-marker-/);
+  assert.match(renderSource, /createFirmament\(pyramidHalfBase,pyramidApex,0\)/);
   assert.match(renderSource, /flat-world-zodiac-/);
   assert.match(cosmicSource, /definition\.kind === 'anomaly-flat-world'/);
   assert.match(rendererSource, /camera\.layers\.enable\(2\)/);

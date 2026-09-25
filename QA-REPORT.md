@@ -1,3 +1,28 @@
+# Universe Explorer v0.1.0.6A.3-FW2.1 — QA Report
+
+## Scope
+FW2.1 is a visual-correction/polish hotfix on top of the FW2 presentation-only Flat World observer. The firmament is corrected to a complete square bipyramid centered on the disc plane, with matched upper/lower apices. Additional presentation polish is restricted to the Flat World renderer and observer pose; `visualOnly=true`, `gravitySource=false`, and the no-physics/no-collision boundary remain unchanged.
+
+## Validation summary
+- Full `npm run qa`: **PASS**.
+- Node test suite: **408/408 passed**.
+- Static required-file structure: **PASS (65 required files)**.
+- JavaScript/module syntax checks: **PASS**.
+- Focused Flat World tests now assert the lower firmament apex, mobile-readable firmament edge glow, figure-eight guide markers, disc-plane firmament equator, and interior firmament glow bridge.
+- Protected `src/core/`, `src/physics/`, `src/data/`, and `src/experiments/` trees are byte-for-byte unchanged from the tested FW2 package.
+
+## Visual changes under test
+- Full upper/lower transparent firmament around the disc.
+- Thin translucent edge cylinders supplement one-pixel WebGL line edges for iPhone readability.
+- Subtle figure-eight guide beads improve path readability without changing Sun/Moon motion.
+- Warm upper/lower disc trim, richer deterministic tree canopy, and faint underside root halo.
+- Default disc-top observer is nearly face-on to the vertical figure-eight and slightly offset from the tree centerline.
+
+## Runtime inspection note
+A local headless Chromium graphics smoke test was attempted, but the container's headless GPU/GL backend could not initialize. Static/syntax/unit QA is complete; the final visual acceptance pass remains the iPhone Safari test, as with FW1/FW2.
+
+---
+
 # Universe Explorer v0.1.0.6A.3-FW2 — QA Report
 
 ## Scope

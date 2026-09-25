@@ -1,3 +1,13 @@
+# Universe Explorer v0.1.0.6A.3-FW2.1 — Full Firmament & Visual Polish
+
+- Corrected the firmament from a single pyramid to the reference concept's complete **square bipyramid**: four transparent faces converge above the disc and four more converge below it.
+- Moved the firmament equator to the flat-world disc plane and added an explicit lower apex beneath the World Tree roots.
+- Added lightweight translucent edge cylinders behind the one-pixel line outline so the full firmament remains readable on iPhone without becoming opaque.
+- Added subtle guide beads to the figure-eight celestial path so the Sun/Moon route reads more clearly from the disc-top observer.
+- Added restrained metallic rim trim, a faint underside root halo, and a richer deterministic World Tree canopy while keeping the object mobile-friendly.
+- Adjusted the default disc-top observation pose to view the vertical figure-eight nearly face-on while keeping the central tree slightly off the crossing point.
+- No mass, gravity, collision, atmosphere, terrain, N-body or Solar-System-lighting behavior was added or changed.
+
 # Universe Explorer v0.1.0.6A.3-FW2 — Flat Earth Firmament Disc-Top Observation
 
 - Added a Flat-World-only **LAND / VIEW** action in COSMOS for `FLAT EARTH [ANOMALY]`.

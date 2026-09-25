@@ -50,10 +50,12 @@ export function createFlatWorldObservationRegion(definition) {
       fog: 0x020611,
     },
     observationPose: {
-      radiusFraction: 0.62,
-      azimuthRad: 0.62,
-      eyeHeightRenderUnits: 0.24,
-      initialPitchRad: 0.20,
+      radiusFraction: 0.64,
+      // Nearly face-on to the vertical figure-eight plane, but offset enough that the World Tree
+      // does not hide the crossing point from the default observation view.
+      azimuthRad: 1.42,
+      eyeHeightRenderUnits: 0.25,
+      initialPitchRad: 0.24,
     },
     scientificStatus: 'PRESENTATION-ONLY ANOMALY VIEW. This disc-top viewpoint adds no gravity, atmosphere, collision, terrain physics or claim of a physical flat-world model. The local Sun and Moon remain scripted visual luminaries on the anomaly figure-eight path; the spacecraft is not teleported or landed physically.',
   };

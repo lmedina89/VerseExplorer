@@ -26,6 +26,7 @@ test('FW2 surface renderer reuses the FW1 anomaly geometry and local-luminary an
   assert.match(source, /FLAT_WORLD_VISUAL_LAYER/);
   assert.match(source, /firmamentMaterial\.opacity/);
   assert.match(source, /firmamentEdgeMaterial\.opacity/);
+  assert.match(source, /firmamentGlowMaterial\.opacity/);
   assert.match(source, /camera\.layers\.set\(FLAT_WORLD_VISUAL_LAYER\)/);
 });
 

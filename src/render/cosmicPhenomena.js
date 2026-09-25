@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { PHYSICS, SIMULATION } from '../core/constants.js';
 import { createRng } from '../util/prng.js';
-import { createFlatWorldAnomalyVisual, updateFlatWorldAnomalyVisual } from './flatWorldAnomaly.js?v=ue0106a3fw1';
+import { createFlatWorldAnomalyVisual, updateFlatWorldAnomalyVisual } from './flatWorldAnomaly.js?v=ue0106a3fw21';
 
 function makeAnnulusPoints(definition, seed) {
   const rng = createRng(`${seed}:${definition.id}:visual`);

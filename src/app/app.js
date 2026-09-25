@@ -32,7 +32,7 @@ import { TRANSIT_TIERS, normalizeTransitMultiple, transitArrivalDistanceMeters, 
 import { frameOrbitInsertionPlan, applyFrameOrbitInsertion } from '../physics/frameOrbitInsertion.js?v=ue0105f';
 import { planFrameGuardRoute, resolveFrameGuardWaypoint } from '../navigation/frameGuardRoute.js';
 import { ObservationPlannerSearch } from '../navigation/observationPlanner.js';
-import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3fw2';
+import { UniverseRenderer } from '../render/threeRenderer.js?v=ue0106a3fw21';
 import { Hud } from '../ui/hud.js?v=ue0105f';
 import { SystemMapController } from '../ui/systemMap.js?v=ue0105f';
 import { generateSurfaceRegion, availableSurfaceRegions, SURFACE_REALITY_LABELS, surfacePois, surfaceHeightAt } from '../surface/surfaceGenerator.js?v=ue0105f';
@@ -41,7 +41,7 @@ import { SURFACE_PHASE, SURFACE_TRANSITION_SECONDS, createLandingTransition, beg
 import { stepSurfaceWeather, surfaceWeatherReading } from '../surface/surfaceWeather.js';
 import { surfaceEngineSupport, SURFACE_ENGINE_PROFILES } from '../surface/surfaceProfiles.js?v=ue0105f';
 import { createSurfaceSkyObserverRegion, defaultSurfaceSkyAnchor, surfaceSkyObserverSupport } from '../surface/surfaceSkyObserver.js?v=ue0105f';
-import { createFlatWorldObservationRegion, supportsFlatWorldObservation } from '../surface/flatWorldObservation.js?v=ue0106a3fw2';
+import { createFlatWorldObservationRegion, supportsFlatWorldObservation } from '../surface/flatWorldObservation.js?v=ue0106a3fw21';
 
 const SURFACE_SKY_FOV_PRESETS = Object.freeze([70, 35, 15, 5, 1.5]);
 
@@ -366,7 +366,7 @@ export class UniverseLabApp {
       this.running = false;
       this.hud.showRuntimeError(event.reason);
     });
-    this.hud.notify(`Universe Explorer v0.1.0.6A.3-FW2 online. FLAT EARTH [ANOMALY] remains an intentionally fictional, massless deep-space visual object; COSMOS now adds LAND / VIEW, a presentation-only disc-top viewpoint inside the firmament so its local Sun and Moon figure-eight can be watched from the surface without adding gravity or moving the physical spacecraft. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
+    this.hud.notify(`Universe Explorer v0.1.0.6A.3-FW2.1 online. FLAT EARTH [ANOMALY] remains an intentionally fictional, massless deep-space visual object; COSMOS now adds LAND / VIEW, a presentation-only disc-top viewpoint inside the firmament so its local Sun and Moon figure-eight can be watched from the surface without adding gravity or moving the physical spacecraft. SKY SPAWN is available while actually landed: choose ASTEROID / NEUTRON STAR / PULSAR / BLACK HOLE, aim the center reticle above the horizon, choose NEAR/LOW/MEDIUM/HIGH, PREVIEW, then COMMIT. Compact objects reuse the existing LAB definitions and may catastrophically disrupt the reference system after COMMIT. The earlier flight ORBIT SANDBOX remains available as a secondary engineering tool: choose Earth, Moon or Mars, preview a LOW/MEDIUM/HIGH circular prograde asteroid orbit, then COMMIT to add it as a live Newtonian gravity source. The first commit marks the reference system SOL — MODIFIED. Preview geometry is presentation-only; canonical SOL physics remain inherited. Active backend: ${backend}. Inherited core: Universe Lab v0.1.5.5 / ABYSSAL-155.`);
   }
 
   syncGenerationProfileControls(profileId = this.system?.generationProfileId ?? 'origin') {
